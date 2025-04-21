@@ -1,30 +1,63 @@
 # TeamTasker
 
-TeamTasker is a people-focused task management application designed to help teams collaborate effectively, manage workloads, and track development goals.
+<div align="center">
 
-## Features
+![TeamTasker Logo](public/logo.svg)
 
-- **Dashboard Overview**: Get a quick glance at your tasks, team workload, and development goals
-- **Task Management**: Create, assign, and track tasks with priority levels and progress tracking
-- **Team Workload Visualization**: See how work is distributed across your team
-- **Skills Matrix**: Track and visualize team skills and competencies
-- **Development Goals**: Set and monitor personal and team development objectives
-- **Responsive Design**: Works seamlessly on desktop and mobile devices
+[![Next.js](https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
+[![React Query](https://img.shields.io/badge/React%20Query-5-FF4154?style=for-the-badge&logo=react-query)](https://tanstack.com/query/)
+[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
-## Tech Stack
+</div>
 
-- **Framework**: [Next.js](https://nextjs.org/) (React framework)
+TeamTasker is a people-focused task management application designed to help teams collaborate effectively, manage workloads, and track development goals. It puts team members at the center of project management, focusing on skills development alongside task completion.
+
+## ✨ Features
+
+- **📊 Dashboard Overview**: Get a quick glance at your tasks, team workload, and development goals
+- **📝 Task Management**: Create, assign, and track tasks with priority levels and progress tracking
+- **👥 Team Workload Visualization**: See how work is distributed across your team
+- **🧠 Skills Matrix**: Track and visualize team skills and competencies
+- **🎯 Development Goals**: Set and monitor personal and team development objectives
+- **📱 Responsive Design**: Works seamlessly on desktop and mobile devices
+- **🔒 Authentication**: Secure user authentication and authorization
+- **🌓 Dark Mode**: Toggle between light and dark themes
+
+## 🛠️ Tech Stack
+
+- **Framework**: [Next.js 14](https://nextjs.org/) with App Router
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
 - **Styling**: [Tailwind CSS](https://tailwindcss.com/) with [shadcn/ui](https://ui.shadcn.com/) components
-- **State Management**: React hooks and context
+- **State Management**: [React Query](https://tanstack.com/query/) for server state, React hooks and context for UI state
+- **API Integration**: Axios with custom interceptors for API requests
 - **Charts and Visualization**: [Recharts](https://recharts.org/)
 - **Form Handling**: [React Hook Form](https://react-hook-form.com/) with [Zod](https://github.com/colinhacks/zod) validation
+- **Testing**: MSW for API mocking during development
 
-## Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
 
 - Node.js (version 18.x or higher recommended)
-- npm or yarn package manager
+- npm, yarn, or pnpm package manager
+
+### Environment Setup
+
+1. Copy the example environment file:
+   ```bash
+   cp .env.example .env.local
+   ```
+
+2. Update the environment variables in `.env.local` as needed:
+   ```
+   # Enable API mocking for development
+   NEXT_PUBLIC_API_MOCKING=enabled
+
+   # API URL (when not using mocks)
+   NEXT_PUBLIC_API_URL=http://localhost:8000/api
+   ```
 
 ### Installation
 
@@ -54,33 +87,93 @@ TeamTasker is a people-focused task management application designed to help team
 
 4. Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
 
-## Project Structure
+### Mock Credentials
 
-- `/app`: Next.js app router pages and layouts
-- `/components`: Reusable React components
-  - `/components/ui`: UI components from shadcn/ui
-  - `/components/dashboard`: Dashboard-specific components
-  - `/components/team`: Team management components
-  - `/components/profile`: User profile components
-- `/hooks`: Custom React hooks
-- `/lib`: Utility functions and shared code
-- `/public`: Static assets
-- `/styles`: Global CSS styles
+When using the mock API, you can log in with these credentials:
 
-## Current Status
+- **Email**: `user@example.com`
+- **Password**: `password`
 
-This project is currently a frontend prototype with mock data. Future development plans include:
+## 📂 Project Structure
 
-- Backend API integration
-- Authentication and user management
-- Real-time updates and notifications
-- Advanced filtering and search capabilities
-- Mobile app version
+```
+├── app/                  # Next.js app router pages and layouts
+├── components/           # Reusable React components
+│   ├── ui/               # UI components from shadcn/ui
+│   ├── dashboard/        # Dashboard-specific components
+│   ├── team/             # Team management components
+│   ├── profile/          # User profile components
+│   └── tasks/            # Task management components
+├── context/              # React context providers
+├── hooks/                # Custom React hooks
+├── lib/                  # Utility functions and shared code
+│   ├── api/              # API client and endpoints
+│   │   ├── endpoints/    # API endpoint functions
+│   │   ├── hooks/        # React Query hooks
+│   │   └── types/        # TypeScript types for API
+│   └── utils/            # General utility functions
+├── mocks/                # Mock Service Worker setup
+├── public/               # Static assets
+└── styles/               # Global CSS styles
+```
 
-## Contributing
+## 💬 API Integration
+
+The application uses React Query for data fetching and state management. API calls are made using Axios with custom interceptors for authentication and error handling.
+
+### Mock API
+
+During development, the application uses Mock Service Worker (MSW) to simulate API responses. This allows for development without a backend server.
+
+To enable/disable API mocking, set the `NEXT_PUBLIC_API_MOCKING` environment variable:
+
+```
+NEXT_PUBLIC_API_MOCKING=enabled  # Enable API mocking
+NEXT_PUBLIC_API_MOCKING=disabled  # Disable API mocking (use real API)
+```
+
+## 🛠 Development
+
+### Code Style
+
+This project uses ESLint and Prettier for code formatting. To lint the code, run:
+
+```bash
+npm run lint
+```
+
+### Building for Production
+
+To build the application for production, run:
+
+```bash
+npm run build
+```
+
+The build output will be in the `.next` directory.
+
+## 📝 Roadmap
+
+Future development plans include:
+
+- [ ] Backend API integration with a real server
+- [ ] Real-time updates and notifications
+- [ ] Advanced filtering and search capabilities
+- [ ] Team permissions and role management
+- [ ] Mobile app version
+- [ ] Integration with third-party tools (GitHub, Jira, etc.)
+- [ ] Comprehensive test coverage
+
+## 👮‍♂️ Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
-## License
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📜 License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
