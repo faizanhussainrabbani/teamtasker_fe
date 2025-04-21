@@ -33,8 +33,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const loginMutation = useLogin();
   const registerMutation = useRegister();
   const logoutMutation = useLogout();
-  const { 
-    data: currentUser, 
+  const {
+    data: currentUser,
     isLoading: isLoadingUser,
     isError: isErrorUser,
     error: userError
@@ -43,15 +43,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Check if user is authenticated on initial load
   useEffect(() => {
     const token = getAuthToken();
-    
+
     if (!token) {
       setIsLoading(false);
       return;
     }
-    
+
     // User data will be fetched by the useCurrentUser hook
     setIsLoading(isLoadingUser);
-    
+
     if (isErrorUser) {
       setError(parseApiError(userError));
       removeAuthToken();
@@ -69,9 +69,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Redirect to login page if not authenticated and trying to access protected routes
   useEffect(() => {
+    // For development purposes, we'll disable authentication redirection
+    if (process.env.NEXT_PUBLIC_API_MOCKING === 'enabled') {
+      // Skip authentication check in development with MSW
+      setIsLoading(false);
+      return;
+    }
+
     const token = getAuthToken();
     const isAuthPage = pathname === '/login' || pathname === '/register';
-    
+
     if (!token && !isAuthPage && !isLoading) {
       // Only redirect if we've finished checking authentication
       if (!isLoadingUser) {
@@ -87,22 +94,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       setIsLoading(true);
       setError(null);
-      
+
       const result = await loginMutation.mutateAsync(credentials);
-      
+
       setAuthToken(result.token);
       setUser(result.user);
-      
+
       toast({
         title: "Login successful",
         description: `Welcome back, ${result.user.name}!`,
       });
-      
+
       router.push('/dashboard');
     } catch (err) {
       const parsedError = parseApiError(err);
       setError(parsedError);
-      
+
       toast({
         title: "Login failed",
         description: parsedError.message,
@@ -117,22 +124,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       setIsLoading(true);
       setError(null);
-      
+
       const result = await registerMutation.mutateAsync(userData);
-      
+
       setAuthToken(result.token);
       setUser(result.user);
-      
+
       toast({
         title: "Registration successful",
         description: `Welcome to TeamTasker, ${result.user.name}!`,
       });
-      
+
       router.push('/dashboard');
     } catch (err) {
       const parsedError = parseApiError(err);
       setError(parsedError);
-      
+
       toast({
         title: "Registration failed",
         description: parsedError.message,
@@ -146,27 +153,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = async () => {
     try {
       setIsLoading(true);
-      
+
       await logoutMutation.mutateAsync();
-      
+
       removeAuthToken();
       setUser(null);
-      
+
       toast({
         title: "Logged out",
         description: "You have been successfully logged out.",
       });
-      
+
       router.push('/login');
     } catch (err) {
       const parsedError = parseApiError(err);
-      
+
       toast({
         title: "Logout failed",
         description: parsedError.message,
         variant: "destructive",
       });
-      
+
       // Even if the API call fails, we should still remove the token and user
       removeAuthToken();
       setUser(null);
@@ -195,10 +202,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  
+
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
-  
+
   return context;
 }
