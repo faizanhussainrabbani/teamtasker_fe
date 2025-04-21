@@ -61,8 +61,8 @@ export function AppSidebar() {
         <div className="flex items-center gap-2">
           <SidebarTrigger />
           <Link href="/" className="flex items-center gap-2">
-            <div className="rounded-md bg-blue-500 p-1">
-              <Users className="h-5 w-5 text-primary-foreground" />
+            <div className="rounded-md bg-sidebar-primary p-1">
+              <Users className="h-5 w-5 text-sidebar-primary-foreground" />
             </div>
             <span className="font-semibold">TeamTasker</span>
           </Link>
