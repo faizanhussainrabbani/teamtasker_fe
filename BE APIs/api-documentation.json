@@ -1,0 +1,147 @@
+{
+  "title": "TeamTasker API Documentation",
+  "version": "1.0.0",
+  "baseUrl": "http://localhost:3002/api",
+  "description": "API documentation for the TeamTasker application",
+  "endpoints": [
+    {
+      "name": "Authentication",
+      "description": "Endpoints for authentication and authorization",
+      "path": "/auth",
+      "file": "auth.json"
+    },
+    {
+      "name": "Tasks",
+      "description": "Endpoints for managing tasks",
+      "path": "/tasks",
+      "file": "tasks.json"
+    },
+    {
+      "name": "Users",
+      "description": "Endpoints for user management and profiles",
+      "path": "/users",
+      "file": "users.json"
+    },
+    {
+      "name": "Teams",
+      "description": "Endpoints for team management and workload",
+      "path": "/teams",
+      "file": "teams.json"
+    },
+    {
+      "name": "Activities",
+      "description": "Endpoints for activity feeds and notifications",
+      "path": "/activities",
+      "file": "activities.json"
+    },
+    {
+      "name": "Announcements",
+      "description": "Endpoints for team announcements",
+      "path": "/communication/announcements",
+      "file": "announcements.json"
+    },
+    {
+      "name": "Skills",
+      "description": "Endpoints for skills and development",
+      "path": "/skills",
+      "file": "skills.json"
+    }
+  ],
+  "models": {
+    "User": {
+      "id": "string",
+      "name": "string",
+      "email": "string",
+      "role": "string",
+      "avatar": "string | null",
+      "initials": "string",
+      "department": "string | null",
+      "bio": "string | null",
+      "location": "string | null",
+      "phone": "string | null",
+      "createdAt": "string (ISO date)",
+      "updatedAt": "string (ISO date)"
+    },
+    "Task": {
+      "id": "string",
+      "title": "string",
+      "description": "string",
+      "status": "string (todo, in-progress, completed)",
+      "priority": "string (low, medium, high)",
+      "dueDate": "string (YYYY-MM-DD)",
+      "progress": "number",
+      "assigneeId": "string | null",
+      "assignee": "User | null",
+      "tags": "string[]",
+      "createdAt": "string (ISO date)",
+      "updatedAt": "string (ISO date)"
+    },
+    "Team": {
+      "id": "string",
+      "name": "string",
+      "description": "string",
+      "department": "string",
+      "leadId": "string",
+      "lead": "User",
+      "members": "User[]",
+      "createdAt": "string (ISO date)",
+      "updatedAt": "string (ISO date)"
+    },
+    "Activity": {
+      "id": "string",
+      "user": "User",
+      "action": "string (completed, commented, assigned, updated, created, deleted)",
+      "target": "string",
+      "targetId": "string | null",
+      "targetType": "string | null",
+      "assigneeId": "string | null",
+      "assignee": "User | null",
+      "comment": "string | null",
+      "createdAt": "string (ISO date)",
+      "timestamp": "string"
+    },
+    "Announcement": {
+      "id": "string",
+      "title": "string",
+      "content": "string",
+      "author": "User",
+      "date": "string (ISO date)",
+      "isPinned": "boolean",
+      "likes": "number",
+      "hasLiked": "boolean"
+    },
+    "Skill": {
+      "id": "string",
+      "name": "string",
+      "category": "string",
+      "description": "string",
+      "createdAt": "string (ISO date)",
+      "updatedAt": "string (ISO date)"
+    },
+    "UserSkill": {
+      "id": "string",
+      "skillId": "string",
+      "name": "string",
+      "level": "number",
+      "yearsOfExperience": "number",
+      "projects": "number",
+      "createdAt": "string (ISO date)",
+      "updatedAt": "string (ISO date)"
+    },
+    "DevelopmentGoal": {
+      "id": "string",
+      "title": "string",
+      "description": "string",
+      "category": "string (technical, certification, leadership)",
+      "status": "string (not-started, in-progress, completed)",
+      "progress": "number",
+      "dueDate": "string (YYYY-MM-DD)",
+      "createdAt": "string (ISO date)",
+      "updatedAt": "string (ISO date)"
+    }
+  },
+  "authentication": {
+    "type": "Bearer Token",
+    "description": "All API endpoints (except login and register) require authentication using a JWT token. The token should be included in the Authorization header as 'Bearer {token}'."
+  }
+}

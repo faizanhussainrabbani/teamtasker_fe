@@ -1,0 +1,295 @@
+{
+  "uuid": "d7e6d310-c2e2-11ed-afa1-0242ac120002",
+  "lastMigration": 27,
+  "name": "TeamTasker API",
+  "endpointPrefix": "api",
+  "latency": 0,
+  "port": 3002,
+  "hostname": "0.0.0.0",
+  "routes": [
+    {
+      "uuid": "d7e6d311-c2e2-11ed-afa1-0242ac120002",
+      "documentation": "Login user",
+      "method": "post",
+      "endpoint": "auth/login",
+      "responses": [
+        {
+          "uuid": "d7e6d312-c2e2-11ed-afa1-0242ac120002",
+          "body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"user\": {\n    \"id\": \"user-1\",\n    \"name\": \"Jane Doe\",\n    \"email\": \"jane.doe@example.com\",\n    \"role\": \"Team Lead\",\n    \"avatar\": \"/placeholder.svg?height=40&width=40\",\n    \"initials\": \"JD\"\n  }\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Success",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "filePath": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true
+        }
+      ],
+      "enabled": true,
+      "responseMode": null
+    },
+    {
+      "uuid": "d7e6d313-c2e2-11ed-afa1-0242ac120002",
+      "documentation": "Get current user",
+      "method": "get",
+      "endpoint": "auth/me",
+      "responses": [
+        {
+          "uuid": "d7e6d314-c2e2-11ed-afa1-0242ac120002",
+          "body": "{\n  \"id\": \"user-1\",\n  \"name\": \"Jane Doe\",\n  \"email\": \"jane.doe@example.com\",\n  \"role\": \"Team Lead\",\n  \"avatar\": \"/placeholder.svg?height=40&width=40\",\n  \"initials\": \"JD\",\n  \"department\": \"Engineering\"\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Success",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "filePath": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true
+        }
+      ],
+      "enabled": true,
+      "responseMode": null
+    },
+    {
+      "uuid": "d7e6d315-c2e2-11ed-afa1-0242ac120002",
+      "documentation": "Get tasks",
+      "method": "get",
+      "endpoint": "tasks",
+      "responses": [
+        {
+          "uuid": "d7e6d316-c2e2-11ed-afa1-0242ac120002",
+          "body": "{\n  \"data\": [\n    {\n      \"id\": \"task-1\",\n      \"title\": \"API Integration\",\n      \"description\": \"Integrate the new payment gateway API with our checkout system\",\n      \"status\": \"in-progress\",\n      \"priority\": \"high\",\n      \"dueDate\": \"2023-05-15\",\n      \"progress\": 45,\n      \"assigneeId\": \"user-1\",\n      \"assignee\": {\n        \"id\": \"user-1\",\n        \"name\": \"Jane Doe\",\n        \"avatar\": \"/placeholder.svg?height=32&width=32\",\n        \"initials\": \"JD\"\n      },\n      \"tags\": [\"Backend\", \"API\"],\n      \"createdAt\": \"2023-05-01T10:00:00Z\",\n      \"updatedAt\": \"2023-05-10T15:30:00Z\"\n    },\n    {\n      \"id\": \"task-2\",\n      \"title\": \"User Dashboard Redesign\",\n      \"description\": \"Redesign the user dashboard for better UX and accessibility\",\n      \"status\": \"in-progress\",\n      \"priority\": \"medium\",\n      \"dueDate\": \"2023-05-18\",\n      \"progress\": 30,\n      \"assigneeId\": \"user-2\",\n      \"assignee\": {\n        \"id\": \"user-2\",\n        \"name\": \"John Smith\",\n        \"avatar\": \"/placeholder.svg?height=32&width=32\",\n        \"initials\": \"JS\"\n      },\n      \"tags\": [\"UI/UX\", \"Frontend\"],\n      \"createdAt\": \"2023-05-05T09:00:00Z\",\n      \"updatedAt\": \"2023-05-12T11:30:00Z\"\n    },\n    {\n      \"id\": \"task-3\",\n      \"title\": \"Database Optimization\",\n      \"description\": \"Optimize database queries for better performance\",\n      \"status\": \"todo\",\n      \"priority\": \"medium\",\n      \"dueDate\": \"2023-05-20\",\n      \"progress\": 0,\n      \"assigneeId\": \"user-3\",\n      \"assignee\": {\n        \"id\": \"user-3\",\n        \"name\": \"Emily Chen\",\n        \"avatar\": \"/placeholder.svg?height=32&width=32\",\n        \"initials\": \"EC\"\n      },\n      \"tags\": [\"Database\", \"Performance\"],\n      \"createdAt\": \"2023-05-08T14:00:00Z\",\n      \"updatedAt\": \"2023-05-08T14:00:00Z\"\n    }\n  ],\n  \"total\": 3,\n  \"page\": 1,\n  \"limit\": 10,\n  \"totalPages\": 1\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Success",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "filePath": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true
+        }
+      ],
+      "enabled": true,
+      "responseMode": null
+    },
+    {
+      "uuid": "d7e6d317-c2e2-11ed-afa1-0242ac120002",
+      "documentation": "Get users",
+      "method": "get",
+      "endpoint": "users",
+      "responses": [
+        {
+          "uuid": "d7e6d318-c2e2-11ed-afa1-0242ac120002",
+          "body": "{\n  \"data\": [\n    {\n      \"id\": \"user-1\",\n      \"name\": \"Jane Doe\",\n      \"email\": \"jane.doe@example.com\",\n      \"role\": \"Team Lead\",\n      \"avatar\": \"/placeholder.svg?height=40&width=40\",\n      \"initials\": \"JD\",\n      \"department\": \"Engineering\",\n      \"createdAt\": \"2023-01-15T10:00:00Z\",\n      \"updatedAt\": \"2023-05-05T13:00:00Z\"\n    },\n    {\n      \"id\": \"user-2\",\n      \"name\": \"John Smith\",\n      \"email\": \"john.smith@example.com\",\n      \"role\": \"Frontend Developer\",\n      \"avatar\": \"/placeholder.svg?height=40&width=40\",\n      \"initials\": \"JS\",\n      \"department\": \"Engineering\",\n      \"createdAt\": \"2023-02-10T09:00:00Z\",\n      \"updatedAt\": \"2023-05-01T11:30:00Z\"\n    }\n  ],\n  \"total\": 2,\n  \"page\": 1,\n  \"limit\": 10,\n  \"totalPages\": 1\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Success",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "filePath": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true
+        }
+      ],
+      "enabled": true,
+      "responseMode": null
+    },
+    {
+      "uuid": "d7e6d319-c2e2-11ed-afa1-0242ac120002",
+      "documentation": "Get user profile",
+      "method": "get",
+      "endpoint": "profile",
+      "responses": [
+        {
+          "uuid": "d7e6d320-c2e2-11ed-afa1-0242ac120002",
+          "body": "{\n  \"id\": \"user-1\",\n  \"name\": \"Jane Doe\",\n  \"email\": \"jane.doe@example.com\",\n  \"role\": \"Team Lead\",\n  \"avatar\": \"/placeholder.svg?height=40&width=40\",\n  \"initials\": \"JD\",\n  \"department\": \"Engineering\",\n  \"bio\": \"Experienced team lead with 8 years in software development.\",\n  \"location\": \"New York, NY\",\n  \"phone\": \"+1 (555) 123-4567\",\n  \"skills\": [\n    {\n      \"name\": \"React\",\n      \"level\": 90,\n      \"yearsOfExperience\": 5\n    },\n    {\n      \"name\": \"TypeScript\",\n      \"level\": 85,\n      \"yearsOfExperience\": 4\n    },\n    {\n      \"name\": \"Node.js\",\n      \"level\": 75,\n      \"yearsOfExperience\": 3\n    }\n  ],\n  \"createdAt\": \"2023-01-15T10:00:00Z\",\n  \"updatedAt\": \"2023-05-05T13:00:00Z\"\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Success",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "filePath": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true
+        }
+      ],
+      "enabled": true,
+      "responseMode": null
+    },
+    {
+      "uuid": "d7e6d321-c2e2-11ed-afa1-0242ac120002",
+      "documentation": "Get activities",
+      "method": "get",
+      "endpoint": "activities",
+      "responses": [
+        {
+          "uuid": "d7e6d322-c2e2-11ed-afa1-0242ac120002",
+          "body": "{\n  \"data\": [\n    {\n      \"id\": \"activity-1\",\n      \"user\": {\n        \"id\": \"user-2\",\n        \"name\": \"John Smith\",\n        \"avatar\": \"/placeholder.svg?height=32&width=32\",\n        \"initials\": \"JS\"\n      },\n      \"action\": \"completed\",\n      \"target\": \"User Authentication Feature\",\n      \"targetId\": \"task-4\",\n      \"targetType\": \"task\",\n      \"createdAt\": \"2023-05-15T10:30:00Z\",\n      \"timestamp\": \"2 hours ago\"\n    },\n    {\n      \"id\": \"activity-2\",\n      \"user\": {\n        \"id\": \"user-3\",\n        \"name\": \"Emily Chen\",\n        \"avatar\": \"/placeholder.svg?height=32&width=32\",\n        \"initials\": \"EC\"\n      },\n      \"action\": \"commented\",\n      \"target\": \"API Integration\",\n      \"targetId\": \"task-1\",\n      \"targetType\": \"task\",\n      \"comment\": \"I've identified a potential issue with the authentication flow. Let's discuss this in our next meeting.\",\n      \"createdAt\": \"2023-05-15T08:30:00Z\",\n      \"timestamp\": \"4 hours ago\"\n    }\n  ],\n  \"total\": 2,\n  \"page\": 1,\n  \"limit\": 10,\n  \"totalPages\": 1\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Success",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "filePath": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true
+        }
+      ],
+      "enabled": true,
+      "responseMode": null
+    },
+    {
+      "uuid": "d7e6d323-c2e2-11ed-afa1-0242ac120002",
+      "documentation": "Get announcements",
+      "method": "get",
+      "endpoint": "communication/announcements",
+      "responses": [
+        {
+          "uuid": "d7e6d324-c2e2-11ed-afa1-0242ac120002",
+          "body": "{\n  \"data\": [\n    {\n      \"id\": \"ann-1\",\n      \"title\": \"New Project Launch: Team Tasker\",\n      \"content\": \"We're excited to announce the launch of our new project, Team Tasker! This platform will help teams manage tasks, track progress, and improve collaboration. The beta version will be available next week for internal testing.\",\n      \"author\": {\n        \"id\": \"user-5\",\n        \"name\": \"Sarah Wilson\",\n        \"role\": \"Product Manager\",\n        \"avatar\": \"/placeholder.svg?height=40&width=40\",\n        \"initials\": \"SW\"\n      },\n      \"date\": \"2023-05-10T10:00:00Z\",\n      \"isPinned\": true,\n      \"likes\": 12,\n      \"hasLiked\": false\n    },\n    {\n      \"id\": \"ann-2\",\n      \"title\": \"Office Closure: Memorial Day Weekend\",\n      \"content\": \"Please note that our office will be closed on Monday, May 29th, in observance of Memorial Day. All deadlines falling on this date will be extended to Tuesday, May 30th. Enjoy the long weekend!\",\n      \"author\": {\n        \"id\": \"user-4\",\n        \"name\": \"Michael Brown\",\n        \"role\": \"HR Manager\",\n        \"avatar\": \"/placeholder.svg?height=40&width=40\",\n        \"initials\": \"MB\"\n      },\n      \"date\": \"2023-05-15T14:30:00Z\",\n      \"isPinned\": false,\n      \"likes\": 8,\n      \"hasLiked\": true\n    }\n  ],\n  \"total\": 2,\n  \"page\": 1,\n  \"limit\": 10,\n  \"totalPages\": 1\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Success",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "filePath": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true
+        }
+      ],
+      "enabled": true,
+      "responseMode": null
+    },
+    {
+      "uuid": "d7e6d325-c2e2-11ed-afa1-0242ac120002",
+      "documentation": "Get development goals",
+      "method": "get",
+      "endpoint": "development/goals",
+      "responses": [
+        {
+          "uuid": "d7e6d326-c2e2-11ed-afa1-0242ac120002",
+          "body": "[\n  {\n    \"id\": \"goal-1\",\n    \"title\": \"Learn GraphQL Advanced Concepts\",\n    \"description\": \"Complete advanced GraphQL course and implement in a project\",\n    \"category\": \"technical\",\n    \"status\": \"in-progress\",\n    \"progress\": 40,\n    \"dueDate\": \"2023-08-30\",\n    \"createdAt\": \"2023-04-15T10:00:00Z\",\n    \"updatedAt\": \"2023-05-10T14:30:00Z\"\n  },\n  {\n    \"id\": \"goal-2\",\n    \"title\": \"AWS Certification\",\n    \"description\": \"Obtain AWS Certified Solutions Architect certification\",\n    \"category\": \"certification\",\n    \"status\": \"not-started\",\n    \"progress\": 0,\n    \"dueDate\": \"2023-12-15\",\n    \"createdAt\": \"2023-05-01T09:00:00Z\",\n    \"updatedAt\": \"2023-05-01T09:00:00Z\"\n  },\n  {\n    \"id\": \"goal-3\",\n    \"title\": \"Lead a Frontend Project\",\n    \"description\": \"Take leadership role in upcoming frontend project\",\n    \"category\": \"leadership\",\n    \"status\": \"in-progress\",\n    \"progress\": 25,\n    \"dueDate\": \"2023-07-30\",\n    \"createdAt\": \"2023-03-10T11:30:00Z\",\n    \"updatedAt\": \"2023-05-15T16:45:00Z\"\n  }\n]",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Success",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "filePath": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true
+        }
+      ],
+      "enabled": true,
+      "responseMode": null
+    }
+  ],
+  "proxyMode": false,
+  "proxyHost": "",
+  "proxyRemovePrefix": false,
+  "tlsOptions": {
+    "enabled": false,
+    "type": "CERT",
+    "pfxPath": "",
+    "certPath": "",
+    "keyPath": "",
+    "caPath": "",
+    "passphrase": ""
+  },
+  "cors": true,
+  "headers": [
+    {
+      "key": "Content-Type",
+      "value": "application/json"
+    },
+    {
+      "key": "Access-Control-Allow-Origin",
+      "value": "*"
+    },
+    {
+      "key": "Access-Control-Allow-Methods",
+      "value": "GET,POST,PUT,PATCH,DELETE,HEAD,OPTIONS"
+    },
+    {
+      "key": "Access-Control-Allow-Headers",
+      "value": "Content-Type, Origin, Accept, Authorization, Content-Length, X-Requested-With, X-Request-ID"
+    }
+  ],
+  "proxyReqHeaders": [
+    {
+      "key": "",
+      "value": ""
+    }
+  ],
+  "proxyResHeaders": [
+    {
+      "key": "",
+      "value": ""
+    }
+  ],
+  "data": []
+}

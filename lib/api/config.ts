@@ -1,6 +1,6 @@
 // API configuration
 export const API_CONFIG = {
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002/api',
   timeout: 10000,
   version: 'v1',
   endpoints: {
@@ -12,5 +12,6 @@ export const API_CONFIG = {
     skills: '/skills',
     development: '/development',
     communication: '/communication',
+    activities: '/activities',
   }
 };
