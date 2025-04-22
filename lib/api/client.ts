@@ -16,12 +16,14 @@ const dispatchApiEvent = (eventName: string, data?: any) => {
 
 // Create axios instance with default config
 const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002/api',
   timeout: 15000, // Increased timeout for slower connections
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   },
+  // Add CORS support
+  withCredentials: false,
 });
 
 // Add request logging in development
@@ -48,8 +50,13 @@ apiClient.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
-    // Add request ID for tracing
-    config.headers['X-Request-ID'] = crypto.randomUUID();
+    // Add CORS headers
+    config.headers['Access-Control-Allow-Origin'] = '*';
+    config.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, PATCH, DELETE, OPTIONS';
+    config.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization';
+
+    // Removed custom X-Request-ID header to avoid CORS issues
+    // config.headers['X-Request-ID'] = crypto.randomUUID();
 
     return config;
   },

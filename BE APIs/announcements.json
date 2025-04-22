@@ -1,0 +1,313 @@
+{
+  "endpoint": "/api/communication/announcements",
+  "description": "API endpoints for team announcements",
+  "methods": [
+    {
+      "method": "GET",
+      "description": "Get a list of announcements with optional filtering",
+      "url": "/api/communication/announcements",
+      "queryParams": [
+        {
+          "name": "search",
+          "type": "string",
+          "required": false,
+          "description": "Search in title and content"
+        },
+        {
+          "name": "isPinned",
+          "type": "boolean",
+          "required": false,
+          "description": "Filter by pinned status"
+        },
+        {
+          "name": "authorId",
+          "type": "string",
+          "required": false,
+          "description": "Filter by author ID"
+        },
+        {
+          "name": "page",
+          "type": "number",
+          "required": false,
+          "description": "Page number for pagination"
+        },
+        {
+          "name": "limit",
+          "type": "number",
+          "required": false,
+          "description": "Number of items per page"
+        },
+        {
+          "name": "sortBy",
+          "type": "string",
+          "required": false,
+          "description": "Field to sort by (default: date)"
+        },
+        {
+          "name": "sortDirection",
+          "type": "string",
+          "required": false,
+          "description": "Sort direction (asc, desc)"
+        }
+      ],
+      "request": {
+        "headers": {
+          "Authorization": "Bearer {token}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "id": "ann-1",
+              "title": "New Project Launch: Team Tasker",
+              "content": "We're excited to announce the launch of our new project, Team Tasker! This platform will help teams manage tasks, track progress, and improve collaboration. The beta version will be available next week for internal testing.",
+              "author": {
+                "id": "user-5",
+                "name": "Sarah Wilson",
+                "role": "Product Manager",
+                "avatar": "/placeholder.svg?height=40&width=40",
+                "initials": "SW"
+              },
+              "date": "2023-05-10T10:00:00Z",
+              "isPinned": true,
+              "likes": 12,
+              "hasLiked": false
+            },
+            {
+              "id": "ann-2",
+              "title": "Office Closure: Memorial Day Weekend",
+              "content": "Please note that our office will be closed on Monday, May 29th, in observance of Memorial Day. All deadlines falling on this date will be extended to Tuesday, May 30th. Enjoy the long weekend!",
+              "author": {
+                "id": "user-4",
+                "name": "Michael Brown",
+                "role": "HR Manager",
+                "avatar": "/placeholder.svg?height=40&width=40",
+                "initials": "MB"
+              },
+              "date": "2023-05-15T14:30:00Z",
+              "isPinned": false,
+              "likes": 8,
+              "hasLiked": true
+            }
+          ],
+          "total": 2,
+          "page": 1,
+          "limit": 10,
+          "totalPages": 1
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "description": "Get a single announcement by ID",
+      "url": "/api/communication/announcements/{id}",
+      "pathParams": [
+        {
+          "name": "id",
+          "type": "string",
+          "required": true,
+          "description": "Announcement ID"
+        }
+      ],
+      "request": {
+        "headers": {
+          "Authorization": "Bearer {token}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "id": "ann-1",
+          "title": "New Project Launch: Team Tasker",
+          "content": "We're excited to announce the launch of our new project, Team Tasker! This platform will help teams manage tasks, track progress, and improve collaboration. The beta version will be available next week for internal testing.",
+          "author": {
+            "id": "user-5",
+            "name": "Sarah Wilson",
+            "role": "Product Manager",
+            "avatar": "/placeholder.svg?height=40&width=40",
+            "initials": "SW"
+          },
+          "date": "2023-05-10T10:00:00Z",
+          "isPinned": true,
+          "likes": 12,
+          "hasLiked": false
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "description": "Create a new announcement",
+      "url": "/api/communication/announcements",
+      "request": {
+        "headers": {
+          "Authorization": "Bearer {token}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "title": "New Announcement",
+          "content": "This is a new announcement for the team.",
+          "isPinned": false
+        }
+      },
+      "response": {
+        "status": 201,
+        "body": {
+          "id": "ann-5",
+          "title": "New Announcement",
+          "content": "This is a new announcement for the team.",
+          "author": {
+            "id": "user-1",
+            "name": "Jane Doe",
+            "role": "Team Lead",
+            "avatar": "/placeholder.svg?height=40&width=40",
+            "initials": "JD"
+          },
+          "date": "2023-05-20T09:00:00Z",
+          "isPinned": false,
+          "likes": 0,
+          "hasLiked": false
+        }
+      }
+    },
+    {
+      "method": "PATCH",
+      "description": "Update an existing announcement",
+      "url": "/api/communication/announcements/{id}",
+      "pathParams": [
+        {
+          "name": "id",
+          "type": "string",
+          "required": true,
+          "description": "Announcement ID"
+        }
+      ],
+      "request": {
+        "headers": {
+          "Authorization": "Bearer {token}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "title": "Updated Announcement Title",
+          "content": "Updated announcement content."
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "id": "ann-1",
+          "title": "Updated Announcement Title",
+          "content": "Updated announcement content.",
+          "author": {
+            "id": "user-5",
+            "name": "Sarah Wilson",
+            "role": "Product Manager",
+            "avatar": "/placeholder.svg?height=40&width=40",
+            "initials": "SW"
+          },
+          "date": "2023-05-10T10:00:00Z",
+          "isPinned": true,
+          "likes": 12,
+          "hasLiked": false
+        }
+      }
+    },
+    {
+      "method": "DELETE",
+      "description": "Delete an announcement",
+      "url": "/api/communication/announcements/{id}",
+      "pathParams": [
+        {
+          "name": "id",
+          "type": "string",
+          "required": true,
+          "description": "Announcement ID"
+        }
+      ],
+      "request": {
+        "headers": {
+          "Authorization": "Bearer {token}"
+        }
+      },
+      "response": {
+        "status": 204,
+        "body": null
+      }
+    },
+    {
+      "method": "POST",
+      "description": "Toggle pin status of an announcement",
+      "url": "/api/communication/announcements/{id}/toggle-pin",
+      "pathParams": [
+        {
+          "name": "id",
+          "type": "string",
+          "required": true,
+          "description": "Announcement ID"
+        }
+      ],
+      "request": {
+        "headers": {
+          "Authorization": "Bearer {token}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "id": "ann-1",
+          "title": "New Project Launch: Team Tasker",
+          "content": "We're excited to announce the launch of our new project, Team Tasker! This platform will help teams manage tasks, track progress, and improve collaboration. The beta version will be available next week for internal testing.",
+          "author": {
+            "id": "user-5",
+            "name": "Sarah Wilson",
+            "role": "Product Manager",
+            "avatar": "/placeholder.svg?height=40&width=40",
+            "initials": "SW"
+          },
+          "date": "2023-05-10T10:00:00Z",
+          "isPinned": false,
+          "likes": 12,
+          "hasLiked": false
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "description": "Toggle like status of an announcement",
+      "url": "/api/communication/announcements/{id}/toggle-like",
+      "pathParams": [
+        {
+          "name": "id",
+          "type": "string",
+          "required": true,
+          "description": "Announcement ID"
+        }
+      ],
+      "request": {
+        "headers": {
+          "Authorization": "Bearer {token}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "id": "ann-1",
+          "title": "New Project Launch: Team Tasker",
+          "content": "We're excited to announce the launch of our new project, Team Tasker! This platform will help teams manage tasks, track progress, and improve collaboration. The beta version will be available next week for internal testing.",
+          "author": {
+            "id": "user-5",
+            "name": "Sarah Wilson",
+            "role": "Product Manager",
+            "avatar": "/placeholder.svg?height=40&width=40",
+            "initials": "SW"
+          },
+          "date": "2023-05-10T10:00:00Z",
+          "isPinned": true,
+          "likes": 13,
+          "hasLiked": true
+        }
+      }
+    }
+  ]
+}

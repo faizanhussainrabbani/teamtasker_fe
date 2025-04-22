@@ -7,115 +7,8 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Plus } from "lucide-react"
 import { TaskDialog } from "@/components/tasks/task-dialog"
-
-// Sample task data
-const initialTasks = [
-  {
-    id: "task-1",
-    title: "API Integration",
-    description: "Integrate the new payment gateway API with our checkout system",
-    status: "in-progress",
-    priority: "high",
-    dueDate: "2023-05-15",
-    progress: 45,
-    assignee: {
-      name: "Jane Doe",
-      avatar: "/placeholder.svg?height=32&width=32",
-      initials: "JD",
-    },
-    tags: ["Backend", "API"],
-  },
-  {
-    id: "task-2",
-    title: "User Dashboard Redesign",
-    description: "Redesign the user dashboard for better UX and accessibility",
-    status: "in-progress",
-    priority: "medium",
-    dueDate: "2023-05-18",
-    progress: 30,
-    assignee: {
-      name: "John Smith",
-      avatar: "/placeholder.svg?height=32&width=32",
-      initials: "JS",
-    },
-    tags: ["UI/UX", "Frontend"],
-  },
-  {
-    id: "task-3",
-    title: "Database Optimization",
-    description: "Optimize database queries for better performance",
-    status: "todo",
-    priority: "medium",
-    dueDate: "2023-05-20",
-    progress: 0,
-    assignee: {
-      name: "Emily Chen",
-      avatar: "/placeholder.svg?height=32&width=32",
-      initials: "EC",
-    },
-    tags: ["Database", "Performance"],
-  },
-  {
-    id: "task-4",
-    title: "Documentation Update",
-    description: "Update API documentation with new endpoints",
-    status: "completed",
-    priority: "low",
-    dueDate: "2023-05-10",
-    progress: 100,
-    assignee: {
-      name: "Michael Brown",
-      avatar: "/placeholder.svg?height=32&width=32",
-      initials: "MB",
-    },
-    tags: ["Documentation"],
-  },
-  {
-    id: "task-5",
-    title: "Security Audit",
-    description: "Perform security audit on authentication system",
-    status: "todo",
-    priority: "high",
-    dueDate: "2023-05-25",
-    progress: 0,
-    assignee: {
-      name: "Jane Doe",
-      avatar: "/placeholder.svg?height=32&width=32",
-      initials: "JD",
-    },
-    tags: ["Security", "Audit"],
-  },
-  {
-    id: "task-6",
-    title: "Mobile Responsiveness",
-    description: "Fix mobile responsiveness issues on checkout page",
-    status: "todo",
-    priority: "medium",
-    dueDate: "2023-05-22",
-    progress: 0,
-    assignee: {
-      name: "John Smith",
-      avatar: "/placeholder.svg?height=32&width=32",
-      initials: "JS",
-    },
-    tags: ["Frontend", "Mobile"],
-  },
-  {
-    id: "task-7",
-    title: "User Testing",
-    description: "Conduct user testing for the new feature",
-    status: "todo",
-    priority: "medium",
-    dueDate: "2023-05-28",
-    progress: 0,
-    assignee: {
-      name: "Sarah Wilson",
-      avatar: "/placeholder.svg?height=32&width=32",
-      initials: "SW",
-    },
-    tags: ["Testing", "UX"],
-  },
-]
+import { useTasks, useUpdateTaskStatus } from "@/lib/api/hooks/useTasks"
+import { LoadingState, ErrorState, EmptyState } from "@/components/ui/api-state"
 
 // Function to get priority color
 const getPriorityColor = (priority: string) => {
@@ -132,13 +25,19 @@ const getPriorityColor = (priority: string) => {
 }
 
 export function TasksKanban() {
-  const [tasks, setTasks] = useState(initialTasks)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [selectedTask, setSelectedTask] = useState<any>(null)
 
-  const todoTasks = tasks.filter((task) => task.status === "todo")
-  const inProgressTasks = tasks.filter((task) => task.status === "in-progress")
-  const completedTasks = tasks.filter((task) => task.status === "completed")
+  // Fetch all tasks
+  const { data, isLoading, isError, error, refetch } = useTasks()
+
+  // Task status update mutation
+  const updateTaskStatus = useUpdateTaskStatus()
+
+  // Filter tasks by status
+  const todoTasks = data?.data.filter((task) => task.status === "todo") || []
+  const inProgressTasks = data?.data.filter((task) => task.status === "in-progress") || []
+  const completedTasks = data?.data.filter((task) => task.status === "completed") || []
 
   const openTaskDialog = (task: any) => {
     setSelectedTask(task)
@@ -156,15 +55,9 @@ export function TasksKanban() {
   const handleDrop = (e: React.DragEvent, status: string) => {
     e.preventDefault()
     const taskId = e.dataTransfer.getData("taskId")
-    
-    setTasks(
-      tasks.map((task) => {
-        if (task.id === taskId) {
-          return { ...task, status }
-        }
-        return task
-      })
-    )
+
+    // Update task status via API
+    updateTaskStatus.mutate({ id: taskId, status })
   }
 
   return (
@@ -180,17 +73,36 @@ export function TasksKanban() {
         </Button>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          {/* To Do Column */}
-          <div 
-            className="space-y-4"
-            onDragOver={handleDragOver}
-            onDrop={(e) => handleDrop(e, "todo")}
-          >
-            <div className="rounded-lg bg-muted p-3">
-              <h3 className="font-medium">To Do ({todoTasks.length})</h3>
-            </div>
-            {todoTasks.map((task) => (
+        {isLoading ? (
+          <LoadingState message="Loading tasks..." />
+        ) : isError ? (
+          <ErrorState
+            message={`Error loading tasks: ${error?.message || 'Unknown error'}`}
+            onRetry={() => refetch()}
+          />
+        ) : !data?.data || data.data.length === 0 ? (
+          <EmptyState
+            title="No tasks found"
+            description="There are no tasks in the system."
+            action={
+              <Button onClick={() => { setSelectedTask(null); setIsDialogOpen(true); }}>
+                <Plus className="mr-2 h-4 w-4" />
+                Create Task
+              </Button>
+            }
+          />
+        ) : (
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            {/* To Do Column */}
+            <div
+              className="space-y-4"
+              onDragOver={handleDragOver}
+              onDrop={(e) => handleDrop(e, "todo")}
+            >
+              <div className="rounded-lg bg-muted p-3">
+                <h3 className="font-medium">To Do ({todoTasks.length})</h3>
+              </div>
+              {todoTasks.map((task) => (
               <div
                 key={task.id}
                 className="rounded-lg border bg-card p-3 shadow-sm"
@@ -232,7 +144,7 @@ export function TasksKanban() {
           </div>
 
           {/* In Progress Column */}
-          <div 
+          <div
             className="space-y-4"
             onDragOver={handleDragOver}
             onDrop={(e) => handleDrop(e, "in-progress")}
@@ -282,7 +194,7 @@ export function TasksKanban() {
           </div>
 
           {/* Completed Column */}
-          <div 
+          <div
             className="space-y-4"
             onDragOver={handleDragOver}
             onDrop={(e) => handleDrop(e, "completed")}
@@ -331,6 +243,7 @@ export function TasksKanban() {
             </Button>
           </div>
         </div>
+        )}
       </CardContent>
       {isDialogOpen && (
         <TaskDialog

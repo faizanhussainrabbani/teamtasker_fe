@@ -1,0 +1,144 @@
+{
+  "endpoint": "/api/activities",
+  "description": "API endpoints for activity feeds and notifications",
+  "methods": [
+    {
+      "method": "GET",
+      "description": "Get a list of activities with optional filtering",
+      "url": "/api/activities",
+      "queryParams": [
+        {
+          "name": "userId",
+          "type": "string",
+          "required": false,
+          "description": "Filter by user ID"
+        },
+        {
+          "name": "targetType",
+          "type": "string",
+          "required": false,
+          "description": "Filter by target type (e.g., task, project)"
+        },
+        {
+          "name": "targetId",
+          "type": "string",
+          "required": false,
+          "description": "Filter by target ID"
+        },
+        {
+          "name": "action",
+          "type": "string",
+          "required": false,
+          "description": "Filter by action type (completed, commented, assigned, updated, created, deleted)"
+        },
+        {
+          "name": "page",
+          "type": "number",
+          "required": false,
+          "description": "Page number for pagination"
+        },
+        {
+          "name": "limit",
+          "type": "number",
+          "required": false,
+          "description": "Number of items per page"
+        },
+        {
+          "name": "sortBy",
+          "type": "string",
+          "required": false,
+          "description": "Field to sort by (default: createdAt)"
+        },
+        {
+          "name": "sortDirection",
+          "type": "string",
+          "required": false,
+          "description": "Sort direction (asc, desc)"
+        }
+      ],
+      "request": {
+        "headers": {
+          "Authorization": "Bearer {token}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "id": "activity-1",
+              "user": {
+                "id": "user-2",
+                "name": "John Smith",
+                "avatar": "/placeholder.svg?height=32&width=32",
+                "initials": "JS"
+              },
+              "action": "completed",
+              "target": "User Authentication Feature",
+              "targetId": "task-4",
+              "targetType": "task",
+              "createdAt": "2023-05-15T10:30:00Z",
+              "timestamp": "2 hours ago"
+            },
+            {
+              "id": "activity-2",
+              "user": {
+                "id": "user-3",
+                "name": "Emily Chen",
+                "avatar": "/placeholder.svg?height=32&width=32",
+                "initials": "EC"
+              },
+              "action": "commented",
+              "target": "API Integration",
+              "targetId": "task-1",
+              "targetType": "task",
+              "comment": "I've identified a potential issue with the authentication flow. Let's discuss this in our next meeting.",
+              "createdAt": "2023-05-15T08:30:00Z",
+              "timestamp": "4 hours ago"
+            }
+          ],
+          "total": 2,
+          "page": 1,
+          "limit": 10,
+          "totalPages": 1
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "description": "Get a single activity by ID",
+      "url": "/api/activities/{id}",
+      "pathParams": [
+        {
+          "name": "id",
+          "type": "string",
+          "required": true,
+          "description": "Activity ID"
+        }
+      ],
+      "request": {
+        "headers": {
+          "Authorization": "Bearer {token}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "id": "activity-1",
+          "user": {
+            "id": "user-2",
+            "name": "John Smith",
+            "avatar": "/placeholder.svg?height=32&width=32",
+            "initials": "JS"
+          },
+          "action": "completed",
+          "target": "User Authentication Feature",
+          "targetId": "task-4",
+          "targetType": "task",
+          "createdAt": "2023-05-15T10:30:00Z",
+          "timestamp": "2 hours ago"
+        }
+      }
+    }
+  ]
+}

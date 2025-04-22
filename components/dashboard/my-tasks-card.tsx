@@ -8,55 +8,9 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-
-// Sample task data
-const tasks = [
-  {
-    id: "task-1",
-    title: "API Integration",
-    status: "in-progress",
-    priority: "high",
-    dueDate: "2023-05-15",
-    progress: 45,
-    tags: ["Backend", "API"],
-  },
-  {
-    id: "task-2",
-    title: "User Dashboard Redesign",
-    status: "in-progress",
-    priority: "medium",
-    dueDate: "2023-05-18",
-    progress: 30,
-    tags: ["UI/UX", "Frontend"],
-  },
-  {
-    id: "task-3",
-    title: "Database Optimization",
-    status: "todo",
-    priority: "medium",
-    dueDate: "2023-05-20",
-    progress: 0,
-    tags: ["Database", "Performance"],
-  },
-  {
-    id: "task-4",
-    title: "Documentation Update",
-    status: "completed",
-    priority: "low",
-    dueDate: "2023-05-10",
-    progress: 100,
-    tags: ["Documentation"],
-  },
-  {
-    id: "task-5",
-    title: "Security Audit",
-    status: "todo",
-    priority: "high",
-    dueDate: "2023-05-25",
-    progress: 0,
-    tags: ["Security", "Audit"],
-  },
-]
+import { useTasks, useUpdateTaskStatus } from "@/lib/api/hooks/useTasks"
+import { TaskStatus } from "@/lib/api/types/tasks"
+import { LoadingState, ErrorState, EmptyState } from "@/components/ui/api-state"
 
 // Update the getStatusIcon function to use blue colors
 const getStatusIcon = (status: string) => {
@@ -89,13 +43,14 @@ const getPriorityColor = (priority: string) => {
 export function MyTasksCard() {
   const [activeTab, setActiveTab] = useState("all")
 
-  const filteredTasks = tasks.filter((task) => {
-    if (activeTab === "all") return true
-    if (activeTab === "todo") return task.status === "todo"
-    if (activeTab === "in-progress") return task.status === "in-progress"
-    if (activeTab === "completed") return task.status === "completed"
-    return true
-  })
+  // Convert UI filter to API parameter
+  const statusFilter = activeTab !== "all" ? activeTab as TaskStatus : undefined
+
+  // Fetch tasks with React Query
+  const { data, isLoading, isError, error, refetch } = useTasks({ status: statusFilter })
+
+  // Task status update mutation
+  const updateTaskStatus = useUpdateTaskStatus()
 
   return (
     <Card>
@@ -117,51 +72,73 @@ export function MyTasksCard() {
             <TabsTrigger value="completed">Completed</TabsTrigger>
           </TabsList>
           <TabsContent value={activeTab} className="space-y-4">
-            {filteredTasks.map((task) => (
-              <div key={task.id} className="flex items-center justify-between rounded-lg border p-3 text-sm">
-                <div className="flex items-center gap-3">
-                  {getStatusIcon(task.status)}
-                  <div>
-                    <div className="font-medium">{task.title}</div>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <span>Due {new Date(task.dueDate).toLocaleDateString()}</span>
-                      <span>•</span>
-                      <Badge variant="outline" className={getPriorityColor(task.priority)}>
-                        {task.priority}
-                      </Badge>
+            {isLoading ? (
+              <LoadingState message="Loading tasks..." />
+            ) : isError ? (
+              <ErrorState
+                message={`Error loading tasks: ${error?.message || 'Unknown error'}`}
+                onRetry={() => refetch()}
+              />
+            ) : !data?.data || data.data.length === 0 ? (
+              <EmptyState
+                title="No tasks found"
+                description={`You don't have any ${activeTab !== 'all' ? activeTab + ' ' : ''}tasks.`}
+              />
+            ) : (
+              data.data.map((task) => (
+                <div key={task.id} className="flex items-center justify-between rounded-lg border p-3 text-sm">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="cursor-pointer"
+                      onClick={() => {
+                        const newStatus = task.status === "completed" ? "todo" : "completed";
+                        updateTaskStatus.mutate({ id: task.id, status: newStatus });
+                      }}
+                    >
+                      {getStatusIcon(task.status)}
+                    </div>
+                    <div>
+                      <div className="font-medium">{task.title}</div>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <span>Due {new Date(task.dueDate).toLocaleDateString()}</span>
+                        <span>•</span>
+                        <Badge variant="outline" className={getPriorityColor(task.priority)}>
+                          {task.priority}
+                        </Badge>
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="hidden w-32 md:block">
-                    <div className="flex items-center justify-between text-xs">
-                      <span>{task.progress}%</span>
+                  <div className="flex items-center gap-3">
+                    <div className="hidden w-32 md:block">
+                      <div className="flex items-center justify-between text-xs">
+                        <span>{task.progress}%</span>
+                      </div>
+                      <Progress value={task.progress} className="h-1.5" />
                     </div>
-                    <Progress value={task.progress} className="h-1.5" />
+                    <div className="flex gap-1">
+                      {task.tags.map((tag) => (
+                        <Badge key={tag} variant="secondary" className="text-xs">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <MoreHorizontal className="h-4 w-4" />
+                          <span className="sr-only">More options</span>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem>Edit Task</DropdownMenuItem>
+                        <DropdownMenuItem>Change Status</DropdownMenuItem>
+                        <DropdownMenuItem>Add Comment</DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
-                  <div className="flex gap-1">
-                    {task.tags.map((tag) => (
-                      <Badge key={tag} variant="secondary" className="text-xs">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <MoreHorizontal className="h-4 w-4" />
-                        <span className="sr-only">More options</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem>Edit Task</DropdownMenuItem>
-                      <DropdownMenuItem>Change Status</DropdownMenuItem>
-                      <DropdownMenuItem>Add Comment</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </TabsContent>
         </Tabs>
       </CardContent>
