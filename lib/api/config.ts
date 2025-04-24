@@ -10,7 +10,8 @@ export const API_CONFIG = {
     auth: '/auth',
     profile: '/users/profile',
     skills: '/skills',
-    development: '/development',
+    development: '/users/development',
+    developmentGoals: '/users/profile/development-goals',
     communication: '/communication',
     activities: '/activities',
   }
