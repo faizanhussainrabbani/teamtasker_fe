@@ -11,7 +11,6 @@ export const API_CONFIG = {
     profile: '/users/profile',
     skills: '/skills',
     development: '/users/development',
-    developmentGoals: '/users/profile/development-goals',
     communication: '/communication',
     activities: '/activities',
   }

@@ -6,7 +6,6 @@ import { MyTasksCard } from "@/components/dashboard/my-tasks-card";
 import { SkillsOverviewCard } from "@/components/dashboard/skills-overview-card";
 import { RecentActivityCard } from "@/components/dashboard/recent-activity-card";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
-import { DevelopmentGoalsCard } from "@/components/dashboard/development-goals-card";
 import { useState, useEffect } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -53,9 +52,6 @@ export default function DashboardPage() {
         </div>
         <div className="lg:col-span-2">
           <TeamWorkloadCard isLoading={isPageLoading} />
-        </div>
-        <div className="lg:col-span-1">
-          <DevelopmentGoalsCard isLoading={isPageLoading} />
         </div>
         <div className="lg:col-span-3">
           <RecentActivityCard isLoading={isPageLoading} />

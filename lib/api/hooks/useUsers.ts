@@ -1,23 +1,19 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { 
-  getUsers, 
-  getUserById, 
-  createUser, 
-  updateUser, 
+import {
+  getUsers,
+  getUserById,
+  createUser,
+  updateUser,
   deleteUser,
   getCurrentUserProfile,
   updateCurrentUserProfile,
-  updateUserSkills,
-  getUserDevelopmentGoals,
-  createDevelopmentGoal,
-  updateDevelopmentGoal
+  updateUserSkills
 } from '../endpoints/users';
-import { 
-  UserCreateRequest, 
-  UserUpdateRequest, 
+import {
+  UserCreateRequest,
+  UserUpdateRequest,
   UsersQueryParams,
-  UserSkill,
-  DevelopmentGoal
+  UserSkill
 } from '../types/users';
 import { parseApiError } from '@/lib/error-handling';
 
@@ -30,8 +26,6 @@ export const userKeys = {
   detail: (id: string) => [...userKeys.details(), id] as const,
   profile: () => [...userKeys.all, 'profile'] as const,
   skills: () => [...userKeys.profile(), 'skills'] as const,
-  developmentGoals: () => [...userKeys.profile(), 'development-goals'] as const,
-  developmentGoal: (id: string) => [...userKeys.developmentGoals(), id] as const,
 };
 
 /**
@@ -66,7 +60,7 @@ export const useUser = (id: string) => {
  */
 export const useCreateUser = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (newUser: UserCreateRequest) => createUser(newUser),
     onSuccess: () => {
@@ -84,9 +78,9 @@ export const useCreateUser = () => {
  */
 export const useUpdateUser = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: ({ id, user }: { id: string; user: UserUpdateRequest }) => 
+    mutationFn: ({ id, user }: { id: string; user: UserUpdateRequest }) =>
       updateUser(id, user),
     onSuccess: (updatedUser) => {
       // Update the user in the cache
@@ -105,7 +99,7 @@ export const useUpdateUser = () => {
  */
 export const useDeleteUser = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (id: string) => deleteUser(id),
     onSuccess: (_, id) => {
@@ -138,7 +132,7 @@ export const useCurrentUserProfile = () => {
  */
 export const useUpdateCurrentUserProfile = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (profile: UserUpdateRequest) => updateCurrentUserProfile(profile),
     onSuccess: (updatedProfile) => {
@@ -156,7 +150,7 @@ export const useUpdateCurrentUserProfile = () => {
  */
 export const useUpdateUserSkills = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (skills: UserSkill[]) => updateUserSkills(skills),
     onSuccess: () => {
@@ -169,54 +163,4 @@ export const useUpdateUserSkills = () => {
   });
 };
 
-/**
- * Hook for fetching user development goals
- */
-export const useUserDevelopmentGoals = () => {
-  return useQuery({
-    queryKey: userKeys.developmentGoals(),
-    queryFn: () => getUserDevelopmentGoals(),
-    onError: (error) => {
-      console.error('Error fetching development goals:', parseApiError(error));
-    },
-  });
-};
 
-/**
- * Hook for creating a development goal
- */
-export const useCreateDevelopmentGoal = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: (goal: Omit<DevelopmentGoal, 'id'>) => createDevelopmentGoal(goal),
-    onSuccess: () => {
-      // Invalidate and refetch development goals
-      queryClient.invalidateQueries({ queryKey: userKeys.developmentGoals() });
-    },
-    onError: (error) => {
-      console.error('Error creating development goal:', parseApiError(error));
-    },
-  });
-};
-
-/**
- * Hook for updating a development goal
- */
-export const useUpdateDevelopmentGoal = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: ({ id, goal }: { id: string; goal: Partial<DevelopmentGoal> }) => 
-      updateDevelopmentGoal(id, goal),
-    onSuccess: (updatedGoal) => {
-      // Update the goal in the cache
-      queryClient.setQueryData(userKeys.developmentGoal(updatedGoal.id), updatedGoal);
-      // Invalidate the goals list
-      queryClient.invalidateQueries({ queryKey: userKeys.developmentGoals() });
-    },
-    onError: (error, { id }) => {
-      console.error(`Error updating development goal ${id}:`, parseApiError(error));
-    },
-  });
-};

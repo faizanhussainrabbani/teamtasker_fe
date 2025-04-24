@@ -13,7 +13,6 @@ import {
 
 const USERS_ENDPOINT = API_CONFIG.endpoints.users;
 const PROFILE_ENDPOINT = API_CONFIG.endpoints.profile;
-const DEVELOPMENT_GOALS_ENDPOINT = API_CONFIG.endpoints.developmentGoals;
 
 /**
  * Get all users with optional filtering
@@ -78,26 +77,4 @@ export const updateUserSkills = async (skills: UserSkill[]): Promise<UserSkill[]
   return response.data;
 };
 
-/**
- * Get user development goals
- */
-export const getUserDevelopmentGoals = async (): Promise<DevelopmentGoal[]> => {
-  const response = await apiClient.get(`${DEVELOPMENT_GOALS_ENDPOINT}`);
-  return response.data;
-};
 
-/**
- * Create development goal
- */
-export const createDevelopmentGoal = async (goal: Omit<DevelopmentGoal, 'id'>): Promise<DevelopmentGoal> => {
-  const response = await apiClient.post(`${DEVELOPMENT_GOALS_ENDPOINT}`, goal);
-  return response.data;
-};
-
-/**
- * Update development goal
- */
-export const updateDevelopmentGoal = async (id: string, goal: Partial<DevelopmentGoal>): Promise<DevelopmentGoal> => {
-  const response = await apiClient.patch(`${DEVELOPMENT_GOALS_ENDPOINT}/${id}`, goal);
-  return response.data;
-};
