@@ -27,9 +27,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const showSidebar = mounted && isAuthenticated;
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      {showSidebar ? <AppSidebar /> : null}
-      <main className={`${showSidebar ? 'flex-1' : 'w-full'} overflow-hidden`}>
+    <div className="flex h-screen w-full overflow-hidden">
+      {showSidebar ? <AppSidebar className="shrink-0" /> : null}
+      <main className="flex-1 w-full overflow-hidden">
         {children}
       </main>
     </div>

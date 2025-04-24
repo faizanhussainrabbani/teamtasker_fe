@@ -51,12 +51,16 @@ const mainNavItems = [
   },
 ]
 
-export function AppSidebar() {
+interface AppSidebarProps {
+  className?: string;
+}
+
+export function AppSidebar({ className }: AppSidebarProps) {
   const pathname = usePathname()
   const [searchQuery, setSearchQuery] = useState("")
 
   return (
-    <Sidebar>
+    <Sidebar className={className}>
       <SidebarHeader className="border-b px-6 py-3">
         <div className="flex items-center gap-2">
           <SidebarTrigger />
