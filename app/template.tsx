@@ -9,9 +9,8 @@ import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/context/auth-context';
 import ErrorBoundary from '@/components/error-boundary';
 import ApiErrorListener from '@/components/api-error-listener';
-import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
-export function Providers({ children }: { children: React.ReactNode }) {
+export default function Template({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient({
     defaultOptions: {
       queries: {
@@ -28,9 +27,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <AuthProvider>
             <SidebarProvider>
-              <AuthenticatedLayout>
-                {children}
-              </AuthenticatedLayout>
+              {children}
               <ApiErrorListener />
               <Toaster />
             </SidebarProvider>

@@ -1,15 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { 
-  login, 
-  register, 
-  getCurrentUser, 
+import {
+  login,
+  register,
+  getCurrentUser,
   logout,
   forgotPassword,
   resetPassword,
   changePassword
 } from '../endpoints/auth';
-import { 
-  LoginRequest, 
+import {
+  LoginRequest,
   RegisterRequest,
   ForgotPasswordRequest,
   ResetPasswordRequest,
@@ -29,7 +29,7 @@ export const authKeys = {
  */
 export const useLogin = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (credentials: LoginRequest) => login(credentials),
     onSuccess: (data) => {
@@ -49,7 +49,7 @@ export const useLogin = () => {
  */
 export const useRegister = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (userData: RegisterRequest) => register(userData),
     onSuccess: (data) => {
@@ -72,6 +72,8 @@ export const useCurrentUser = () => {
     queryKey: authKeys.user(),
     queryFn: () => getCurrentUser(),
     retry: false,
+    // Disable this query by default to prevent API calls during development
+    enabled: false,
     onError: (error) => {
       console.error('Error fetching current user:', parseApiError(error));
     },
@@ -83,7 +85,7 @@ export const useCurrentUser = () => {
  */
 export const useLogout = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: () => logout(),
     onSuccess: () => {
@@ -129,7 +131,7 @@ export const useResetPassword = () => {
 };
 
 /**
- * Hook for changing the password of the authenticated user
+ * Hook for changing a user's password
  */
 export const useChangePassword = () => {
   return useMutation({
@@ -139,3 +141,4 @@ export const useChangePassword = () => {
     },
   });
 };
+

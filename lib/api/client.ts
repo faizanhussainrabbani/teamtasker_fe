@@ -16,7 +16,7 @@ const dispatchApiEvent = (eventName: string, data?: any) => {
 
 // Create axios instance with default config
 const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002/api',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5220/api',
   timeout: 15000, // Increased timeout for slower connections
   headers: {
     'Content-Type': 'application/json',

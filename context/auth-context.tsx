@@ -69,25 +69,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Redirect to login page if not authenticated and trying to access protected routes
   useEffect(() => {
-    // For development purposes, we'll disable authentication redirection
+    // Skip if we're still loading the user
+    if (isLoadingUser) return;
+
+    // For development purposes, we'll disable authentication redirection if API mocking is enabled
     if (process.env.NEXT_PUBLIC_API_MOCKING === 'enabled') {
-      // Skip authentication check in development with MSW
       setIsLoading(false);
       return;
     }
 
     const token = getAuthToken();
-    const isAuthPage = pathname === '/login' || pathname === '/register';
+    const isAuthPage = pathname === '/login' || pathname === '/register' || pathname === '/forgot-password';
 
     if (!token && !isAuthPage && !isLoading) {
       // Only redirect if we've finished checking authentication
-      if (!isLoadingUser) {
-        router.push('/login');
-      }
+      router.push('/login');
     } else if (token && isAuthPage && !isLoading) {
       // Redirect to dashboard if already authenticated and on auth page
       router.push('/dashboard');
     }
+
+    setIsLoading(false);
   }, [pathname, isLoading, isLoadingUser, router]);
 
   const login = async (credentials: LoginRequest) => {

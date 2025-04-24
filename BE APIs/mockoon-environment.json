@@ -4,7 +4,7 @@
   "name": "TeamTasker API",
   "endpointPrefix": "api",
   "latency": 0,
-  "port": 3002,
+  "port": 5220,
   "hostname": "0.0.0.0",
   "routes": [
     {
