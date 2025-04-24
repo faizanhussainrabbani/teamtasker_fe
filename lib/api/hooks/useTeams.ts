@@ -17,10 +17,10 @@ export const teamKeys = {
 export const useTeamWorkload = () => {
   // Fetch all users
   const usersQuery = useUsers();
-  
+
   // Fetch all tasks
   const tasksQuery = useTasks();
-  
+
   // Combine the queries
   return useQuery({
     queryKey: teamKeys.workload(),
@@ -29,32 +29,51 @@ export const useTeamWorkload = () => {
       if (!usersQuery.data || !tasksQuery.data) {
         return [];
       }
-      
-      const users = usersQuery.data.data;
-      const tasks = tasksQuery.data.data;
-      
+
+      // Handle different response structures
+      const users = Array.isArray(usersQuery.data)
+        ? usersQuery.data
+        : (usersQuery.data.data || []);
+
+      const tasks = Array.isArray(tasksQuery.data)
+        ? tasksQuery.data
+        : (tasksQuery.data.data || []);
+
+      // Check if users is an array before mapping
+      if (!Array.isArray(users)) {
+        console.error('Users data is not an array:', users);
+        return [];
+      }
+
       // Calculate workload for each user
       return users.map(user => {
-        // Get tasks assigned to this user
-        const userTasks = tasks.filter(task => task.assigneeId === user.id);
-        
-        // Calculate workload based on number of tasks and their priority
-        const workload = calculateWorkload(userTasks);
-        
-        // Get top skills from user profile (if available)
-        const skills = user.skills?.slice(0, 3).map(skill => skill.name) || [];
-        
-        return {
-          id: user.id,
-          name: user.name,
-          role: user.role,
-          avatar: user.avatar,
-          initials: user.initials,
-          workload,
-          tasks: userTasks.length,
-          skills,
-        };
-      });
+        if (!user) return null;
+
+        try {
+          // Get tasks assigned to this user
+          const userTasks = tasks.filter(task => task && task.assigneeId === user.id);
+
+          // Calculate workload based on number of tasks and their priority
+          const workload = calculateWorkload(userTasks);
+
+          // Get top skills from user profile (if available)
+          const skills = user.skills?.slice?.(0, 3)?.map?.(skill => skill.name) || [];
+
+          return {
+            id: user.id || 'unknown',
+            name: user.name || 'Unknown User',
+            role: user.role || 'Team Member',
+            avatar: user.avatar || '',
+            initials: user.initials || user.name?.substring(0, 2)?.toUpperCase() || 'UN',
+            workload,
+            tasks: userTasks.length,
+            skills,
+          };
+        } catch (error) {
+          console.error('Error processing user data:', error, user);
+          return null;
+        }
+      }).filter(Boolean); // Remove any null entries
     },
     enabled: usersQuery.isSuccess && tasksQuery.isSuccess,
     onError: (error) => {
@@ -65,33 +84,39 @@ export const useTeamWorkload = () => {
 
 // Helper function to calculate workload percentage based on tasks
 const calculateWorkload = (tasks: any[]) => {
-  if (tasks.length === 0) return 0;
-  
+  if (!Array.isArray(tasks) || tasks.length === 0) return 0;
+
   // Simple calculation: base workload on number of tasks and their priority
   let workloadScore = 0;
-  
+
   tasks.forEach(task => {
-    // Add weight based on priority
-    switch (task.priority) {
-      case 'high':
-        workloadScore += 20;
-        break;
-      case 'medium':
-        workloadScore += 15;
-        break;
-      case 'low':
-        workloadScore += 10;
-        break;
-      default:
-        workloadScore += 10;
-    }
-    
-    // Add weight based on status
-    if (task.status === 'in-progress') {
-      workloadScore += 5;
+    if (!task) return;
+
+    try {
+      // Add weight based on priority
+      switch (task.priority) {
+        case 'high':
+          workloadScore += 20;
+          break;
+        case 'medium':
+          workloadScore += 15;
+          break;
+        case 'low':
+          workloadScore += 10;
+          break;
+        default:
+          workloadScore += 10;
+      }
+
+      // Add weight based on status
+      if (task.status === 'in-progress') {
+        workloadScore += 5;
+      }
+    } catch (error) {
+      console.error('Error processing task for workload calculation:', error, task);
     }
   });
-  
+
   // Cap at 100%
   return Math.min(workloadScore, 100);
 };
