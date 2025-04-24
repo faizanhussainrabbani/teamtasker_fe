@@ -1,9 +1,9 @@
 'use client';
 
 import { useAuth } from '@/context/auth-context';
-import { TeamWorkloadCard } from "@/components/dashboard/team-workload-card";
+import { TasksProvider } from '@/context/tasks-context';
 import { MyTasksCard } from "@/components/dashboard/my-tasks-card";
-import { RecentActivityCard } from "@/components/dashboard/recent-activity-card";
+import { LazyLoadedCards } from "@/components/dashboard/lazy-loaded-cards";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { useState, useEffect } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -42,21 +42,19 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="flex flex-col h-screen">
-      <DashboardHeader />
-      <div className="flex-1 overflow-auto p-4 w-full">
-        <div className="grid grid-rows-[minmax(350px,1fr)_minmax(250px,1fr)] lg:grid-rows-[minmax(350px,1fr)] gap-4 md:grid-cols-1 lg:grid-cols-2 w-full h-full">
-          <div className="lg:col-span-1 w-full">
-            <MyTasksCard isLoading={isPageLoading} />
-          </div>
-          <div className="lg:col-span-1 w-full">
-            <TeamWorkloadCard isLoading={isPageLoading} />
-          </div>
-          <div className="lg:col-span-2 w-full">
-            <RecentActivityCard isLoading={isPageLoading} />
+    <TasksProvider>
+      <div className="flex flex-col h-screen">
+        <DashboardHeader />
+        <div className="flex-1 overflow-auto p-4 w-full">
+          <div className="grid grid-rows-[minmax(350px,1fr)_minmax(250px,1fr)] lg:grid-rows-[minmax(350px,1fr)] gap-4 md:grid-cols-1 lg:grid-cols-2 w-full h-full">
+            <div className="lg:col-span-1 w-full">
+              <MyTasksCard isLoading={isPageLoading} />
+            </div>
+            {/* Lazy loaded components */}
+            <LazyLoadedCards isLoading={isPageLoading} />
           </div>
         </div>
       </div>
-    </div>
+    </TasksProvider>
   );
 }

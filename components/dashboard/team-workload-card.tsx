@@ -6,7 +6,7 @@ import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ChevronRight } from "lucide-react"
-import { useTeamWorkload } from "@/lib/api/hooks/useTeams"
+import { useTeamWorkload } from "@/lib/api/hooks/useTeamWorkload"
 import { LoadingState, ErrorState, EmptyState } from "@/components/ui/api-state"
 
 const getWorkloadColor = (workload: number) => {

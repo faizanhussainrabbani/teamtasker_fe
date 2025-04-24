@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -12,11 +13,32 @@ interface RecentActivityCardProps {
 }
 
 export function RecentActivityCard({ isLoading: cardIsLoading }: RecentActivityCardProps) {
-  // Fetch activities with React Query
-  const { data, isLoading: dataIsLoading, isError, error, refetch } = useActivities({ limit: 5 });
+  // State to track if we should load activities
+  const [shouldFetchData, setShouldFetchData] = useState(false);
+
+  // Only fetch activities after component has mounted
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShouldFetchData(true);
+    }, 500); // Small delay to prioritize core components
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Fetch activities with React Query, but only when shouldFetchData is true
+  const {
+    data,
+    isLoading: dataIsLoading,
+    isError,
+    error,
+    refetch
+  } = useActivities(
+    { limit: 5 },
+    { enabled: shouldFetchData } // Only run query when shouldFetchData is true
+  );
 
   // Combine loading states
-  const isLoading = cardIsLoading || dataIsLoading;
+  const isLoading = cardIsLoading || dataIsLoading || !shouldFetchData;
 
   return (
     <Card className="h-full flex flex-col">

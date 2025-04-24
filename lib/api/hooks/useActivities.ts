@@ -19,8 +19,13 @@ export const activityKeys = {
 
 /**
  * Hook for fetching activities with filters
+ * @param params Query parameters for filtering activities
+ * @param options Additional options for the query
  */
-export const useActivities = (params?: ActivitiesQueryParams) => {
+export const useActivities = (
+  params?: ActivitiesQueryParams,
+  options?: { enabled?: boolean }
+) => {
   return useQuery({
     queryKey: activityKeys.list(params || {}),
     queryFn: async () => {
@@ -34,6 +39,7 @@ export const useActivities = (params?: ActivitiesQueryParams) => {
         throw error;
       }
     },
+    enabled: options?.enabled !== false, // Default to true if not specified
     onError: (error) => {
       console.error('Error fetching activities:', parseApiError(error));
     },

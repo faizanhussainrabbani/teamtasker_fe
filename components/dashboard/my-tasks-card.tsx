@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { useTasks, useUpdateTaskStatus } from "@/lib/api/hooks/useTasks"
+import { useUpdateTaskStatus } from "@/lib/api/hooks/useTasks"
+import { useDashboardTasks } from "@/context/tasks-context"
 import { TaskStatus } from "@/lib/api/types/tasks"
 import { LoadingState, ErrorState, EmptyState } from "@/components/ui/api-state"
 
@@ -47,14 +48,24 @@ interface MyTasksCardProps {
 export function MyTasksCard({ isLoading: cardIsLoading }: MyTasksCardProps) {
   const [activeTab, setActiveTab] = useState("all")
 
-  // Convert UI filter to API parameter
-  const statusFilter = activeTab !== "all" ? activeTab as TaskStatus : undefined
+  // Get shared tasks data from context
+  const { allTasks, isLoading: tasksLoading, isError, refetch } = useDashboardTasks();
 
-  // Fetch tasks with React Query
-  const { data, isLoading: dataIsLoading, isError, error, refetch } = useTasks({ status: statusFilter })
+  // Filter tasks based on the active tab
+  const filteredTasks = allTasks?.data?.filter(task =>
+    activeTab === "all" || task.status === activeTab
+  ) || [];
+
+  // Create a data structure that matches the original API response
+  const data = {
+    data: filteredTasks,
+    total: filteredTasks.length,
+    page: 1,
+    limit: 10
+  };
 
   // Combine loading states
-  const isLoading = cardIsLoading || dataIsLoading
+  const isLoading = cardIsLoading || tasksLoading
 
   // Task status update mutation
   const updateTaskStatus = useUpdateTaskStatus()
