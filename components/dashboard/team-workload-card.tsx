@@ -41,9 +41,14 @@ export function TeamWorkloadCard({ isLoading: cardIsLoading }: TeamWorkloadCardP
         {isLoading ? (
           <LoadingState message="Loading team workload..." />
         ) : isError ? (
-          <ErrorState
-            message={`Error loading team workload: ${error?.message || 'Unknown error'}`}
-            onRetry={() => refetch()}
+          <EmptyState
+            title="No team members found"
+            description="There are no team members with assigned tasks."
+            action={
+              <Button variant="outline" size="sm" onClick={() => refetch()}>
+                Try Again
+              </Button>
+            }
           />
         ) : !teamMembers || teamMembers.length === 0 ? (
           <EmptyState

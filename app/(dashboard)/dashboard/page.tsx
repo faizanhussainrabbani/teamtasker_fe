@@ -28,7 +28,7 @@ export default function DashboardPage() {
     return (
       <div className="p-6">
         <Skeleton className="h-12 w-64 mb-6" />
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
           <Skeleton className="h-[200px] w-full" />
           <Skeleton className="h-[200px] w-full" />
           <Skeleton className="h-[200px] w-full lg:col-span-2" />
@@ -40,7 +40,7 @@ export default function DashboardPage() {
   return (
     <div className="flex flex-col">
       <DashboardHeader />
-      <div className="grid gap-4 p-4 md:grid-cols-2 lg:grid-cols-2">
+      <div className="grid gap-4 p-4 md:grid-cols-1 lg:grid-cols-2">
         <div className="lg:col-span-1">
           <MyTasksCard isLoading={isPageLoading} />
         </div>

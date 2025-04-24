@@ -1,17 +1,17 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { 
-  getTasks, 
-  getTaskById, 
-  createTask, 
-  updateTask, 
+import {
+  getTasks,
+  getTaskById,
+  createTask,
+  updateTask,
   deleteTask,
   updateTaskStatus,
   updateTaskProgress
 } from '../endpoints/tasks';
-import { 
-  TaskCreateRequest, 
-  TaskUpdateRequest, 
-  TasksQueryParams 
+import {
+  TaskCreateRequest,
+  TaskUpdateRequest,
+  TasksQueryParams
 } from '../types/tasks';
 import { parseApiError } from '@/lib/error-handling';
 
@@ -30,7 +30,17 @@ export const taskKeys = {
 export const useTasks = (params?: TasksQueryParams) => {
   return useQuery({
     queryKey: taskKeys.list(params || {}),
-    queryFn: () => getTasks(params),
+    queryFn: async () => {
+      try {
+        return await getTasks(params);
+      } catch (error: any) {
+        // If it's a 404 error, return empty data instead of throwing
+        if (error.response?.status === 404) {
+          return { data: [], total: 0, page: 1, limit: params?.limit || 10 };
+        }
+        throw error;
+      }
+    },
     onError: (error) => {
       console.error('Error fetching tasks:', parseApiError(error));
     },
@@ -56,7 +66,7 @@ export const useTask = (id: string) => {
  */
 export const useCreateTask = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (newTask: TaskCreateRequest) => createTask(newTask),
     onSuccess: () => {
@@ -74,9 +84,9 @@ export const useCreateTask = () => {
  */
 export const useUpdateTask = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: ({ id, task }: { id: string; task: TaskUpdateRequest }) => 
+    mutationFn: ({ id, task }: { id: string; task: TaskUpdateRequest }) =>
       updateTask(id, task),
     onSuccess: (updatedTask) => {
       // Update the task in the cache
@@ -95,7 +105,7 @@ export const useUpdateTask = () => {
  */
 export const useDeleteTask = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (id: string) => deleteTask(id),
     onSuccess: (_, id) => {
@@ -115,9 +125,9 @@ export const useDeleteTask = () => {
  */
 export const useUpdateTaskStatus = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: ({ id, status }: { id: string; status: string }) => 
+    mutationFn: ({ id, status }: { id: string; status: string }) =>
       updateTaskStatus(id, status),
     onSuccess: (updatedTask) => {
       // Update the task in the cache
@@ -136,9 +146,9 @@ export const useUpdateTaskStatus = () => {
  */
 export const useUpdateTaskProgress = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: ({ id, progress }: { id: string; progress: number }) => 
+    mutationFn: ({ id, progress }: { id: string; progress: number }) =>
       updateTaskProgress(id, progress),
     onSuccess: (updatedTask) => {
       // Update the task in the cache

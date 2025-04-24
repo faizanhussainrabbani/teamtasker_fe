@@ -82,9 +82,14 @@ export function MyTasksCard({ isLoading: cardIsLoading }: MyTasksCardProps) {
             {isLoading ? (
               <LoadingState message="Loading tasks..." />
             ) : isError ? (
-              <ErrorState
-                message={`Error loading tasks: ${error?.message || 'Unknown error'}`}
-                onRetry={() => refetch()}
+              <EmptyState
+                title="No tasks found"
+                description={`You don't have any ${activeTab !== 'all' ? activeTab + ' ' : ''}tasks.`}
+                action={
+                  <Button variant="outline" size="sm" onClick={() => refetch()}>
+                    Try Again
+                  </Button>
+                }
               />
             ) : !data?.data || data.data.length === 0 ? (
               <EmptyState

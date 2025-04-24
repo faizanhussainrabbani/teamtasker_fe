@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
-import { 
-  getActivities, 
+import {
+  getActivities,
   getActivityById
 } from '../endpoints/activities';
-import { 
+import {
   ActivitiesQueryParams
 } from '../types/activities';
 import { parseApiError } from '@/lib/error-handling';
@@ -23,7 +23,17 @@ export const activityKeys = {
 export const useActivities = (params?: ActivitiesQueryParams) => {
   return useQuery({
     queryKey: activityKeys.list(params || {}),
-    queryFn: () => getActivities(params),
+    queryFn: async () => {
+      try {
+        return await getActivities(params);
+      } catch (error: any) {
+        // If it's a 404 error, return empty data instead of throwing
+        if (error.response?.status === 404) {
+          return { data: [], total: 0, page: 1, limit: params?.limit || 10 };
+        }
+        throw error;
+      }
+    },
     onError: (error) => {
       console.error('Error fetching activities:', parseApiError(error));
     },

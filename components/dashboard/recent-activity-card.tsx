@@ -33,9 +33,14 @@ export function RecentActivityCard({ isLoading: cardIsLoading }: RecentActivityC
         {isLoading ? (
           <LoadingState message="Loading activities..." />
         ) : isError ? (
-          <ErrorState
-            message={`Error loading activities: ${error?.message || 'Unknown error'}`}
-            onRetry={() => refetch()}
+          <EmptyState
+            title="No activities found"
+            description="There are no recent activities to display."
+            action={
+              <Button variant="outline" size="sm" onClick={() => refetch()}>
+                Try Again
+              </Button>
+            }
           />
         ) : !data?.data || data.data.length === 0 ? (
           <EmptyState
