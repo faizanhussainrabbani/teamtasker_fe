@@ -16,9 +16,9 @@ export const teamKeys = {
 export const useTeamTasks = () => {
   // Fetch all users
   const usersQuery = useUsers();
-  
+
   // Get tasks from context instead of making a separate API call
-  const { allTasks, isLoading: tasksLoading, isError: tasksError } = useDashboardTasks();
+  const { allTasks, isLoading: tasksLoading, isError: tasksError, refetch: refetchTasks } = useDashboardTasks();
 
   // Combine the queries
   return useQuery({
@@ -43,33 +43,51 @@ export const useTeamTasks = () => {
       }
 
       // Get team members with their assigned tasks
-      return users.map(user => {
-        if (!user) return null;
+      return users
+        .filter(user => user && user.id !== undefined) // Filter out invalid users
+        .map(user => {
+          try {
+            // Get tasks assigned to this user
+            const userTasks = tasks.filter(task =>
+              task && task.assigneeId === user.id
+            );
 
-        try {
-          // Get tasks assigned to this user
-          const userTasks = tasks.filter(task => task && task.assigneeId === user.id);
-          
-          // Skip users with no tasks
-          if (userTasks.length === 0) return null;
+            // Skip users with no tasks
+            if (userTasks.length === 0) return null;
 
-          return {
-            id: user.id || 'unknown',
-            name: user.name || 'Unknown User',
-            role: user.role || 'Team Member',
-            avatar: user.avatar || '',
-            initials: user.initials || user.name?.substring(0, 2)?.toUpperCase() || 'UN',
-            tasks: userTasks,
-          };
-        } catch (error) {
-          console.error('Error processing user data:', error, user);
-          return null;
-        }
-      }).filter(Boolean); // Remove any null entries
+            // Sort tasks by status and due date
+            const sortedTasks = [...userTasks].sort((a, b) => {
+              // First by status priority (in-progress, todo, completed)
+              const statusOrder = { 'in-progress': 0, 'todo': 1, 'completed': 2 };
+              const statusDiff =
+                (statusOrder[a.status.toLowerCase()] || 99) -
+                (statusOrder[b.status.toLowerCase()] || 99);
+
+              if (statusDiff !== 0) return statusDiff;
+
+              // Then by due date (earliest first)
+              return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+            });
+
+            return {
+              id: user.id,
+              name: user.name || 'Unknown User',
+              role: user.role || 'Team Member',
+              avatar: user.avatar || '',
+              initials: user.initials || user.name?.substring(0, 2)?.toUpperCase() || 'UN',
+              tasks: sortedTasks,
+            };
+          } catch (error) {
+            console.error('Error processing user data:', error, user);
+            return null;
+          }
+        })
+        .filter(Boolean); // Remove any null entries
     },
     enabled: usersQuery.isSuccess && !tasksLoading && !tasksError,
     onError: (error) => {
       console.error('Error fetching team tasks:', parseApiError(error));
     },
+    refetchOnWindowFocus: false,
   });
 };
