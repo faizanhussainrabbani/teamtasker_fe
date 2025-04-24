@@ -10,6 +10,17 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
+/**
+ * Login page component
+ *
+ * Provides a form for users to log in to the application
+ *
+ * @component
+ * @example
+ * // This component is typically rendered by the Next.js router
+ * // at the /login route
+ * <LoginPage />
+ */
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -18,6 +29,14 @@ export default function LoginPage() {
   const { login, isLoading, error } = useAuth();
   const router = useRouter();
 
+  /**
+   * Handle form submission for login
+   *
+   * Prevents default form submission, sets loading state,
+   * and attempts to log in the user with the provided credentials
+   *
+   * @param e - Form event
+   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);

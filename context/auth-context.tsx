@@ -9,18 +9,65 @@ import { LoginRequest, RegisterRequest } from '@/lib/api/types/auth';
 import { parseApiError, ApiError } from '@/lib/error-handling';
 import { useToast } from '@/components/ui/use-toast';
 
+/**
+ * Authentication context type definition
+ * Provides authentication state and methods for the entire application
+ */
 interface AuthContextType {
+  /**
+   * Current authenticated user or null if not authenticated
+   */
   user: User | null;
+
+  /**
+   * Whether authentication operations are in progress
+   */
   isLoading: boolean;
+
+  /**
+   * Whether the user is currently authenticated
+   */
   isAuthenticated: boolean;
+
+  /**
+   * Log in a user with email and password
+   * @param credentials - Login credentials including email and password
+   */
   login: (credentials: LoginRequest) => Promise<void>;
+
+  /**
+   * Register a new user
+   * @param userData - Registration data including name, email, and password
+   */
   register: (userData: RegisterRequest) => Promise<void>;
+
+  /**
+   * Log out the current user
+   */
   logout: () => Promise<void>;
+
+  /**
+   * Current authentication error, if any
+   */
   error: ApiError | null;
 }
 
+// Create the authentication context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+/**
+ * Authentication Provider component
+ *
+ * Manages authentication state and provides authentication methods to the application
+ *
+ * @component
+ * @example
+ * return (
+ *   <AuthProvider>
+ *     <App />
+ *   </AuthProvider>
+ * )
+ */
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -202,6 +249,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
+/**
+ * Hook to access the authentication context
+ *
+ * Provides access to the current user, authentication state, and authentication methods
+ *
+ * @returns Authentication context with user data and auth methods
+ * @throws Error if used outside of an AuthProvider
+ *
+ * @example
+ * const { user, login, logout, isAuthenticated } = useAuth();
+ *
+ * // Check if user is authenticated
+ * if (isAuthenticated) {
+ *   // User is logged in
+ *   console.log(`Hello, ${user.name}`);
+ * } else {
+ *   // User is not logged in
+ *   login({ email, password });
+ * }
+ */
 export function useAuth() {
   const context = useContext(AuthContext);
 
