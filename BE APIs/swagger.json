@@ -1,0 +1,2494 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2709
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fmodern\fcharset0 Courier;}
+{\colortbl;\red255\green255\blue255;\red255\green255\blue255;}
+{\*\expandedcolortbl;;\cssrgb\c100000\c100000\c100000;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\deftab720
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs26 \cf2 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 \{\
+  "openapi": "3.0.4",\
+  "info": \{\
+    "title": "TeamTasker API",\
+    "description": "An API for managing team tasks and projects",\
+    "contact": \{\
+      "name": "TeamTasker Support",\
+      "email": "support@teamtasker.com"\
+    \},\
+    "version": "v1"\
+  \},\
+  "paths": \{\
+    "/api/Auth/login": \{\
+      "post": \{\
+        "tags": [\
+          "Auth"\
+        ],\
+        "requestBody": \{\
+          "content": \{\
+            "application/json": \{\
+              "schema": \{\
+                "$ref": "#/components/schemas/TeamTasker.Application.Auth.Models.AuthRequest"\
+              \}\
+            \},\
+            "text/json": \{\
+              "schema": \{\
+                "$ref": "#/components/schemas/TeamTasker.Application.Auth.Models.AuthRequest"\
+              \}\
+            \},\
+            "application/*+json": \{\
+              "schema": \{\
+                "$ref": "#/components/schemas/TeamTasker.Application.Auth.Models.AuthRequest"\
+              \}\
+            \}\
+          \}\
+        \},\
+        "responses": \{\
+          "200": \{\
+            "description": "OK",\
+            "content": \{\
+              "text/plain": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/TeamTasker.Application.Auth.Models.AuthResponse"\
+                \}\
+              \},\
+              "application/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/TeamTasker.Application.Auth.Models.AuthResponse"\
+                \}\
+              \},\
+              "text/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/TeamTasker.Application.Auth.Models.AuthResponse"\
+                \}\
+              \}\
+            \}\
+          \},\
+          "401": \{\
+            "description": "Unauthorized",\
+            "content": \{\
+              "text/plain": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "application/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "text/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \}\
+            \}\
+          \}\
+        \}\
+      \}\
+    \},\
+    "/api/Auth/register": \{\
+      "post": \{\
+        "tags": [\
+          "Auth"\
+        ],\
+        "requestBody": \{\
+          "content": \{\
+            "application/json": \{\
+              "schema": \{\
+                "$ref": "#/components/schemas/TeamTasker.Application.Auth.Models.RegisterRequest"\
+              \}\
+            \},\
+            "text/json": \{\
+              "schema": \{\
+                "$ref": "#/components/schemas/TeamTasker.Application.Auth.Models.RegisterRequest"\
+              \}\
+            \},\
+            "application/*+json": \{\
+              "schema": \{\
+                "$ref": "#/components/schemas/TeamTasker.Application.Auth.Models.RegisterRequest"\
+              \}\
+            \}\
+          \}\
+        \},\
+        "responses": \{\
+          "201": \{\
+            "description": "Created",\
+            "content": \{\
+              "text/plain": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/TeamTasker.Application.Auth.Models.AuthResponse"\
+                \}\
+              \},\
+              "application/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/TeamTasker.Application.Auth.Models.AuthResponse"\
+                \}\
+              \},\
+              "text/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/TeamTasker.Application.Auth.Models.AuthResponse"\
+                \}\
+              \}\
+            \}\
+          \},\
+          "400": \{\
+            "description": "Bad Request",\
+            "content": \{\
+              "text/plain": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "application/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "text/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \}\
+            \}\
+          \}\
+        \}\
+      \}\
+    \},\
+    "/api/Auth/me": \{\
+      "get": \{\
+        "tags": [\
+          "Auth"\
+        ],\
+        "responses": \{\
+          "200": \{\
+            "description": "OK",\
+            "content": \{\
+              "text/plain": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/TeamTasker.Application.Auth.Models.AuthResponse"\
+                \}\
+              \},\
+              "application/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/TeamTasker.Application.Auth.Models.AuthResponse"\
+                \}\
+              \},\
+              "text/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/TeamTasker.Application.Auth.Models.AuthResponse"\
+                \}\
+              \}\
+            \}\
+          \},\
+          "401": \{\
+            "description": "Unauthorized",\
+            "content": \{\
+              "text/plain": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "application/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "text/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \}\
+            \}\
+          \}\
+        \}\
+      \}\
+    \},\
+    "/api/Auth/logout": \{\
+      "post": \{\
+        "tags": [\
+          "Auth"\
+        ],\
+        "responses": \{\
+          "200": \{\
+            "description": "OK"\
+          \}\
+        \}\
+      \}\
+    \},\
+    "/api/Auth/forgot-password": \{\
+      "post": \{\
+        "tags": [\
+          "Auth"\
+        ],\
+        "requestBody": \{\
+          "content": \{\
+            "application/json": \{\
+              "schema": \{\
+                "$ref": "#/components/schemas/TeamTasker.Application.Auth.Models.ForgotPasswordRequest"\
+              \}\
+            \},\
+            "text/json": \{\
+              "schema": \{\
+                "$ref": "#/components/schemas/TeamTasker.Application.Auth.Models.ForgotPasswordRequest"\
+              \}\
+            \},\
+            "application/*+json": \{\
+              "schema": \{\
+                "$ref": "#/components/schemas/TeamTasker.Application.Auth.Models.ForgotPasswordRequest"\
+              \}\
+            \}\
+          \}\
+        \},\
+        "responses": \{\
+          "200": \{\
+            "description": "OK"\
+          \},\
+          "400": \{\
+            "description": "Bad Request",\
+            "content": \{\
+              "text/plain": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "application/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "text/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \}\
+            \}\
+          \}\
+        \}\
+      \}\
+    \},\
+    "/api/Auth/reset-password": \{\
+      "post": \{\
+        "tags": [\
+          "Auth"\
+        ],\
+        "requestBody": \{\
+          "content": \{\
+            "application/json": \{\
+              "schema": \{\
+                "$ref": "#/components/schemas/TeamTasker.Application.Auth.Models.ResetPasswordRequest"\
+              \}\
+            \},\
+            "text/json": \{\
+              "schema": \{\
+                "$ref": "#/components/schemas/TeamTasker.Application.Auth.Models.ResetPasswordRequest"\
+              \}\
+            \},\
+            "application/*+json": \{\
+              "schema": \{\
+                "$ref": "#/components/schemas/TeamTasker.Application.Auth.Models.ResetPasswordRequest"\
+              \}\
+            \}\
+          \}\
+        \},\
+        "responses": \{\
+          "200": \{\
+            "description": "OK"\
+          \},\
+          "400": \{\
+            "description": "Bad Request",\
+            "content": \{\
+              "text/plain": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "application/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "text/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \}\
+            \}\
+          \}\
+        \}\
+      \}\
+    \},\
+    "/api/Auth/change-password": \{\
+      "post": \{\
+        "tags": [\
+          "Auth"\
+        ],\
+        "requestBody": \{\
+          "content": \{\
+            "application/json": \{\
+              "schema": \{\
+                "$ref": "#/components/schemas/TeamTasker.Application.Auth.Models.ChangePasswordRequest"\
+              \}\
+            \},\
+            "text/json": \{\
+              "schema": \{\
+                "$ref": "#/components/schemas/TeamTasker.Application.Auth.Models.ChangePasswordRequest"\
+              \}\
+            \},\
+            "application/*+json": \{\
+              "schema": \{\
+                "$ref": "#/components/schemas/TeamTasker.Application.Auth.Models.ChangePasswordRequest"\
+              \}\
+            \}\
+          \}\
+        \},\
+        "responses": \{\
+          "200": \{\
+            "description": "OK"\
+          \},\
+          "400": \{\
+            "description": "Bad Request",\
+            "content": \{\
+              "text/plain": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "application/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "text/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \}\
+            \}\
+          \},\
+          "401": \{\
+            "description": "Unauthorized",\
+            "content": \{\
+              "text/plain": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "application/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "text/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \}\
+            \}\
+          \}\
+        \}\
+      \}\
+    \},\
+    "/api/Projects": \{\
+      "get": \{\
+        "tags": [\
+          "Projects"\
+        ],\
+        "parameters": [\
+          \{\
+            "name": "pageNumber",\
+            "in": "query",\
+            "schema": \{\
+              "type": "integer",\
+              "format": "int32",\
+              "default": 1\
+            \}\
+          \},\
+          \{\
+            "name": "pageSize",\
+            "in": "query",\
+            "schema": \{\
+              "type": "integer",\
+              "format": "int32",\
+              "default": 10\
+            \}\
+          \},\
+          \{\
+            "name": "searchTerm",\
+            "in": "query",\
+            "schema": \{\
+              "type": "string"\
+            \}\
+          \},\
+          \{\
+            "name": "status",\
+            "in": "query",\
+            "schema": \{\
+              "type": "string"\
+            \}\
+          \}\
+        ],\
+        "responses": \{\
+          "200": \{\
+            "description": "OK",\
+            "content": \{\
+              "text/plain": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/TeamTasker.Application.Common.Models.PaginatedList`1[[TeamTasker.Application.Projects.Queries.GetProjects.ProjectDto, TeamTasker.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"\
+                \}\
+              \},\
+              "application/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/TeamTasker.Application.Common.Models.PaginatedList`1[[TeamTasker.Application.Projects.Queries.GetProjects.ProjectDto, TeamTasker.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"\
+                \}\
+              \},\
+              "text/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/TeamTasker.Application.Common.Models.PaginatedList`1[[TeamTasker.Application.Projects.Queries.GetProjects.ProjectDto, TeamTasker.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"\
+                \}\
+              \}\
+            \}\
+          \}\
+        \}\
+      \},\
+      "post": \{\
+        "tags": [\
+          "Projects"\
+        ],\
+        "requestBody": \{\
+          "content": \{\
+            "application/json": \{\
+              "schema": \{\
+                "$ref": "#/components/schemas/TeamTasker.Application.Projects.Commands.CreateProject.CreateProjectCommand"\
+              \}\
+            \},\
+            "text/json": \{\
+              "schema": \{\
+                "$ref": "#/components/schemas/TeamTasker.Application.Projects.Commands.CreateProject.CreateProjectCommand"\
+              \}\
+            \},\
+            "application/*+json": \{\
+              "schema": \{\
+                "$ref": "#/components/schemas/TeamTasker.Application.Projects.Commands.CreateProject.CreateProjectCommand"\
+              \}\
+            \}\
+          \}\
+        \},\
+        "responses": \{\
+          "201": \{\
+            "description": "Created",\
+            "content": \{\
+              "text/plain": \{\
+                "schema": \{\
+                  "type": "integer",\
+                  "format": "int32"\
+                \}\
+              \},\
+              "application/json": \{\
+                "schema": \{\
+                  "type": "integer",\
+                  "format": "int32"\
+                \}\
+              \},\
+              "text/json": \{\
+                "schema": \{\
+                  "type": "integer",\
+                  "format": "int32"\
+                \}\
+              \}\
+            \}\
+          \},\
+          "400": \{\
+            "description": "Bad Request",\
+            "content": \{\
+              "text/plain": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "application/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "text/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \}\
+            \}\
+          \}\
+        \}\
+      \}\
+    \},\
+    "/api/Projects/\{id\}": \{\
+      "get": \{\
+        "tags": [\
+          "Projects"\
+        ],\
+        "parameters": [\
+          \{\
+            "name": "id",\
+            "in": "path",\
+            "required": true,\
+            "schema": \{\
+              "type": "integer",\
+              "format": "int32"\
+            \}\
+          \}\
+        ],\
+        "responses": \{\
+          "200": \{\
+            "description": "OK",\
+            "content": \{\
+              "text/plain": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/TeamTasker.Application.Projects.Queries.GetProjectById.ProjectDetailDto"\
+                \}\
+              \},\
+              "application/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/TeamTasker.Application.Projects.Queries.GetProjectById.ProjectDetailDto"\
+                \}\
+              \},\
+              "text/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/TeamTasker.Application.Projects.Queries.GetProjectById.ProjectDetailDto"\
+                \}\
+              \}\
+            \}\
+          \},\
+          "404": \{\
+            "description": "Not Found",\
+            "content": \{\
+              "text/plain": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "application/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "text/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \}\
+            \}\
+          \}\
+        \}\
+      \},\
+      "put": \{\
+        "tags": [\
+          "Projects"\
+        ],\
+        "parameters": [\
+          \{\
+            "name": "id",\
+            "in": "path",\
+            "required": true,\
+            "schema": \{\
+              "type": "integer",\
+              "format": "int32"\
+            \}\
+          \}\
+        ],\
+        "requestBody": \{\
+          "content": \{\
+            "application/json": \{\
+              "schema": \{\
+                "$ref": "#/components/schemas/TeamTasker.Application.Projects.Commands.UpdateProject.UpdateProjectCommand"\
+              \}\
+            \},\
+            "text/json": \{\
+              "schema": \{\
+                "$ref": "#/components/schemas/TeamTasker.Application.Projects.Commands.UpdateProject.UpdateProjectCommand"\
+              \}\
+            \},\
+            "application/*+json": \{\
+              "schema": \{\
+                "$ref": "#/components/schemas/TeamTasker.Application.Projects.Commands.UpdateProject.UpdateProjectCommand"\
+              \}\
+            \}\
+          \}\
+        \},\
+        "responses": \{\
+          "204": \{\
+            "description": "No Content"\
+          \},\
+          "400": \{\
+            "description": "Bad Request",\
+            "content": \{\
+              "text/plain": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "application/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "text/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \}\
+            \}\
+          \},\
+          "404": \{\
+            "description": "Not Found",\
+            "content": \{\
+              "text/plain": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "application/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "text/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \}\
+            \}\
+          \}\
+        \}\
+      \},\
+      "delete": \{\
+        "tags": [\
+          "Projects"\
+        ],\
+        "parameters": [\
+          \{\
+            "name": "id",\
+            "in": "path",\
+            "required": true,\
+            "schema": \{\
+              "type": "integer",\
+              "format": "int32"\
+            \}\
+          \}\
+        ],\
+        "responses": \{\
+          "204": \{\
+            "description": "No Content"\
+          \},\
+          "404": \{\
+            "description": "Not Found",\
+            "content": \{\
+              "text/plain": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "application/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "text/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \}\
+            \}\
+          \}\
+        \}\
+      \}\
+    \},\
+    "/api/Tasks": \{\
+      "get": \{\
+        "tags": [\
+          "Tasks"\
+        ],\
+        "parameters": [\
+          \{\
+            "name": "Status",\
+            "in": "query",\
+            "schema": \{\
+              "type": "string"\
+            \}\
+          \},\
+          \{\
+            "name": "Priority",\
+            "in": "query",\
+            "schema": \{\
+              "type": "string"\
+            \}\
+          \},\
+          \{\
+            "name": "AssigneeId",\
+            "in": "query",\
+            "schema": \{\
+              "type": "integer",\
+              "format": "int32"\
+            \}\
+          \},\
+          \{\
+            "name": "ProjectId",\
+            "in": "query",\
+            "schema": \{\
+              "type": "integer",\
+              "format": "int32"\
+            \}\
+          \},\
+          \{\
+            "name": "DueDate",\
+            "in": "query",\
+            "schema": \{\
+              "type": "string",\
+              "format": "date-time"\
+            \}\
+          \},\
+          \{\
+            "name": "Tag",\
+            "in": "query",\
+            "schema": \{\
+              "type": "string"\
+            \}\
+          \},\
+          \{\
+            "name": "PageNumber",\
+            "in": "query",\
+            "schema": \{\
+              "type": "integer",\
+              "format": "int32"\
+            \}\
+          \},\
+          \{\
+            "name": "PageSize",\
+            "in": "query",\
+            "schema": \{\
+              "type": "integer",\
+              "format": "int32"\
+            \}\
+          \},\
+          \{\
+            "name": "SortBy",\
+            "in": "query",\
+            "schema": \{\
+              "type": "string"\
+            \}\
+          \},\
+          \{\
+            "name": "SortDirection",\
+            "in": "query",\
+            "schema": \{\
+              "type": "string"\
+            \}\
+          \},\
+          \{\
+            "name": "Search",\
+            "in": "query",\
+            "schema": \{\
+              "type": "string"\
+            \}\
+          \},\
+          \{\
+            "name": "SortAscending",\
+            "in": "query",\
+            "schema": \{\
+              "type": "boolean"\
+            \}\
+          \}\
+        ],\
+        "responses": \{\
+          "200": \{\
+            "description": "OK",\
+            "content": \{\
+              "text/plain": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/TeamTasker.Application.Common.Models.PaginatedList`1[[TeamTasker.Application.Tasks.Models.TaskDto, TeamTasker.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"\
+                \}\
+              \},\
+              "application/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/TeamTasker.Application.Common.Models.PaginatedList`1[[TeamTasker.Application.Tasks.Models.TaskDto, TeamTasker.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"\
+                \}\
+              \},\
+              "text/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/TeamTasker.Application.Common.Models.PaginatedList`1[[TeamTasker.Application.Tasks.Models.TaskDto, TeamTasker.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"\
+                \}\
+              \}\
+            \}\
+          \},\
+          "401": \{\
+            "description": "Unauthorized",\
+            "content": \{\
+              "text/plain": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "application/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "text/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \}\
+            \}\
+          \}\
+        \}\
+      \},\
+      "post": \{\
+        "tags": [\
+          "Tasks"\
+        ],\
+        "requestBody": \{\
+          "content": \{\
+            "application/json": \{\
+              "schema": \{\
+                "$ref": "#/components/schemas/TeamTasker.Application.Tasks.Models.CreateTaskRequest"\
+              \}\
+            \},\
+            "text/json": \{\
+              "schema": \{\
+                "$ref": "#/components/schemas/TeamTasker.Application.Tasks.Models.CreateTaskRequest"\
+              \}\
+            \},\
+            "application/*+json": \{\
+              "schema": \{\
+                "$ref": "#/components/schemas/TeamTasker.Application.Tasks.Models.CreateTaskRequest"\
+              \}\
+            \}\
+          \}\
+        \},\
+        "responses": \{\
+          "201": \{\
+            "description": "Created",\
+            "content": \{\
+              "text/plain": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/TeamTasker.Application.Tasks.Models.TaskDetailDto"\
+                \}\
+              \},\
+              "application/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/TeamTasker.Application.Tasks.Models.TaskDetailDto"\
+                \}\
+              \},\
+              "text/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/TeamTasker.Application.Tasks.Models.TaskDetailDto"\
+                \}\
+              \}\
+            \}\
+          \},\
+          "400": \{\
+            "description": "Bad Request",\
+            "content": \{\
+              "text/plain": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "application/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "text/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \}\
+            \}\
+          \},\
+          "401": \{\
+            "description": "Unauthorized",\
+            "content": \{\
+              "text/plain": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "application/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "text/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \}\
+            \}\
+          \}\
+        \}\
+      \}\
+    \},\
+    "/api/Tasks/\{id\}": \{\
+      "get": \{\
+        "tags": [\
+          "Tasks"\
+        ],\
+        "parameters": [\
+          \{\
+            "name": "id",\
+            "in": "path",\
+            "required": true,\
+            "schema": \{\
+              "type": "integer",\
+              "format": "int32"\
+            \}\
+          \}\
+        ],\
+        "responses": \{\
+          "200": \{\
+            "description": "OK",\
+            "content": \{\
+              "text/plain": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/TeamTasker.Application.Tasks.Models.TaskDetailDto"\
+                \}\
+              \},\
+              "application/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/TeamTasker.Application.Tasks.Models.TaskDetailDto"\
+                \}\
+              \},\
+              "text/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/TeamTasker.Application.Tasks.Models.TaskDetailDto"\
+                \}\
+              \}\
+            \}\
+          \},\
+          "404": \{\
+            "description": "Not Found",\
+            "content": \{\
+              "text/plain": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "application/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "text/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \}\
+            \}\
+          \},\
+          "401": \{\
+            "description": "Unauthorized",\
+            "content": \{\
+              "text/plain": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "application/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "text/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \}\
+            \}\
+          \}\
+        \}\
+      \},\
+      "patch": \{\
+        "tags": [\
+          "Tasks"\
+        ],\
+        "parameters": [\
+          \{\
+            "name": "id",\
+            "in": "path",\
+            "required": true,\
+            "schema": \{\
+              "type": "integer",\
+              "format": "int32"\
+            \}\
+          \}\
+        ],\
+        "requestBody": \{\
+          "content": \{\
+            "application/json": \{\
+              "schema": \{\
+                "$ref": "#/components/schemas/TeamTasker.Application.Tasks.Models.UpdateTaskRequest"\
+              \}\
+            \},\
+            "text/json": \{\
+              "schema": \{\
+                "$ref": "#/components/schemas/TeamTasker.Application.Tasks.Models.UpdateTaskRequest"\
+              \}\
+            \},\
+            "application/*+json": \{\
+              "schema": \{\
+                "$ref": "#/components/schemas/TeamTasker.Application.Tasks.Models.UpdateTaskRequest"\
+              \}\
+            \}\
+          \}\
+        \},\
+        "responses": \{\
+          "200": \{\
+            "description": "OK",\
+            "content": \{\
+              "text/plain": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/TeamTasker.Application.Tasks.Models.TaskDetailDto"\
+                \}\
+              \},\
+              "application/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/TeamTasker.Application.Tasks.Models.TaskDetailDto"\
+                \}\
+              \},\
+              "text/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/TeamTasker.Application.Tasks.Models.TaskDetailDto"\
+                \}\
+              \}\
+            \}\
+          \},\
+          "400": \{\
+            "description": "Bad Request",\
+            "content": \{\
+              "text/plain": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "application/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "text/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \}\
+            \}\
+          \},\
+          "404": \{\
+            "description": "Not Found",\
+            "content": \{\
+              "text/plain": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "application/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "text/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \}\
+            \}\
+          \},\
+          "401": \{\
+            "description": "Unauthorized",\
+            "content": \{\
+              "text/plain": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "application/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "text/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \}\
+            \}\
+          \}\
+        \}\
+      \},\
+      "delete": \{\
+        "tags": [\
+          "Tasks"\
+        ],\
+        "parameters": [\
+          \{\
+            "name": "id",\
+            "in": "path",\
+            "required": true,\
+            "schema": \{\
+              "type": "integer",\
+              "format": "int32"\
+            \}\
+          \}\
+        ],\
+        "responses": \{\
+          "204": \{\
+            "description": "No Content"\
+          \},\
+          "404": \{\
+            "description": "Not Found",\
+            "content": \{\
+              "text/plain": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "application/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "text/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \}\
+            \}\
+          \},\
+          "401": \{\
+            "description": "Unauthorized",\
+            "content": \{\
+              "text/plain": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "application/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "text/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \}\
+            \}\
+          \}\
+        \}\
+      \}\
+    \},\
+    "/api/Users": \{\
+      "get": \{\
+        "tags": [\
+          "Users"\
+        ],\
+        "parameters": [\
+          \{\
+            "name": "Role",\
+            "in": "query",\
+            "schema": \{\
+              "type": "string"\
+            \}\
+          \},\
+          \{\
+            "name": "Department",\
+            "in": "query",\
+            "schema": \{\
+              "type": "string"\
+            \}\
+          \},\
+          \{\
+            "name": "PageNumber",\
+            "in": "query",\
+            "schema": \{\
+              "type": "integer",\
+              "format": "int32"\
+            \}\
+          \},\
+          \{\
+            "name": "PageSize",\
+            "in": "query",\
+            "schema": \{\
+              "type": "integer",\
+              "format": "int32"\
+            \}\
+          \},\
+          \{\
+            "name": "SortBy",\
+            "in": "query",\
+            "schema": \{\
+              "type": "string"\
+            \}\
+          \},\
+          \{\
+            "name": "SortDirection",\
+            "in": "query",\
+            "schema": \{\
+              "type": "string"\
+            \}\
+          \},\
+          \{\
+            "name": "Search",\
+            "in": "query",\
+            "schema": \{\
+              "type": "string"\
+            \}\
+          \},\
+          \{\
+            "name": "SortAscending",\
+            "in": "query",\
+            "schema": \{\
+              "type": "boolean"\
+            \}\
+          \}\
+        ],\
+        "responses": \{\
+          "200": \{\
+            "description": "OK",\
+            "content": \{\
+              "text/plain": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/TeamTasker.Application.Common.Models.PaginatedList`1[[TeamTasker.Application.Users.Models.UserDto, TeamTasker.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"\
+                \}\
+              \},\
+              "application/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/TeamTasker.Application.Common.Models.PaginatedList`1[[TeamTasker.Application.Users.Models.UserDto, TeamTasker.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"\
+                \}\
+              \},\
+              "text/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/TeamTasker.Application.Common.Models.PaginatedList`1[[TeamTasker.Application.Users.Models.UserDto, TeamTasker.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"\
+                \}\
+              \}\
+            \}\
+          \},\
+          "401": \{\
+            "description": "Unauthorized",\
+            "content": \{\
+              "text/plain": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "application/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "text/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \}\
+            \}\
+          \}\
+        \}\
+      \}\
+    \},\
+    "/api/Users/\{id\}": \{\
+      "get": \{\
+        "tags": [\
+          "Users"\
+        ],\
+        "parameters": [\
+          \{\
+            "name": "id",\
+            "in": "path",\
+            "required": true,\
+            "schema": \{\
+              "type": "integer",\
+              "format": "int32"\
+            \}\
+          \}\
+        ],\
+        "responses": \{\
+          "200": \{\
+            "description": "OK",\
+            "content": \{\
+              "text/plain": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/TeamTasker.Application.Users.Models.UserDetailDto"\
+                \}\
+              \},\
+              "application/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/TeamTasker.Application.Users.Models.UserDetailDto"\
+                \}\
+              \},\
+              "text/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/TeamTasker.Application.Users.Models.UserDetailDto"\
+                \}\
+              \}\
+            \}\
+          \},\
+          "404": \{\
+            "description": "Not Found",\
+            "content": \{\
+              "text/plain": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "application/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "text/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \}\
+            \}\
+          \},\
+          "401": \{\
+            "description": "Unauthorized",\
+            "content": \{\
+              "text/plain": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "application/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "text/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \}\
+            \}\
+          \}\
+        \}\
+      \}\
+    \},\
+    "/api/Users/profile": \{\
+      "get": \{\
+        "tags": [\
+          "Users"\
+        ],\
+        "responses": \{\
+          "200": \{\
+            "description": "OK",\
+            "content": \{\
+              "text/plain": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/TeamTasker.Application.Users.Models.UserDetailDto"\
+                \}\
+              \},\
+              "application/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/TeamTasker.Application.Users.Models.UserDetailDto"\
+                \}\
+              \},\
+              "text/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/TeamTasker.Application.Users.Models.UserDetailDto"\
+                \}\
+              \}\
+            \}\
+          \},\
+          "401": \{\
+            "description": "Unauthorized",\
+            "content": \{\
+              "text/plain": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "application/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "text/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \}\
+            \}\
+          \}\
+        \}\
+      \},\
+      "patch": \{\
+        "tags": [\
+          "Users"\
+        ],\
+        "requestBody": \{\
+          "content": \{\
+            "application/json": \{\
+              "schema": \{\
+                "$ref": "#/components/schemas/TeamTasker.Application.Users.Models.UpdateProfileRequest"\
+              \}\
+            \},\
+            "text/json": \{\
+              "schema": \{\
+                "$ref": "#/components/schemas/TeamTasker.Application.Users.Models.UpdateProfileRequest"\
+              \}\
+            \},\
+            "application/*+json": \{\
+              "schema": \{\
+                "$ref": "#/components/schemas/TeamTasker.Application.Users.Models.UpdateProfileRequest"\
+              \}\
+            \}\
+          \}\
+        \},\
+        "responses": \{\
+          "200": \{\
+            "description": "OK",\
+            "content": \{\
+              "text/plain": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/TeamTasker.Application.Users.Models.UserDetailDto"\
+                \}\
+              \},\
+              "application/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/TeamTasker.Application.Users.Models.UserDetailDto"\
+                \}\
+              \},\
+              "text/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/TeamTasker.Application.Users.Models.UserDetailDto"\
+                \}\
+              \}\
+            \}\
+          \},\
+          "400": \{\
+            "description": "Bad Request",\
+            "content": \{\
+              "text/plain": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "application/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "text/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \}\
+            \}\
+          \},\
+          "401": \{\
+            "description": "Unauthorized",\
+            "content": \{\
+              "text/plain": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "application/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \},\
+              "text/json": \{\
+                "schema": \{\
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"\
+                \}\
+              \}\
+            \}\
+          \}\
+        \}\
+      \}\
+    \}\
+  \},\
+  "components": \{\
+    "schemas": \{\
+      "Microsoft.AspNetCore.Mvc.ProblemDetails": \{\
+        "type": "object",\
+        "properties": \{\
+          "type": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "title": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "status": \{\
+            "type": "integer",\
+            "format": "int32",\
+            "nullable": true\
+          \},\
+          "detail": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "instance": \{\
+            "type": "string",\
+            "nullable": true\
+          \}\
+        \},\
+        "additionalProperties": \{ \}\
+      \},\
+      "TeamTasker.Application.Auth.Models.AuthRequest": \{\
+        "required": [\
+          "password",\
+          "username"\
+        ],\
+        "type": "object",\
+        "properties": \{\
+          "username": \{\
+            "minLength": 1,\
+            "type": "string"\
+          \},\
+          "password": \{\
+            "minLength": 1,\
+            "type": "string"\
+          \}\
+        \},\
+        "additionalProperties": false\
+      \},\
+      "TeamTasker.Application.Auth.Models.AuthResponse": \{\
+        "type": "object",\
+        "properties": \{\
+          "id": \{\
+            "type": "integer",\
+            "format": "int32"\
+          \},\
+          "username": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "email": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "fullName": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "token": \{\
+            "type": "string",\
+            "nullable": true\
+          \}\
+        \},\
+        "additionalProperties": false\
+      \},\
+      "TeamTasker.Application.Auth.Models.ChangePasswordRequest": \{\
+        "required": [\
+          "confirmNewPassword",\
+          "currentPassword",\
+          "newPassword"\
+        ],\
+        "type": "object",\
+        "properties": \{\
+          "currentPassword": \{\
+            "minLength": 1,\
+            "type": "string"\
+          \},\
+          "newPassword": \{\
+            "minLength": 6,\
+            "type": "string"\
+          \},\
+          "confirmNewPassword": \{\
+            "minLength": 1,\
+            "type": "string"\
+          \}\
+        \},\
+        "additionalProperties": false\
+      \},\
+      "TeamTasker.Application.Auth.Models.ForgotPasswordRequest": \{\
+        "required": [\
+          "email"\
+        ],\
+        "type": "object",\
+        "properties": \{\
+          "email": \{\
+            "minLength": 1,\
+            "type": "string",\
+            "format": "email"\
+          \}\
+        \},\
+        "additionalProperties": false\
+      \},\
+      "TeamTasker.Application.Auth.Models.RegisterRequest": \{\
+        "required": [\
+          "email",\
+          "firstName",\
+          "lastName",\
+          "password",\
+          "username"\
+        ],\
+        "type": "object",\
+        "properties": \{\
+          "firstName": \{\
+            "minLength": 1,\
+            "type": "string"\
+          \},\
+          "lastName": \{\
+            "minLength": 1,\
+            "type": "string"\
+          \},\
+          "email": \{\
+            "minLength": 1,\
+            "type": "string",\
+            "format": "email"\
+          \},\
+          "username": \{\
+            "minLength": 1,\
+            "type": "string"\
+          \},\
+          "password": \{\
+            "minLength": 6,\
+            "type": "string"\
+          \}\
+        \},\
+        "additionalProperties": false\
+      \},\
+      "TeamTasker.Application.Auth.Models.ResetPasswordRequest": \{\
+        "required": [\
+          "confirmPassword",\
+          "email",\
+          "password",\
+          "token"\
+        ],\
+        "type": "object",\
+        "properties": \{\
+          "token": \{\
+            "minLength": 1,\
+            "type": "string"\
+          \},\
+          "email": \{\
+            "minLength": 1,\
+            "type": "string",\
+            "format": "email"\
+          \},\
+          "password": \{\
+            "minLength": 6,\
+            "type": "string"\
+          \},\
+          "confirmPassword": \{\
+            "minLength": 1,\
+            "type": "string"\
+          \}\
+        \},\
+        "additionalProperties": false\
+      \},\
+      "TeamTasker.Application.Common.Models.PaginatedList`1[[TeamTasker.Application.Projects.Queries.GetProjects.ProjectDto, TeamTasker.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": \{\
+        "type": "object",\
+        "properties": \{\
+          "items": \{\
+            "type": "array",\
+            "items": \{\
+              "$ref": "#/components/schemas/TeamTasker.Application.Projects.Queries.GetProjects.ProjectDto"\
+            \},\
+            "nullable": true\
+          \},\
+          "pageNumber": \{\
+            "type": "integer",\
+            "format": "int32"\
+          \},\
+          "pageSize": \{\
+            "type": "integer",\
+            "format": "int32"\
+          \},\
+          "totalCount": \{\
+            "type": "integer",\
+            "format": "int32",\
+            "readOnly": true\
+          \},\
+          "totalPages": \{\
+            "type": "integer",\
+            "format": "int32",\
+            "readOnly": true\
+          \},\
+          "hasPreviousPage": \{\
+            "type": "boolean",\
+            "readOnly": true\
+          \},\
+          "hasNextPage": \{\
+            "type": "boolean",\
+            "readOnly": true\
+          \}\
+        \},\
+        "additionalProperties": false\
+      \},\
+      "TeamTasker.Application.Common.Models.PaginatedList`1[[TeamTasker.Application.Tasks.Models.TaskDto, TeamTasker.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": \{\
+        "type": "object",\
+        "properties": \{\
+          "items": \{\
+            "type": "array",\
+            "items": \{\
+              "$ref": "#/components/schemas/TeamTasker.Application.Tasks.Models.TaskDto"\
+            \},\
+            "nullable": true\
+          \},\
+          "pageNumber": \{\
+            "type": "integer",\
+            "format": "int32"\
+          \},\
+          "pageSize": \{\
+            "type": "integer",\
+            "format": "int32"\
+          \},\
+          "totalCount": \{\
+            "type": "integer",\
+            "format": "int32",\
+            "readOnly": true\
+          \},\
+          "totalPages": \{\
+            "type": "integer",\
+            "format": "int32",\
+            "readOnly": true\
+          \},\
+          "hasPreviousPage": \{\
+            "type": "boolean",\
+            "readOnly": true\
+          \},\
+          "hasNextPage": \{\
+            "type": "boolean",\
+            "readOnly": true\
+          \}\
+        \},\
+        "additionalProperties": false\
+      \},\
+      "TeamTasker.Application.Common.Models.PaginatedList`1[[TeamTasker.Application.Users.Models.UserDto, TeamTasker.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": \{\
+        "type": "object",\
+        "properties": \{\
+          "items": \{\
+            "type": "array",\
+            "items": \{\
+              "$ref": "#/components/schemas/TeamTasker.Application.Users.Models.UserDto"\
+            \},\
+            "nullable": true\
+          \},\
+          "pageNumber": \{\
+            "type": "integer",\
+            "format": "int32"\
+          \},\
+          "pageSize": \{\
+            "type": "integer",\
+            "format": "int32"\
+          \},\
+          "totalCount": \{\
+            "type": "integer",\
+            "format": "int32",\
+            "readOnly": true\
+          \},\
+          "totalPages": \{\
+            "type": "integer",\
+            "format": "int32",\
+            "readOnly": true\
+          \},\
+          "hasPreviousPage": \{\
+            "type": "boolean",\
+            "readOnly": true\
+          \},\
+          "hasNextPage": \{\
+            "type": "boolean",\
+            "readOnly": true\
+          \}\
+        \},\
+        "additionalProperties": false\
+      \},\
+      "TeamTasker.Application.Projects.Commands.CreateProject.CreateProjectCommand": \{\
+        "type": "object",\
+        "properties": \{\
+          "name": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "description": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "startDate": \{\
+            "type": "string",\
+            "format": "date-time"\
+          \},\
+          "endDate": \{\
+            "type": "string",\
+            "format": "date-time",\
+            "nullable": true\
+          \}\
+        \},\
+        "additionalProperties": false\
+      \},\
+      "TeamTasker.Application.Projects.Commands.UpdateProject.UpdateProjectCommand": \{\
+        "type": "object",\
+        "properties": \{\
+          "id": \{\
+            "type": "integer",\
+            "format": "int32"\
+          \},\
+          "name": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "description": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "startDate": \{\
+            "type": "string",\
+            "format": "date-time"\
+          \},\
+          "endDate": \{\
+            "type": "string",\
+            "format": "date-time",\
+            "nullable": true\
+          \}\
+        \},\
+        "additionalProperties": false\
+      \},\
+      "TeamTasker.Application.Projects.Queries.GetProjectById.ProjectDetailDto": \{\
+        "type": "object",\
+        "properties": \{\
+          "id": \{\
+            "type": "integer",\
+            "format": "int32"\
+          \},\
+          "name": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "description": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "startDate": \{\
+            "type": "string",\
+            "format": "date-time"\
+          \},\
+          "endDate": \{\
+            "type": "string",\
+            "format": "date-time",\
+            "nullable": true\
+          \},\
+          "status": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "tasks": \{\
+            "type": "array",\
+            "items": \{\
+              "$ref": "#/components/schemas/TeamTasker.Application.Projects.Queries.GetProjectById.TaskDto"\
+            \},\
+            "nullable": true\
+          \}\
+        \},\
+        "additionalProperties": false\
+      \},\
+      "TeamTasker.Application.Projects.Queries.GetProjectById.TaskDto": \{\
+        "type": "object",\
+        "properties": \{\
+          "id": \{\
+            "type": "integer",\
+            "format": "int32"\
+          \},\
+          "title": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "description": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "dueDate": \{\
+            "type": "string",\
+            "format": "date-time"\
+          \},\
+          "status": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "priority": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "assignedToUserId": \{\
+            "type": "integer",\
+            "format": "int32",\
+            "nullable": true\
+          \}\
+        \},\
+        "additionalProperties": false\
+      \},\
+      "TeamTasker.Application.Projects.Queries.GetProjects.ProjectDto": \{\
+        "type": "object",\
+        "properties": \{\
+          "id": \{\
+            "type": "integer",\
+            "format": "int32"\
+          \},\
+          "name": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "description": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "startDate": \{\
+            "type": "string",\
+            "format": "date-time"\
+          \},\
+          "endDate": \{\
+            "type": "string",\
+            "format": "date-time",\
+            "nullable": true\
+          \},\
+          "status": \{\
+            "type": "string",\
+            "nullable": true\
+          \}\
+        \},\
+        "additionalProperties": false\
+      \},\
+      "TeamTasker.Application.Tasks.Models.CreateTaskRequest": \{\
+        "required": [\
+          "priority",\
+          "projectId",\
+          "status",\
+          "title"\
+        ],\
+        "type": "object",\
+        "properties": \{\
+          "title": \{\
+            "maxLength": 100,\
+            "minLength": 3,\
+            "type": "string"\
+          \},\
+          "description": \{\
+            "maxLength": 1000,\
+            "minLength": 0,\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "status": \{\
+            "minLength": 1,\
+            "type": "string"\
+          \},\
+          "priority": \{\
+            "minLength": 1,\
+            "type": "string"\
+          \},\
+          "dueDate": \{\
+            "type": "string",\
+            "format": "date-time",\
+            "nullable": true\
+          \},\
+          "projectId": \{\
+            "type": "integer",\
+            "format": "int32"\
+          \},\
+          "assigneeId": \{\
+            "type": "integer",\
+            "format": "int32",\
+            "nullable": true\
+          \},\
+          "tags": \{\
+            "type": "array",\
+            "items": \{\
+              "type": "string"\
+            \},\
+            "nullable": true\
+          \}\
+        \},\
+        "additionalProperties": false\
+      \},\
+      "TeamTasker.Application.Tasks.Models.TaskDetailDto": \{\
+        "type": "object",\
+        "properties": \{\
+          "id": \{\
+            "type": "integer",\
+            "format": "int32"\
+          \},\
+          "title": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "description": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "status": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "priority": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "dueDate": \{\
+            "type": "string",\
+            "format": "date-time",\
+            "nullable": true\
+          \},\
+          "progress": \{\
+            "type": "integer",\
+            "format": "int32"\
+          \},\
+          "projectId": \{\
+            "type": "integer",\
+            "format": "int32"\
+          \},\
+          "projectName": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "assigneeId": \{\
+            "type": "integer",\
+            "format": "int32",\
+            "nullable": true\
+          \},\
+          "assignee": \{\
+            "$ref": "#/components/schemas/TeamTasker.Application.Tasks.Models.UserMinimalDto"\
+          \},\
+          "creatorId": \{\
+            "type": "integer",\
+            "format": "int32"\
+          \},\
+          "creator": \{\
+            "$ref": "#/components/schemas/TeamTasker.Application.Tasks.Models.UserMinimalDto"\
+          \},\
+          "tags": \{\
+            "type": "array",\
+            "items": \{\
+              "type": "string"\
+            \},\
+            "nullable": true\
+          \},\
+          "createdDate": \{\
+            "type": "string",\
+            "format": "date-time"\
+          \},\
+          "updatedDate": \{\
+            "type": "string",\
+            "format": "date-time"\
+          \},\
+          "completedDate": \{\
+            "type": "string",\
+            "format": "date-time",\
+            "nullable": true\
+          \}\
+        \},\
+        "additionalProperties": false\
+      \},\
+      "TeamTasker.Application.Tasks.Models.TaskDto": \{\
+        "type": "object",\
+        "properties": \{\
+          "id": \{\
+            "type": "integer",\
+            "format": "int32"\
+          \},\
+          "title": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "description": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "status": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "priority": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "dueDate": \{\
+            "type": "string",\
+            "format": "date-time",\
+            "nullable": true\
+          \},\
+          "progress": \{\
+            "type": "integer",\
+            "format": "int32"\
+          \},\
+          "projectId": \{\
+            "type": "integer",\
+            "format": "int32"\
+          \},\
+          "projectName": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "assigneeId": \{\
+            "type": "integer",\
+            "format": "int32",\
+            "nullable": true\
+          \},\
+          "assignee": \{\
+            "$ref": "#/components/schemas/TeamTasker.Application.Tasks.Models.UserMinimalDto"\
+          \},\
+          "tags": \{\
+            "type": "array",\
+            "items": \{\
+              "type": "string"\
+            \},\
+            "nullable": true\
+          \},\
+          "createdDate": \{\
+            "type": "string",\
+            "format": "date-time"\
+          \},\
+          "updatedDate": \{\
+            "type": "string",\
+            "format": "date-time"\
+          \},\
+          "completedDate": \{\
+            "type": "string",\
+            "format": "date-time",\
+            "nullable": true\
+          \}\
+        \},\
+        "additionalProperties": false\
+      \},\
+      "TeamTasker.Application.Tasks.Models.UpdateTaskRequest": \{\
+        "type": "object",\
+        "properties": \{\
+          "title": \{\
+            "maxLength": 100,\
+            "minLength": 3,\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "description": \{\
+            "maxLength": 1000,\
+            "minLength": 0,\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "status": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "priority": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "dueDate": \{\
+            "type": "string",\
+            "format": "date-time",\
+            "nullable": true\
+          \},\
+          "progress": \{\
+            "maximum": 100,\
+            "minimum": 0,\
+            "type": "integer",\
+            "format": "int32",\
+            "nullable": true\
+          \},\
+          "assigneeId": \{\
+            "type": "integer",\
+            "format": "int32",\
+            "nullable": true\
+          \},\
+          "tags": \{\
+            "type": "array",\
+            "items": \{\
+              "type": "string"\
+            \},\
+            "nullable": true\
+          \}\
+        \},\
+        "additionalProperties": false\
+      \},\
+      "TeamTasker.Application.Tasks.Models.UserMinimalDto": \{\
+        "type": "object",\
+        "properties": \{\
+          "id": \{\
+            "type": "integer",\
+            "format": "int32"\
+          \},\
+          "name": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "avatar": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "initials": \{\
+            "type": "string",\
+            "nullable": true\
+          \}\
+        \},\
+        "additionalProperties": false\
+      \},\
+      "TeamTasker.Application.Users.Models.AddressDto": \{\
+        "type": "object",\
+        "properties": \{\
+          "street": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "city": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "state": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "country": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "zipCode": \{\
+            "type": "string",\
+            "nullable": true\
+          \}\
+        \},\
+        "additionalProperties": false\
+      \},\
+      "TeamTasker.Application.Users.Models.AddressUpdateRequest": \{\
+        "type": "object",\
+        "properties": \{\
+          "street": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "city": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "state": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "country": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "zipCode": \{\
+            "type": "string",\
+            "nullable": true\
+          \}\
+        \},\
+        "additionalProperties": false\
+      \},\
+      "TeamTasker.Application.Users.Models.UpdateProfileRequest": \{\
+        "required": [\
+          "email",\
+          "firstName",\
+          "lastName"\
+        ],\
+        "type": "object",\
+        "properties": \{\
+          "firstName": \{\
+            "minLength": 1,\
+            "type": "string"\
+          \},\
+          "lastName": \{\
+            "minLength": 1,\
+            "type": "string"\
+          \},\
+          "email": \{\
+            "minLength": 1,\
+            "type": "string",\
+            "format": "email"\
+          \},\
+          "department": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "bio": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "location": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "phone": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "address": \{\
+            "$ref": "#/components/schemas/TeamTasker.Application.Users.Models.AddressUpdateRequest"\
+          \}\
+        \},\
+        "additionalProperties": false\
+      \},\
+      "TeamTasker.Application.Users.Models.UserDetailDto": \{\
+        "type": "object",\
+        "properties": \{\
+          "id": \{\
+            "type": "integer",\
+            "format": "int32"\
+          \},\
+          "firstName": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "lastName": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "fullName": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "email": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "username": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "role": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "avatar": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "initials": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "department": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "bio": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "location": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "phone": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "address": \{\
+            "$ref": "#/components/schemas/TeamTasker.Application.Users.Models.AddressDto"\
+          \},\
+          "skills": \{\
+            "type": "array",\
+            "items": \{\
+              "$ref": "#/components/schemas/TeamTasker.Application.Users.Models.UserSkillDto"\
+            \},\
+            "nullable": true\
+          \},\
+          "createdDate": \{\
+            "type": "string",\
+            "format": "date-time"\
+          \},\
+          "updatedDate": \{\
+            "type": "string",\
+            "format": "date-time"\
+          \}\
+        \},\
+        "additionalProperties": false\
+      \},\
+      "TeamTasker.Application.Users.Models.UserDto": \{\
+        "type": "object",\
+        "properties": \{\
+          "id": \{\
+            "type": "integer",\
+            "format": "int32"\
+          \},\
+          "firstName": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "lastName": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "fullName": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "email": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "username": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "role": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "avatar": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "initials": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "department": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "createdDate": \{\
+            "type": "string",\
+            "format": "date-time"\
+          \},\
+          "updatedDate": \{\
+            "type": "string",\
+            "format": "date-time"\
+          \}\
+        \},\
+        "additionalProperties": false\
+      \},\
+      "TeamTasker.Application.Users.Models.UserSkillDto": \{\
+        "type": "object",\
+        "properties": \{\
+          "id": \{\
+            "type": "integer",\
+            "format": "int32"\
+          \},\
+          "name": \{\
+            "type": "string",\
+            "nullable": true\
+          \},\
+          "level": \{\
+            "type": "integer",\
+            "format": "int32"\
+          \},\
+          "yearsOfExperience": \{\
+            "type": "integer",\
+            "format": "int32"\
+          \}\
+        \},\
+        "additionalProperties": false\
+      \}\
+    \},\
+    "securitySchemes": \{\
+      "Bearer": \{\
+        "type": "apiKey",\
+        "description": "JWT Authorization header using the Bearer scheme. Example: \\"Authorization: Bearer \{token\}\\"",\
+        "name": "Authorization",\
+        "in": "header"\
+      \}\
+    \}\
+  \},\
+  "security": [\
+    \{\
+      "Bearer": [ ]\
+    \}\
+  ]\
+\}\
+}

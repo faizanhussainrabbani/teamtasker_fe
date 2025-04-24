@@ -109,7 +109,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Update user when currentUser changes
   useEffect(() => {
     if (currentUser) {
-      setUser(currentUser);
+      // Create a user object from the auth response
+      const userObj: User = {
+        id: currentUser.id.toString(),
+        name: currentUser.fullName,
+        email: currentUser.email,
+      };
+      setUser(userObj);
       setIsLoading(false);
     }
   }, [currentUser]);
@@ -141,11 +147,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const result = await loginMutation.mutateAsync(credentials);
 
       setAuthToken(result.token);
-      setUser(result.user);
+      // Create a user object from the auth response
+      const userObj: User = {
+        id: result.id.toString(),
+        name: result.fullName,
+        email: result.email,
+      };
+      setUser(userObj);
 
       toast({
         title: "Login successful",
-        description: `Welcome back, ${result.user.name}!`,
+        description: `Welcome back, ${result.fullName}!`,
       });
 
       router.push('/dashboard');
@@ -171,11 +183,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const result = await registerMutation.mutateAsync(userData);
 
       setAuthToken(result.token);
-      setUser(result.user);
+      // Create a user object from the auth response
+      const userObj: User = {
+        id: result.id.toString(),
+        name: result.fullName,
+        email: result.email,
+      };
+      setUser(userObj);
 
       toast({
         title: "Registration successful",
-        description: `Welcome to TeamTasker, ${result.user.name}!`,
+        description: `Welcome to TeamTasker, ${result.fullName}!`,
       });
 
       router.push('/dashboard');

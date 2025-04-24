@@ -1,15 +1,15 @@
 import apiClient from '../client';
 import { API_CONFIG } from '../config';
-import { 
-  LoginRequest, 
-  LoginResponse, 
-  RegisterRequest, 
+import {
+  LoginRequest,
+  AuthResponse,
+  LoginResponse,
+  RegisterRequest,
   RegisterResponse,
   ForgotPasswordRequest,
   ResetPasswordRequest,
   ChangePasswordRequest
 } from '../types/auth';
-import { User } from '../types/users';
 
 const AUTH_ENDPOINT = API_CONFIG.endpoints.auth;
 
@@ -32,7 +32,7 @@ export const register = async (userData: RegisterRequest): Promise<RegisterRespo
 /**
  * Get current authenticated user
  */
-export const getCurrentUser = async (): Promise<User> => {
+export const getCurrentUser = async (): Promise<AuthResponse> => {
   const response = await apiClient.get(`${AUTH_ENDPOINT}/me`);
   return response.data;
 };

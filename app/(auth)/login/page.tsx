@@ -22,9 +22,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
  * <LoginPage />
  */
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { login, isLoading, error } = useAuth();
   const router = useRouter();
@@ -41,7 +40,7 @@ export default function LoginPage() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      await login({ email, password, rememberMe });
+      await login({ username, password });
     } catch (error) {
       console.error('Login error:', error);
     } finally {
@@ -67,13 +66,13 @@ export default function LoginPage() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="username">Username</Label>
           <Input
-            id="email"
-            type="email"
-            placeholder="name@example.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            id="username"
+            type="text"
+            placeholder="Enter your username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             required
           />
         </div>
@@ -99,16 +98,7 @@ export default function LoginPage() {
           />
         </div>
 
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            id="remember"
-            checked={rememberMe}
-            onCheckedChange={(checked) => setRememberMe(checked as boolean)}
-          />
-          <Label htmlFor="remember" className="text-sm font-normal">
-            Remember me
-          </Label>
-        </div>
+
 
         <Button type="submit" className="w-full" disabled={isSubmitting || isLoading}>
           {isSubmitting ? 'Logging in...' : 'Login'}

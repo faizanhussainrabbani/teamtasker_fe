@@ -10,10 +10,11 @@ import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export default function RegisterPage() {
-  const [name, setName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [passwordConfirmation, setPasswordConfirmation] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { register, isLoading, error } = useAuth();
   const router = useRouter();
@@ -22,7 +23,7 @@ export default function RegisterPage() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      await register({ name, email, password, passwordConfirmation });
+      await register({ firstName, lastName, email, username, password });
     } catch (error) {
       console.error('Registration error:', error);
     } finally {
@@ -48,12 +49,23 @@ export default function RegisterPage() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="name">Full Name</Label>
+          <Label htmlFor="firstName">First Name</Label>
           <Input
-            id="name"
-            placeholder="John Doe"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            id="firstName"
+            placeholder="John"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            required
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="lastName">Last Name</Label>
+          <Input
+            id="lastName"
+            placeholder="Doe"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
             required
           />
         </div>
@@ -71,6 +83,17 @@ export default function RegisterPage() {
         </div>
 
         <div className="space-y-2">
+          <Label htmlFor="username">Username</Label>
+          <Input
+            id="username"
+            placeholder="johndoe"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+          />
+        </div>
+
+        <div className="space-y-2">
           <Label htmlFor="password">Password</Label>
           <Input
             id="password"
@@ -78,18 +101,11 @@ export default function RegisterPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            minLength={6}
           />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="passwordConfirmation">Confirm Password</Label>
-          <Input
-            id="passwordConfirmation"
-            type="password"
-            value={passwordConfirmation}
-            onChange={(e) => setPasswordConfirmation(e.target.value)}
-            required
-          />
+          <p className="text-xs text-muted-foreground mt-1">
+            Password must be at least 6 characters long
+          </p>
         </div>
 
         <Button type="submit" className="w-full" disabled={isSubmitting || isLoading}>

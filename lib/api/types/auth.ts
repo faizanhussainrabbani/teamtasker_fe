@@ -1,40 +1,69 @@
 import { User } from './users';
 
+/**
+ * Auth request payload for login
+ * Matches TeamTasker.Application.Auth.Models.AuthRequest
+ */
 export interface LoginRequest {
-  email: string;
+  username: string;
   password: string;
-  rememberMe?: boolean;
 }
 
-export interface LoginResponse {
+/**
+ * Auth response from the server
+ * Matches TeamTasker.Application.Auth.Models.AuthResponse
+ */
+export interface AuthResponse {
+  id: number;
+  username: string;
+  email: string;
+  fullName: string;
   token: string;
-  user: User;
 }
 
+// Alias for backward compatibility
+export type LoginResponse = AuthResponse;
+
+/**
+ * Register request payload
+ * Matches TeamTasker.Application.Auth.Models.RegisterRequest
+ */
 export interface RegisterRequest {
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
+  username: string;
   password: string;
-  passwordConfirmation: string;
 }
 
-export interface RegisterResponse {
-  token: string;
-  user: User;
-}
+// Alias for backward compatibility
+export type RegisterResponse = AuthResponse;
 
+/**
+ * Forgot password request payload
+ * Matches TeamTasker.Application.Auth.Models.ForgotPasswordRequest
+ */
 export interface ForgotPasswordRequest {
   email: string;
 }
 
+/**
+ * Reset password request payload
+ * Matches TeamTasker.Application.Auth.Models.ResetPasswordRequest
+ */
 export interface ResetPasswordRequest {
   token: string;
+  email: string;
   password: string;
-  passwordConfirmation: string;
+  confirmPassword: string;
 }
 
+/**
+ * Change password request payload
+ * Matches TeamTasker.Application.Auth.Models.ChangePasswordRequest
+ */
 export interface ChangePasswordRequest {
   currentPassword: string;
   newPassword: string;
-  newPasswordConfirmation: string;
+  confirmNewPassword: string;
 }
