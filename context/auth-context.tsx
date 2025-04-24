@@ -119,12 +119,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Skip if we're still loading the user
     if (isLoadingUser) return;
 
-    // For development purposes, we'll disable authentication redirection if API mocking is enabled
-    if (process.env.NEXT_PUBLIC_API_MOCKING === 'enabled') {
-      setIsLoading(false);
-      return;
-    }
-
     const token = getAuthToken();
     const isAuthPage = pathname === '/login' || pathname === '/register' || pathname === '/forgot-password';
 

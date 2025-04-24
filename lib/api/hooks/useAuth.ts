@@ -72,8 +72,6 @@ export const useCurrentUser = () => {
     queryKey: authKeys.user(),
     queryFn: () => getCurrentUser(),
     retry: false,
-    // Disable this query by default to prevent API calls during development
-    enabled: false,
     onError: (error) => {
       console.error('Error fetching current user:', parseApiError(error));
     },
