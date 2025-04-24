@@ -7,9 +7,16 @@ import { ChevronRight } from "lucide-react"
 import { useActivities } from "@/lib/api/hooks/useActivities"
 import { LoadingState, ErrorState, EmptyState } from "@/components/ui/api-state"
 
-export function RecentActivityCard() {
+interface RecentActivityCardProps {
+  isLoading?: boolean;
+}
+
+export function RecentActivityCard({ isLoading: cardIsLoading }: RecentActivityCardProps) {
   // Fetch activities with React Query
-  const { data, isLoading, isError, error, refetch } = useActivities({ limit: 5 });
+  const { data, isLoading: dataIsLoading, isError, error, refetch } = useActivities({ limit: 5 });
+
+  // Combine loading states
+  const isLoading = cardIsLoading || dataIsLoading;
 
   return (
     <Card>

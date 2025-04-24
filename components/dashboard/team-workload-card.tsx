@@ -15,9 +15,16 @@ const getWorkloadColor = (workload: number) => {
   return "bg-blue-300"
 }
 
-export function TeamWorkloadCard() {
+interface TeamWorkloadCardProps {
+  isLoading?: boolean;
+}
+
+export function TeamWorkloadCard({ isLoading: cardIsLoading }: TeamWorkloadCardProps) {
   // Fetch team workload data
-  const { data: teamMembers, isLoading, isError, error, refetch } = useTeamWorkload();
+  const { data: teamMembers, isLoading: dataIsLoading, isError, error, refetch } = useTeamWorkload();
+
+  // Combine loading states
+  const isLoading = cardIsLoading || dataIsLoading;
 
   return (
     <Card>

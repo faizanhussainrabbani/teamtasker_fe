@@ -13,15 +13,24 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 
-export function DashboardHeader() {
+import { useAuth } from "@/context/auth-context"
+
+interface DashboardHeaderProps {
+  isLoading?: boolean;
+}
+
+export function DashboardHeader({ isLoading }: DashboardHeaderProps) {
   const [notifications, setNotifications] = useState(3)
+  const { user } = useAuth();
+
+  const firstName = user?.name?.split(' ')[0] || 'User';
 
   return (
     <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-4">
       <SidebarTrigger className="md:hidden" />
       <div className="flex-1">
         <h1 className="text-xl font-semibold">Dashboard</h1>
-        <p className="text-sm text-muted-foreground">Welcome back, Jane. You have {notifications} new notifications.</p>
+        <p className="text-sm text-muted-foreground">Welcome back, {firstName}. You have {notifications} new notifications.</p>
       </div>
       <div className="flex items-center gap-2">
         <Button variant="outline" size="icon">

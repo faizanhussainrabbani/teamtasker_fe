@@ -20,9 +20,16 @@ const getGoalIcon = (category: string) => {
   }
 };
 
-export function DevelopmentGoalsCard() {
+interface DevelopmentGoalsCardProps {
+  isLoading?: boolean;
+}
+
+export function DevelopmentGoalsCard({ isLoading: cardIsLoading }: DevelopmentGoalsCardProps) {
   // Fetch user development goals
-  const { data: goals, isLoading, isError, error, refetch } = useUserDevelopmentGoals();
+  const { data: goals, isLoading: dataIsLoading, isError, error, refetch } = useUserDevelopmentGoals();
+
+  // Combine loading states
+  const isLoading = cardIsLoading || dataIsLoading;
 
   return (
     <Card className="h-full">

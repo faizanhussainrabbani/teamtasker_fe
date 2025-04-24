@@ -7,9 +7,16 @@ import { ChevronRight, PlusCircle } from "lucide-react"
 import { useCurrentUserProfile } from "@/lib/api/hooks/useUsers"
 import { LoadingState, ErrorState, EmptyState } from "@/components/ui/api-state"
 
-export function SkillsOverviewCard() {
+interface SkillsOverviewCardProps {
+  isLoading?: boolean;
+}
+
+export function SkillsOverviewCard({ isLoading: cardIsLoading }: SkillsOverviewCardProps) {
   // Fetch user profile data which includes skills
-  const { data: profile, isLoading, isError, error, refetch } = useCurrentUserProfile();
+  const { data: profile, isLoading: dataIsLoading, isError, error, refetch } = useCurrentUserProfile();
+
+  // Combine loading states
+  const isLoading = cardIsLoading || dataIsLoading;
 
   // Get top 5 skills sorted by level
   const topSkills = profile?.skills

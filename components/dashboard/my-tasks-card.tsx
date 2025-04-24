@@ -40,14 +40,21 @@ const getPriorityColor = (priority: string) => {
   }
 }
 
-export function MyTasksCard() {
+interface MyTasksCardProps {
+  isLoading?: boolean;
+}
+
+export function MyTasksCard({ isLoading: cardIsLoading }: MyTasksCardProps) {
   const [activeTab, setActiveTab] = useState("all")
 
   // Convert UI filter to API parameter
   const statusFilter = activeTab !== "all" ? activeTab as TaskStatus : undefined
 
   // Fetch tasks with React Query
-  const { data, isLoading, isError, error, refetch } = useTasks({ status: statusFilter })
+  const { data, isLoading: dataIsLoading, isError, error, refetch } = useTasks({ status: statusFilter })
+
+  // Combine loading states
+  const isLoading = cardIsLoading || dataIsLoading
 
   // Task status update mutation
   const updateTaskStatus = useUpdateTaskStatus()
