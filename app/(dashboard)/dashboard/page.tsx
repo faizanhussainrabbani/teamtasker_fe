@@ -3,7 +3,6 @@
 import { useAuth } from '@/context/auth-context';
 import { TeamWorkloadCard } from "@/components/dashboard/team-workload-card";
 import { MyTasksCard } from "@/components/dashboard/my-tasks-card";
-import { SkillsOverviewCard } from "@/components/dashboard/skills-overview-card";
 import { RecentActivityCard } from "@/components/dashboard/recent-activity-card";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { useState, useEffect } from 'react';
@@ -29,12 +28,10 @@ export default function DashboardPage() {
     return (
       <div className="p-6">
         <Skeleton className="h-12 w-64 mb-6" />
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          <Skeleton className="h-[200px] w-full lg:col-span-2" />
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
+          <Skeleton className="h-[200px] w-full" />
           <Skeleton className="h-[200px] w-full" />
           <Skeleton className="h-[200px] w-full lg:col-span-2" />
-          <Skeleton className="h-[200px] w-full" />
-          <Skeleton className="h-[200px] w-full lg:col-span-3" />
         </div>
       </div>
     );
@@ -43,17 +40,14 @@ export default function DashboardPage() {
   return (
     <div className="flex flex-col">
       <DashboardHeader />
-      <div className="grid gap-4 p-4 md:grid-cols-2 lg:grid-cols-3">
-        <div className="lg:col-span-2">
+      <div className="grid gap-4 p-4 md:grid-cols-2 lg:grid-cols-2">
+        <div className="lg:col-span-1">
           <MyTasksCard isLoading={isPageLoading} />
         </div>
         <div className="lg:col-span-1">
-          <SkillsOverviewCard isLoading={isPageLoading} />
-        </div>
-        <div className="lg:col-span-2">
           <TeamWorkloadCard isLoading={isPageLoading} />
         </div>
-        <div className="lg:col-span-3">
+        <div className="lg:col-span-2">
           <RecentActivityCard isLoading={isPageLoading} />
         </div>
       </div>
