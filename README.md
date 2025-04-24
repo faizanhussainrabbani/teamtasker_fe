@@ -34,7 +34,7 @@ TeamTasker is a people-focused task management application designed to help team
 - **API Integration**: Axios with custom interceptors for API requests
 - **Charts and Visualization**: [Recharts](https://recharts.org/)
 - **Form Handling**: [React Hook Form](https://react-hook-form.com/) with [Zod](https://github.com/colinhacks/zod) validation
-- **Testing**: MSW for API mocking during development
+- **Testing**: Jest and React Testing Library for component testing
 
 ## 🚀 Getting Started
 
@@ -52,11 +52,8 @@ TeamTasker is a people-focused task management application designed to help team
 
 2. Update the environment variables in `.env.local` as needed:
    ```
-   # Enable API mocking for development
-   NEXT_PUBLIC_API_MOCKING=enabled
-
-   # API URL (when not using mocks)
-   NEXT_PUBLIC_API_URL=http://localhost:8000/api
+   # API URL for backend connection
+   NEXT_PUBLIC_API_URL=http://localhost:5220/api
    ```
 
 ### Installation
@@ -87,23 +84,22 @@ TeamTasker is a people-focused task management application designed to help team
 
 4. Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
 
-### Mock Credentials
 
-When using the mock API, you can log in with these credentials:
-
-- **Email**: `user@example.com`
-- **Password**: `password`
 
 ## 📂 Project Structure
 
 ```
 ├── app/                  # Next.js app router pages and layouts
+│   ├── (auth)/           # Authentication route group (login, register, forgot-password)
+│   ├── (dashboard)/      # Dashboard route group (authenticated pages)
+│   └── template.tsx      # Application template with providers
 ├── components/           # Reusable React components
 │   ├── ui/               # UI components from shadcn/ui
 │   ├── dashboard/        # Dashboard-specific components
 │   ├── team/             # Team management components
 │   ├── profile/          # User profile components
 │   └── tasks/            # Task management components
+├── constants/            # Application constants
 ├── context/              # React context providers
 ├── hooks/                # Custom React hooks
 ├── lib/                  # Utility functions and shared code
@@ -112,25 +108,17 @@ When using the mock API, you can log in with these credentials:
 │   │   ├── hooks/        # React Query hooks
 │   │   └── types/        # TypeScript types for API
 │   └── utils/            # General utility functions
-├── mocks/                # Mock Service Worker setup
 ├── public/               # Static assets
-└── styles/               # Global CSS styles
+├── styles/               # Global CSS styles
+├── types/                # TypeScript type definitions
+└── utils/                # Utility functions
 ```
 
 ## 💬 API Integration
 
 The application uses React Query for data fetching and state management. API calls are made using Axios with custom interceptors for authentication and error handling.
 
-### Mock API
 
-During development, the application uses Mock Service Worker (MSW) to simulate API responses. This allows for development without a backend server.
-
-To enable/disable API mocking, set the `NEXT_PUBLIC_API_MOCKING` environment variable:
-
-```
-NEXT_PUBLIC_API_MOCKING=enabled  # Enable API mocking
-NEXT_PUBLIC_API_MOCKING=disabled  # Disable API mocking (use real API)
-```
 
 ## 🛠 Development
 
@@ -156,7 +144,7 @@ The build output will be in the `.next` directory.
 
 Future development plans include:
 
-- [ ] Backend API integration with a real server
+- [x] Backend API integration with a real server
 - [ ] Real-time updates and notifications
 - [ ] Advanced filtering and search capabilities
 - [ ] Team permissions and role management
