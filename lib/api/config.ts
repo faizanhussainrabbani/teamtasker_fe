@@ -8,7 +8,7 @@ export const API_CONFIG = {
     users: '/users',
     teams: '/teams',
     auth: '/auth',
-    profile: '/profile',
+    profile: '/users/profile',
     skills: '/skills',
     development: '/development',
     communication: '/communication',
