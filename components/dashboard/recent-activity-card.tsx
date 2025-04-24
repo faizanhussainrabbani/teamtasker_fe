@@ -19,7 +19,7 @@ export function RecentActivityCard({ isLoading: cardIsLoading }: RecentActivityC
   const isLoading = cardIsLoading || dataIsLoading;
 
   return (
-    <Card>
+    <Card className="h-full flex flex-col">
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
           <CardTitle>Recent Activity</CardTitle>
@@ -29,7 +29,7 @@ export function RecentActivityCard({ isLoading: cardIsLoading }: RecentActivityC
           View All <ChevronRight className="ml-1 h-4 w-4" />
         </Button>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex-1 overflow-auto">
         {isLoading ? (
           <LoadingState message="Loading activities..." />
         ) : isError ? (

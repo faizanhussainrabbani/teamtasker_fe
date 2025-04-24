@@ -27,7 +27,7 @@ export function TeamWorkloadCard({ isLoading: cardIsLoading }: TeamWorkloadCardP
   const isLoading = cardIsLoading || dataIsLoading;
 
   return (
-    <Card>
+    <Card className="h-full flex flex-col">
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
           <CardTitle>Team Workload</CardTitle>
@@ -37,7 +37,7 @@ export function TeamWorkloadCard({ isLoading: cardIsLoading }: TeamWorkloadCardP
           Team Details <ChevronRight className="ml-1 h-4 w-4" />
         </Button>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex-1 overflow-auto">
         {isLoading ? (
           <LoadingState message="Loading team workload..." />
         ) : isError ? (

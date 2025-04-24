@@ -26,29 +26,35 @@ export default function DashboardPage() {
 
   if (isLoading || !user) {
     return (
-      <div className="p-6">
-        <Skeleton className="h-12 w-64 mb-6" />
-        <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
-          <Skeleton className="h-[200px] w-full" />
-          <Skeleton className="h-[200px] w-full" />
-          <Skeleton className="h-[200px] w-full lg:col-span-2" />
+      <div className="flex flex-col h-screen">
+        <div className="h-16 border-b px-4 flex items-center">
+          <Skeleton className="h-8 w-64" />
+        </div>
+        <div className="flex-1 overflow-auto p-6">
+          <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2 max-w-screen-2xl mx-auto">
+            <Skeleton className="h-[300px] w-full" />
+            <Skeleton className="h-[300px] w-full" />
+            <Skeleton className="h-[200px] w-full lg:col-span-2" />
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col h-screen">
       <DashboardHeader />
-      <div className="grid gap-4 p-4 md:grid-cols-1 lg:grid-cols-2">
-        <div className="lg:col-span-1">
-          <MyTasksCard isLoading={isPageLoading} />
-        </div>
-        <div className="lg:col-span-1">
-          <TeamWorkloadCard isLoading={isPageLoading} />
-        </div>
-        <div className="lg:col-span-2">
-          <RecentActivityCard isLoading={isPageLoading} />
+      <div className="flex-1 overflow-auto p-4">
+        <div className="grid grid-rows-[minmax(350px,1fr)_minmax(250px,1fr)] lg:grid-rows-[minmax(350px,1fr)] gap-4 md:grid-cols-1 lg:grid-cols-2 max-w-screen-2xl mx-auto h-full">
+          <div className="lg:col-span-1">
+            <MyTasksCard isLoading={isPageLoading} />
+          </div>
+          <div className="lg:col-span-1">
+            <TeamWorkloadCard isLoading={isPageLoading} />
+          </div>
+          <div className="lg:col-span-2">
+            <RecentActivityCard isLoading={isPageLoading} />
+          </div>
         </div>
       </div>
     </div>

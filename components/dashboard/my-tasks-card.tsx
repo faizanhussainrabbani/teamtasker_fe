@@ -60,7 +60,7 @@ export function MyTasksCard({ isLoading: cardIsLoading }: MyTasksCardProps) {
   const updateTaskStatus = useUpdateTaskStatus()
 
   return (
-    <Card>
+    <Card className="h-full flex flex-col">
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
           <CardTitle>My Tasks</CardTitle>
@@ -70,7 +70,7 @@ export function MyTasksCard({ isLoading: cardIsLoading }: MyTasksCardProps) {
           View All <ChevronRight className="ml-1 h-4 w-4" />
         </Button>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex-1 overflow-auto">
         <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-4">
             <TabsTrigger value="all">All</TabsTrigger>
