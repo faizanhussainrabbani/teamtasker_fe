@@ -16,7 +16,7 @@ export const teamKeys = {
 export const useTeamWorkload = () => {
   // Fetch all users
   const usersQuery = useUsers();
-  
+
   // Get tasks from context instead of making a separate API call
   const { allTasks, isLoading: tasksLoading, isError: tasksError } = useDashboardTasks();
 
@@ -32,11 +32,9 @@ export const useTeamWorkload = () => {
       // Handle different response structures
       const users = Array.isArray(usersQuery.data)
         ? usersQuery.data
-        : (usersQuery.data.data || []);
+        : (usersQuery.data?.items || usersQuery.data?.data || []);
 
-      const tasks = Array.isArray(allTasks)
-        ? allTasks
-        : (allTasks.data || []);
+      const tasks = allTasks?.items || [];
 
       // Check if users is an array before mapping
       if (!Array.isArray(users)) {

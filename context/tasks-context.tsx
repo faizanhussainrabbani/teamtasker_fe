@@ -3,12 +3,23 @@
 import { createContext, useContext, ReactNode } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getTasks } from '@/lib/api/endpoints/tasks';
-import { TasksQueryParams, TasksResponse } from '@/lib/api/types/tasks';
+import { TasksQueryParams } from '@/lib/api/types/tasks';
 import { parseApiError } from '@/lib/error-handling';
 import { taskKeys } from '@/lib/api/hooks/useTasks';
 
+// Define the actual API response structure
+interface ApiTasksResponse {
+  items: any[];
+  pageNumber: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+  hasPreviousPage: boolean;
+  hasNextPage: boolean;
+}
+
 interface TasksContextType {
-  allTasks: TasksResponse | undefined;
+  allTasks: ApiTasksResponse | undefined;
   isLoading: boolean;
   isError: boolean;
   error: Error | null;
@@ -66,10 +77,10 @@ export function TasksProvider({ children }: { children: ReactNode }) {
  */
 export function useDashboardTasks() {
   const context = useContext(TasksContext);
-  
+
   if (context === undefined) {
     throw new Error('useDashboardTasks must be used within a TasksProvider');
   }
-  
+
   return context;
 }

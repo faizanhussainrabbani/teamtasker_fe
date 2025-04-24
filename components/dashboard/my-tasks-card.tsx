@@ -13,9 +13,10 @@ import { useDashboardTasks } from "@/context/tasks-context"
 import { TaskStatus } from "@/lib/api/types/tasks"
 import { LoadingState, ErrorState, EmptyState } from "@/components/ui/api-state"
 
-// Update the getStatusIcon function to use blue colors
+// Update the getStatusIcon function to use blue colors and handle case-insensitive status
 const getStatusIcon = (status: string) => {
-  switch (status) {
+  const statusLower = status.toLowerCase();
+  switch (statusLower) {
     case "completed":
       return <CheckCircle2 className="h-5 w-5 text-blue-500" />
     case "in-progress":
@@ -27,9 +28,10 @@ const getStatusIcon = (status: string) => {
   }
 }
 
-// Update the getPriorityColor function to use more greyish-bluish colors
+// Update the getPriorityColor function to use more greyish-bluish colors and handle case-insensitive priority
 const getPriorityColor = (priority: string) => {
-  switch (priority) {
+  const priorityLower = priority.toLowerCase();
+  switch (priorityLower) {
     case "high":
       return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
     case "medium":
@@ -52,11 +54,11 @@ export function MyTasksCard({ isLoading: cardIsLoading }: MyTasksCardProps) {
   const { allTasks, isLoading: tasksLoading, isError, refetch } = useDashboardTasks();
 
   // Filter tasks based on the active tab
-  const filteredTasks = allTasks?.data?.filter(task =>
-    activeTab === "all" || task.status === activeTab
+  const filteredTasks = allTasks?.items?.filter(task =>
+    activeTab === "all" || task.status.toLowerCase() === activeTab
   ) || [];
 
-  // Create a data structure that matches the original API response
+  // Create a data structure that matches what the component expects
   const data = {
     data: filteredTasks,
     total: filteredTasks.length,
@@ -114,7 +116,7 @@ export function MyTasksCard({ isLoading: cardIsLoading }: MyTasksCardProps) {
                     <div
                       className="cursor-pointer"
                       onClick={() => {
-                        const newStatus = task.status === "completed" ? "todo" : "completed";
+                        const newStatus = task.status.toLowerCase() === "completed" ? "todo" : "completed";
                         updateTaskStatus.mutate({ id: task.id, status: newStatus });
                       }}
                     >
