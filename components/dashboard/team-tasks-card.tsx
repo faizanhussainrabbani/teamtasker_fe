@@ -25,11 +25,13 @@ export function TeamTasksCard({ isLoading: cardIsLoading }: TeamTasksCardProps) 
 
   // Get team tasks data from context
   const {
-    teamTasks: contextTeamTasks,
+    teamTasks,
     isLoading: contextLoading,
+    isLoadingType,
     isError: contextError,
     error: contextErrorDetails,
-    refetchType
+    refetchType,
+    getTasksByType
   } = useDashboardTasks();
 
   // Fetch team tasks data using the hook (which now uses teamTasks from context)
@@ -40,6 +42,13 @@ export function TeamTasksCard({ isLoading: cardIsLoading }: TeamTasksCardProps) 
     error,
     refetch
   } = useTeamTasks();
+
+  // Ensure team tasks are loaded
+  useEffect(() => {
+    if (!teamTasks) {
+      getTasksByType('team');
+    }
+  }, [teamTasks, getTasksByType]);
 
   // Combine loading states
   const isLoading = cardIsLoading || dataIsLoading;

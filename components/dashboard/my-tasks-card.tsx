@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { CheckCircle2, Circle, Clock, AlertCircle, MoreHorizontal, ChevronRight } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -50,8 +50,25 @@ interface MyTasksCardProps {
 export function MyTasksCard({ isLoading: cardIsLoading }: MyTasksCardProps) {
   const [activeTab, setActiveTab] = useState("all")
 
-  // Get my tasks data from context
-  const { myTasks, isLoading: tasksLoading, isError, refetchType } = useDashboardTasks();
+  // Get tasks context
+  const {
+    myTasks,
+    isLoading: tasksLoading,
+    isLoadingType,
+    isError,
+    refetchType,
+    getTasksByType
+  } = useDashboardTasks();
+
+  // Function to refresh my tasks
+  const refreshMyTasks = () => refetchType('my');
+
+  // Ensure my tasks are loaded
+  useEffect(() => {
+    if (!myTasks) {
+      getTasksByType('my');
+    }
+  }, [myTasks, getTasksByType]);
 
   // Filter tasks based on the active tab
   const filteredTasks = myTasks?.items?.filter(task =>
@@ -65,9 +82,6 @@ export function MyTasksCard({ isLoading: cardIsLoading }: MyTasksCardProps) {
     page: 1,
     limit: 10
   };
-
-  // Function to refresh my tasks
-  const refreshMyTasks = () => refetchType('my');
 
   // Combine loading states
   const isLoading = cardIsLoading || tasksLoading
