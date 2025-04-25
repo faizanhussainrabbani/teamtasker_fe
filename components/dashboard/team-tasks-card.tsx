@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { ChevronRight, RefreshCw } from "lucide-react"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { useTeamTasks } from "@/lib/api/hooks/useTeamTasks"
+import { useDashboardTasks } from "@/context/tasks-context"
 import { LoadingState, EmptyState } from "@/components/ui/api-state"
 
 interface TeamTasksCardProps {
@@ -22,7 +23,16 @@ export function TeamTasksCard({ isLoading: cardIsLoading }: TeamTasksCardProps) 
   const [activeTab, setActiveTab] = useState("all")
   const [isRefreshing, setIsRefreshing] = useState(false)
 
-  // Fetch team tasks data
+  // Get team tasks data from context
+  const {
+    teamTasks: contextTeamTasks,
+    isLoading: contextLoading,
+    isError: contextError,
+    error: contextErrorDetails,
+    refetchType
+  } = useDashboardTasks();
+
+  // Fetch team tasks data using the hook (which now uses teamTasks from context)
   const {
     data: teamData,
     isLoading: dataIsLoading,
@@ -44,7 +54,11 @@ export function TeamTasksCard({ isLoading: cardIsLoading }: TeamTasksCardProps) 
   // Handle manual refresh with loading indicator
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    await refetch();
+    // Refresh both the context data and the hook data
+    await Promise.all([
+      refetchType('team'),
+      refetch()
+    ]);
     setTimeout(() => setIsRefreshing(false), 500); // Ensure loading state is visible briefly
   };
 

@@ -17,6 +17,18 @@ export interface Task {
     avatar: string;
     initials: string;
   };
+  creatorId?: string;
+  creator?: {
+    id: string;
+    name: string;
+    avatar: string;
+    initials: string;
+  };
+  project?: {
+    id: string;
+    name: string;
+    color?: string;
+  };
   tags: string[];
   progress: number;
   createdAt: string;
@@ -44,6 +56,8 @@ export interface TaskUpdateRequest {
   progress?: number;
 }
 
+export type TaskType = 'my' | 'team' | 'created' | 'unassigned' | 'all';
+
 export interface TasksQueryParams {
   status?: TaskStatus;
   priority?: TaskPriority;
@@ -54,6 +68,7 @@ export interface TasksQueryParams {
   limit?: number;
   sortBy?: string;
   sortDirection?: 'asc' | 'desc';
+  type?: TaskType;
 }
 
 export type TasksResponse = PaginatedResponse<Task>;

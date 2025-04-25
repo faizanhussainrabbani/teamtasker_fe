@@ -11,21 +11,26 @@ export const teamKeys = {
 
 /**
  * Hook for fetching team tasks data
- * This uses the shared tasks data from TasksContext instead of making a separate API call
+ * This uses the team tasks data from TasksContext which is filtered by the API
  */
 export const useTeamTasks = () => {
   // Fetch all users
   const usersQuery = useUsers();
 
-  // Get tasks from context instead of making a separate API call
-  const { allTasks, isLoading: tasksLoading, isError: tasksError, refetch: refetchTasks } = useDashboardTasks();
+  // Get team tasks directly from context
+  const {
+    teamTasks,
+    isLoading: tasksLoading,
+    isError: tasksError,
+    refetchType
+  } = useDashboardTasks();
 
   // Combine the queries
   return useQuery({
     queryKey: teamKeys.tasks(),
     queryFn: () => {
       // Wait for both data sources to be available
-      if (!usersQuery.data || !allTasks) {
+      if (!usersQuery.data || !teamTasks) {
         return [];
       }
 
@@ -34,7 +39,7 @@ export const useTeamTasks = () => {
         ? usersQuery.data
         : (usersQuery.data?.items || usersQuery.data?.data || []);
 
-      const tasks = allTasks?.items || [];
+      const tasks = teamTasks?.items || [];
 
       // Check if users is an array before mapping
       if (!Array.isArray(users)) {
@@ -42,15 +47,35 @@ export const useTeamTasks = () => {
         return [];
       }
 
+      // Create a map of users for quick lookup
+      const userMap = new Map();
+      users.forEach(user => {
+        if (user && user.id) {
+          userMap.set(user.id, user);
+        }
+      });
+
+      // Group tasks by assignee
+      const tasksByAssignee = new Map();
+
+      tasks.forEach(task => {
+        if (!task.assigneeId) return;
+
+        if (!tasksByAssignee.has(task.assigneeId)) {
+          tasksByAssignee.set(task.assigneeId, []);
+        }
+
+        tasksByAssignee.get(task.assigneeId).push(task);
+      });
+
       // Get team members with their assigned tasks
-      return users
-        .filter(user => user && user.id !== undefined) // Filter out invalid users
-        .map(user => {
+      return Array.from(tasksByAssignee.entries())
+        .map(([userId, userTasks]) => {
           try {
-            // Get tasks assigned to this user
-            const userTasks = tasks.filter(task =>
-              task && task.assigneeId === user.id
-            );
+            const user = userMap.get(userId);
+
+            // Skip if user not found
+            if (!user) return null;
 
             // Skip users with no tasks
             if (userTasks.length === 0) return null;
@@ -78,7 +103,7 @@ export const useTeamTasks = () => {
               tasks: sortedTasks,
             };
           } catch (error) {
-            console.error('Error processing user data:', error, user);
+            console.error('Error processing user data:', error);
             return null;
           }
         })
@@ -89,5 +114,6 @@ export const useTeamTasks = () => {
       console.error('Error fetching team tasks:', parseApiError(error));
     },
     refetchOnWindowFocus: false,
+    refetchOnMount: true,
   });
 };

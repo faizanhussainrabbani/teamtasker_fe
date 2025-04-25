@@ -50,11 +50,11 @@ interface MyTasksCardProps {
 export function MyTasksCard({ isLoading: cardIsLoading }: MyTasksCardProps) {
   const [activeTab, setActiveTab] = useState("all")
 
-  // Get shared tasks data from context
-  const { allTasks, isLoading: tasksLoading, isError, refetch } = useDashboardTasks();
+  // Get my tasks data from context
+  const { myTasks, isLoading: tasksLoading, isError, refetchType } = useDashboardTasks();
 
   // Filter tasks based on the active tab
-  const filteredTasks = allTasks?.items?.filter(task =>
+  const filteredTasks = myTasks?.items?.filter(task =>
     activeTab === "all" || task.status.toLowerCase() === activeTab
   ) || [];
 
@@ -65,6 +65,9 @@ export function MyTasksCard({ isLoading: cardIsLoading }: MyTasksCardProps) {
     page: 1,
     limit: 10
   };
+
+  // Function to refresh my tasks
+  const refreshMyTasks = () => refetchType('my');
 
   // Combine loading states
   const isLoading = cardIsLoading || tasksLoading
@@ -99,7 +102,7 @@ export function MyTasksCard({ isLoading: cardIsLoading }: MyTasksCardProps) {
                 title="No tasks found"
                 description={`You don't have any ${activeTab !== 'all' ? activeTab + ' ' : ''}tasks.`}
                 action={
-                  <Button variant="outline" size="sm" onClick={() => refetch()}>
+                  <Button variant="outline" size="sm" onClick={refreshMyTasks}>
                     Try Again
                   </Button>
                 }
