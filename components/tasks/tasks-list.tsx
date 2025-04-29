@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { isAuthenticated } from "@/lib/auth"
+import { setMockAuth, isDevelopment } from "@/lib/mock-auth"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -118,6 +120,12 @@ export function TasksList() {
     // Mark component as mounted
     isMounted.current = true;
 
+    // Set up mock authentication for development if not authenticated
+    if (isDevelopment() && !isAuthenticated()) {
+      console.log('Setting up mock authentication for development in TasksList');
+      setMockAuth();
+    }
+
     // Close menus when clicking outside
     const handleClickOutside = (event) => {
       const menus = document.querySelectorAll('[id^="task-menu-"]');
@@ -192,24 +200,36 @@ export function TasksList() {
     setError(null);
 
     try {
-      console.log("Fetching tasks with params:", params);
+      console.log("🔍 Fetching tasks with params:", params);
 
       // Use the ref to get the latest function without causing dependency issues
+      console.log("🔍 Calling getFilteredTasks function");
       const result = await getFilteredTasksRef.current(params);
 
-      console.log("Fetch tasks result received");
+      console.log("✅ Fetch tasks result received:", result);
+      console.log("✅ Result type:", typeof result);
+      console.log("✅ Result has items:", !!result?.items);
+      console.log("✅ Result has data:", !!result?.data);
+      console.log("✅ Items length:", result?.items?.length || 0);
+      console.log("✅ Data length:", result?.data?.length || 0);
+      console.log("✅ Result keys:", result ? Object.keys(result) : []);
 
       // Cache the result
       if (result) {
+        console.log("✅ Caching result");
         localStorage.setItem(`tasks_cache_${cacheKey}`, JSON.stringify(result));
         localStorage.setItem(`tasks_cache_timestamp_${cacheKey}`, Date.now().toString());
+      } else {
+        console.error("❌ No result to cache");
       }
 
       // Only update state if component is still mounted and operation is active
       if (isMounted.current && isActive) {
-        console.log("Setting tasks data and resetting loading state");
+        console.log("✅ Setting tasks data and resetting loading state");
         setTasksData(result);
         setIsLoading(false);
+      } else {
+        console.log("❌ Component not mounted or operation not active, not updating state");
       }
     } catch (err) {
       console.error("Error fetching tasks:", err);
@@ -445,7 +465,7 @@ export function TasksList() {
               message={`Error loading tasks: ${error?.message || 'Unknown error'}`}
               onRetry={() => refetchTasks()}
             />
-          ) : !tasksData || !tasksData.items || tasksData.items.length === 0 ? (
+          ) : !tasksData || (!tasksData.items && !tasksData.data) || ((tasksData.items?.length || 0) === 0 && (tasksData.data?.length || 0) === 0) ? (
             <EmptyState
               title="No tasks found"
               description="There are no tasks matching your filters."

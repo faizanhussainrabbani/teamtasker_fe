@@ -1,11 +1,13 @@
 'use client';
 
-import React, { createContext, useContext, ReactNode, useState } from 'react';
+import React, { createContext, useContext, ReactNode, useState, useEffect } from 'react';
 import { useQuery, useQueryClient, QueryObserverResult } from '@tanstack/react-query';
 import { getTasks } from '@/lib/api/endpoints/tasks';
 import { TasksQueryParams, TaskType } from '@/lib/api/types/tasks';
 import { parseApiError } from '@/lib/error-handling';
 import { taskKeys } from '@/lib/api/hooks/useTasks';
+import { isAuthenticated } from '@/lib/auth';
+import { setMockAuth, isDevelopment } from '@/lib/mock-auth';
 
 // Define the actual API response structure
 interface ApiTasksResponse {
@@ -108,6 +110,14 @@ export function TasksProvider({ children }: { children: ReactNode }) {
   // Track which task types have been requested - start with 'all' to reduce multiple API calls
   const [requestedTypes, setRequestedTypes] = useState<Set<TaskType>>(new Set(['all']));
 
+  // Set up mock authentication for development if not authenticated
+  useEffect(() => {
+    if (isDevelopment() && !isAuthenticated()) {
+      console.log('Setting up mock authentication for development');
+      setMockAuth();
+    }
+  }, []);
+
   // Track loading states for each task type
   const [loadingStates, setLoadingStates] = useState<TasksLoadingState>({
     all: false,
@@ -153,10 +163,18 @@ export function TasksProvider({ children }: { children: ReactNode }) {
             ...queryParams[type]
           };
 
+          console.log(`🔍 Fetching ${type} tasks with params:`, params);
           const result = await getTasks(params);
+          console.log(`✅ ${type} tasks result:`, result);
 
           // Update loading state
           setLoadingStates(prev => ({ ...prev, [type]: false }));
+
+          // Ensure we have a valid result
+          if (!result) {
+            console.error(`❌ No result returned for ${type} tasks`);
+            return createEmptyResponse();
+          }
 
           return result;
         } catch (error: any) {
@@ -314,9 +332,14 @@ export function TasksProvider({ children }: { children: ReactNode }) {
 
     try {
       // Make a direct API call with the provided parameters
-      console.log("Making API call to getTasks");
+      console.log("🔍 Making API call to getTasks with params:", params);
       const result = await getTasks(params);
-      console.log("API call to getTasks completed");
+      console.log("✅ API call to getTasks completed");
+      console.log("✅ Result:", result);
+      console.log("✅ Result has items:", !!result?.items);
+      console.log("✅ Result has data:", !!result?.data);
+      console.log("✅ Items length:", result?.items?.length || 0);
+      console.log("✅ Data length:", result?.data?.length || 0);
 
       // Cache the result
       queryClient.setQueryData(taskKeys.list({ ...params }), result);

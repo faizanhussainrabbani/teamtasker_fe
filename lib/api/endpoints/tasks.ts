@@ -14,21 +14,64 @@ const TASKS_ENDPOINT = API_CONFIG.endpoints.tasks;
  * Get all tasks with optional filtering
  */
 export const getTasks = async (params?: TasksQueryParams): Promise<TasksResponse> => {
-  console.log('getTasks called with params:', params);
-  console.log('API URL:', TASKS_ENDPOINT);
+  console.log('🔍 getTasks called with params:', params);
+  console.log('🔍 API URL:', `${apiClient.defaults.baseURL}${TASKS_ENDPOINT}`);
 
   try {
+    console.log('🔍 Making API request to:', `${apiClient.defaults.baseURL}${TASKS_ENDPOINT}`);
     const response = await apiClient.get(TASKS_ENDPOINT, { params });
-    console.log('getTasks response:', response.data);
+    console.log('✅ getTasks raw response:', response);
+    console.log('✅ getTasks response data:', response.data);
+
+    // Check if response is empty or undefined
+    if (!response.data) {
+      console.error('❌ Empty response data received');
+      return {
+        items: [],
+        data: [],
+        pageNumber: 1,
+        page: 1,
+        pageSize: 10,
+        limit: 10,
+        totalCount: 0,
+        total: 0,
+        totalPages: 0,
+        hasPreviousPage: false,
+        hasNextPage: false
+      };
+    }
 
     // Log the structure of the response to debug
-    console.log('Response structure:', {
+    console.log('🔍 Response structure:', {
+      type: typeof response.data,
+      isArray: Array.isArray(response.data),
       hasItems: !!response.data.items,
       hasData: !!response.data.data,
       itemsLength: response.data.items?.length || response.data.data?.length,
       hasPageInfo: !!response.data.pageNumber || !!response.data.page,
+      keys: Object.keys(response.data),
       fullStructure: JSON.stringify(response.data, null, 2)
     });
+
+    // Handle if response.data is an array directly
+    if (Array.isArray(response.data)) {
+      console.log('🔍 Response is a direct array, wrapping it');
+      const wrappedResponse = {
+        items: response.data,
+        data: response.data,
+        pageNumber: 1,
+        page: 1,
+        pageSize: response.data.length,
+        limit: response.data.length,
+        totalCount: response.data.length,
+        total: response.data.length,
+        totalPages: 1,
+        hasPreviousPage: false,
+        hasNextPage: false
+      };
+      console.log('✅ Wrapped array response:', wrappedResponse);
+      return wrappedResponse;
+    }
 
     // Normalize the response to match our expected format
     const normalizedResponse = {
@@ -49,7 +92,7 @@ export const getTasks = async (params?: TasksQueryParams): Promise<TasksResponse
       total: response.data.total || response.data.totalCount || 0
     };
 
-    console.log('Normalized response:', normalizedResponse);
+    console.log('✅ Normalized response:', normalizedResponse);
 
     return normalizedResponse;
   } catch (error) {
