@@ -7,7 +7,7 @@ import { TasksKanban } from "@/components/tasks/tasks-kanban"
 import { TasksCalendar } from "@/components/tasks/tasks-calendar"
 import { TasksProvider } from "@/context/tasks-context"
 import { LoadingStateProvider, useLoadingState } from "@/context/loading-state-context"
-import { LoadingState } from "@/components/ui/loading-state"
+import { LoadingState } from "@/components/ui/api-state"
 
 // Inner component that uses the loading state
 function TasksViewInner() {
