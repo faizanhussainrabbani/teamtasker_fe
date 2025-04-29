@@ -57,10 +57,7 @@ export function TasksCalendar() {
     let isMounted = true;
 
     const fetchTasks = async () => {
-      // Only set loading if we don't have data yet
-      if (!tasksData && isMounted) {
-        setLocalLoading(true);
-      }
+      setLocalLoading(true);
 
       try {
         // Use the ref to get the latest function without causing dependency issues
@@ -93,6 +90,7 @@ export function TasksCalendar() {
 
   // Refetch tasks function
   const refetchTasks = async () => {
+    setLocalLoading(true);
     try {
       // Use the ref to get the latest function without causing dependency issues
       const result = await getFilteredTasksRef.current({
@@ -101,8 +99,10 @@ export function TasksCalendar() {
         includeCreator: true,
       });
       setTasksData(result);
+      setLocalLoading(false);
     } catch (error) {
       console.error("Error refetching tasks:", error);
+      setLocalLoading(false);
     }
   };
 

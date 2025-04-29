@@ -136,10 +136,7 @@ export function TasksList() {
   const fetchTasks = React.useCallback(async () => {
     if (!isMounted.current) return;
 
-    // Only set loading state if we don't have data yet
-    if (!tasksData) {
-      setIsLoading(true);
-    }
+    setIsLoading(true);
     setIsError(false);
     setError(null);
 
@@ -171,7 +168,7 @@ export function TasksList() {
         setIsLoading(false);
       }
     }
-  }, [statusFilter, priorityFilter, debouncedSearch, currentPage, pageSize, tasksData]); // Removed getFilteredTasks from dependencies
+  }, [statusFilter, priorityFilter, debouncedSearch, currentPage, pageSize]); // Removed getFilteredTasks and tasksData from dependencies
 
   // Fetch tasks when filters change
   React.useEffect(() => {
