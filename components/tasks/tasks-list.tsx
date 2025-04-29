@@ -172,7 +172,16 @@ export function TasksList() {
 
   // Fetch tasks when filters change
   React.useEffect(() => {
+    // Reset loading state when component mounts
+    setIsLoading(true);
     fetchTasks();
+
+    // Cleanup function to reset state when component unmounts
+    return () => {
+      if (isMounted.current) {
+        setIsLoading(false);
+      }
+    };
   }, [fetchTasks]);
 
   // Debounce search input

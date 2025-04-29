@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, ReactNode, useState } from 'react';
+import React, { createContext, useContext, ReactNode, useState } from 'react';
 import { useQuery, useQueryClient, QueryObserverResult } from '@tanstack/react-query';
 import { getTasks } from '@/lib/api/endpoints/tasks';
 import { TasksQueryParams, TaskType } from '@/lib/api/types/tasks';
@@ -99,11 +99,14 @@ export function TasksProvider({ children }: { children: ReactNode }) {
   // Track loading states for each task type
   const [loadingStates, setLoadingStates] = useState<TasksLoadingState>({
     all: false,
-    my: true, // Start with my and team tasks loading
-    team: true,
+    my: false, // Don't start with loading state
+    team: false,
     created: false,
     unassigned: false
   });
+
+  // Use a ref to track if this is the initial mount
+  const isInitialMount = React.useRef(true);
 
   // Track current page for each task type
   const [currentPage, setCurrentPage] = useState<Record<TaskType, number>>({
@@ -169,6 +172,29 @@ export function TasksProvider({ children }: { children: ReactNode }) {
   const teamTasksQuery = createTaskQuery('team');
   const createdTasksQuery = createTaskQuery('created');
   const unassignedTasksQuery = createTaskQuery('unassigned');
+
+  // Handle component mount and unmount
+  React.useEffect(() => {
+    // On initial mount, reset loading states
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+    }
+
+    // Cleanup function to reset state when component unmounts
+    return () => {
+      // Reset the initial mount flag so next time it mounts it will reset states
+      isInitialMount.current = true;
+
+      // Reset loading states
+      setLoadingStates({
+        all: false,
+        my: false,
+        team: false,
+        created: false,
+        unassigned: false
+      });
+    };
+  }, []);
 
   // Function to get tasks by type with optional additional parameters
   const getTasksByType = async (
