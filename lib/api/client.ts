@@ -27,20 +27,35 @@ const apiClient = axios.create({
 });
 
 // Add request logging in development
-if (process.env.NODE_ENV === 'development') {
-  apiClient.interceptors.request.use(request => {
-    console.log('🚀 API Request:', request.method?.toUpperCase(), request.url);
-    return request;
-  });
+// Always enable logging for debugging
+apiClient.interceptors.request.use(request => {
+  // Log the full URL being used
+  const fullUrl = request.baseURL + request.url;
+  console.log('🚀 API Request:', request.method?.toUpperCase(), fullUrl);
+  console.log('Base URL:', request.baseURL);
+  console.log('Path:', request.url);
+  console.log('Params:', request.params);
+  console.log('Data:', request.data);
+  return request;
+});
 
-  apiClient.interceptors.response.use(response => {
-    console.log('✅ API Response:', response.status, response.config.method?.toUpperCase(), response.config.url);
-    return response;
-  }, error => {
-    console.error('❌ API Error:', parseApiError(error));
-    return Promise.reject(error);
-  });
-}
+apiClient.interceptors.response.use(response => {
+  console.log('✅ API Response:', response.status, response.config.method?.toUpperCase(), response.config.url);
+  return response;
+}, error => {
+  console.error('❌ API Error:', parseApiError(error));
+  if (error.response) {
+    console.error('Error response data:', error.response.data);
+    console.error('Error response status:', error.response.status);
+    console.error('Error response headers:', error.response.headers);
+  } else if (error.request) {
+    console.error('Error request:', error.request);
+  } else {
+    console.error('Error message:', error.message);
+  }
+  console.error('Error config:', error.config);
+  return Promise.reject(error);
+});
 
 // Request interceptor for adding auth token
 apiClient.interceptors.request.use(

@@ -1,9 +1,9 @@
 import apiClient from '../client';
 import { API_CONFIG } from '../config';
-import { 
-  Task, 
-  TaskCreateRequest, 
-  TaskUpdateRequest, 
+import {
+  Task,
+  TaskCreateRequest,
+  TaskUpdateRequest,
   TasksResponse,
   TasksQueryParams
 } from '../types/tasks';
@@ -14,8 +14,17 @@ const TASKS_ENDPOINT = API_CONFIG.endpoints.tasks;
  * Get all tasks with optional filtering
  */
 export const getTasks = async (params?: TasksQueryParams): Promise<TasksResponse> => {
-  const response = await apiClient.get(TASKS_ENDPOINT, { params });
-  return response.data;
+  console.log('getTasks called with params:', params);
+  console.log('API URL:', TASKS_ENDPOINT);
+
+  try {
+    const response = await apiClient.get(TASKS_ENDPOINT, { params });
+    console.log('getTasks response:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('getTasks error:', error);
+    throw error;
+  }
 };
 
 /**

@@ -93,8 +93,8 @@ const createEmptyResponse = (): ApiTasksResponse => ({
 export function TasksProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
 
-  // Track which task types have been requested - start with none to avoid initial double fetching
-  const [requestedTypes, setRequestedTypes] = useState<Set<TaskType>>(new Set([]));
+  // Track which task types have been requested - start with 'my' and 'team' to ensure initial fetching
+  const [requestedTypes, setRequestedTypes] = useState<Set<TaskType>>(new Set(['my', 'team']));
 
   // Track loading states for each task type
   const [loadingStates, setLoadingStates] = useState<TasksLoadingState>({
