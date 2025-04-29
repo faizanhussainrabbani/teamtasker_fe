@@ -130,7 +130,7 @@ export function TaskDialog({ task, open, onOpenChange }: TaskDialogProps) {
   }
 
   // Component for selecting a user directly
-  function AssignToUserSelect({ value, onChange }: { value: string, onChange: (value: string) => void }) {
+  function AssignToUserSelect({ value, onChange }: { value: string | undefined, onChange: (value: string | undefined) => void }) {
     // Fetch users
     const { data: usersData, isLoading: usersLoading } = useUsers();
     const users = usersData?.items || sampleTeamMembers;
@@ -139,14 +139,14 @@ export function TaskDialog({ task, open, onOpenChange }: TaskDialogProps) {
       <div className="space-y-2">
         <Label htmlFor="assignee">Assign to User</Label>
         <Select
-          value={value}
-          onValueChange={onChange}
+          value={value || "unassigned"}
+          onValueChange={(val) => onChange(val === "unassigned" ? undefined : val)}
         >
           <SelectTrigger id="assignee">
             <SelectValue placeholder="Select user" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Unassigned</SelectItem>
+            <SelectItem value="unassigned">Unassigned</SelectItem>
             {users.map((user) => (
               <SelectItem key={user.id} value={user.id.toString()}>
                 <div className="flex items-center gap-2">
@@ -183,9 +183,9 @@ export function TaskDialog({ task, open, onOpenChange }: TaskDialogProps) {
         <div className="space-y-2">
           <Label htmlFor="team">Select Team</Label>
           <Select
-            value={selectedTeam?.toString() || ""}
+            value={selectedTeam?.toString() || "no-team"}
             onValueChange={(value) => {
-              setSelectedTeam(value ? parseInt(value) : undefined);
+              setSelectedTeam(value !== "no-team" ? parseInt(value) : undefined);
               // Reset team member selection when team changes
               onChange(undefined);
             }}
@@ -194,7 +194,7 @@ export function TaskDialog({ task, open, onOpenChange }: TaskDialogProps) {
               <SelectValue placeholder="Select team" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">No team</SelectItem>
+              <SelectItem value="no-team">No team</SelectItem>
               {teams.map((team) => (
                 <SelectItem key={team.id} value={team.id.toString()}>
                   {team.name}
@@ -209,15 +209,15 @@ export function TaskDialog({ task, open, onOpenChange }: TaskDialogProps) {
           <div className="space-y-2">
             <Label htmlFor="teamMember">Select Team Member</Label>
             <Select
-              value={value?.toString() || ""}
-              onValueChange={(value) => onChange(value ? parseInt(value) : undefined)}
+              value={value?.toString() || "unassigned"}
+              onValueChange={(value) => onChange(value !== "unassigned" ? parseInt(value) : undefined)}
               disabled={teamDetailsLoading || teamMembers.length === 0}
             >
               <SelectTrigger id="teamMember">
                 <SelectValue placeholder="Select team member" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Unassigned</SelectItem>
+                <SelectItem value="unassigned">Unassigned</SelectItem>
                 {teamMembers.map((member) => (
                   <SelectItem key={member.id} value={member.id.toString()}>
                     <div className="flex items-center gap-2">
