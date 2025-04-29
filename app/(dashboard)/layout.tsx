@@ -4,6 +4,7 @@ import { useAuth } from '@/context/auth-context';
 import { AppSidebar } from '@/components/app-sidebar';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { LoadingStateProvider } from '@/context/loading-state-context';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   // Use state to ensure hydration consistency
@@ -27,11 +28,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const showSidebar = mounted && isAuthenticated;
 
   return (
-    <div className="flex h-screen w-full overflow-hidden">
-      {showSidebar ? <AppSidebar className="shrink-0" /> : null}
-      <main className="flex-1 w-full overflow-hidden">
-        {children}
-      </main>
-    </div>
+    <LoadingStateProvider>
+      <div className="flex h-screen w-full overflow-hidden">
+        {showSidebar ? <AppSidebar className="shrink-0" /> : null}
+        <main className="flex-1 w-full overflow-hidden">
+          {children}
+        </main>
+      </div>
+    </LoadingStateProvider>
   );
 }
