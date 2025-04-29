@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import { CheckCircle2, Circle, Clock, AlertCircle, MoreHorizontal, ChevronRight } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -63,9 +63,14 @@ export function MyTasksCard({ isLoading: cardIsLoading }: MyTasksCardProps) {
   // Function to refresh my tasks
   const refreshMyTasks = () => refetchType('my');
 
-  // Ensure my tasks are loaded
+  // Use a ref to track if we've already fetched - defined at component level
+  const hasFetched = React.useRef(false);
+
+  // Ensure my tasks are loaded - but only once
   useEffect(() => {
-    if (!myTasks) {
+    if (!myTasks && !hasFetched.current) {
+      console.log("MyTasksCard: Fetching my tasks");
+      hasFetched.current = true;
       getTasksByType('my');
     }
   }, [myTasks, getTasksByType]);

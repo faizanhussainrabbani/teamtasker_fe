@@ -4,7 +4,6 @@ import { useAuth } from '@/context/auth-context';
 import { AppSidebar } from '@/components/app-sidebar';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { LoadingStateProvider } from '@/context/loading-state-context';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   // Use state to ensure hydration consistency
@@ -15,26 +14,27 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   // Only run on client-side after hydration
   useEffect(() => {
     setMounted(true);
-  }, []);
+    console.log("Dashboard layout mounted, auth state:", { isAuthenticated, isLoading });
+  }, [isAuthenticated, isLoading]);
 
   // Redirect to login if not authenticated
   useEffect(() => {
     if (mounted && !isLoading && !isAuthenticated) {
+      console.log("Not authenticated, redirecting to login");
       router.push('/login');
     }
   }, [mounted, isAuthenticated, isLoading, router]);
 
-  // Only show the sidebar if the user is authenticated
-  const showSidebar = mounted && isAuthenticated;
+  // For development purposes, always show the sidebar
+  // In production, you would use: const showSidebar = mounted && isAuthenticated;
+  const showSidebar = true; // Always show sidebar for now
 
   return (
-    <LoadingStateProvider>
-      <div className="flex h-screen w-full overflow-hidden">
-        {showSidebar ? <AppSidebar className="shrink-0" /> : null}
-        <main className="flex-1 w-full overflow-hidden">
-          {children}
-        </main>
-      </div>
-    </LoadingStateProvider>
+    <div className="flex h-screen w-full overflow-hidden">
+      {showSidebar ? <AppSidebar className="shrink-0" /> : null}
+      <main className="flex-1 w-full overflow-hidden">
+        {children}
+      </main>
+    </div>
   );
 }

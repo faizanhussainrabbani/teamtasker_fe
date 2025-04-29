@@ -29,8 +29,11 @@ export const useTeamTasks = () => {
   return useQuery({
     queryKey: teamKeys.tasks(),
     queryFn: () => {
+      console.log("useTeamTasks: Running query function");
+
       // Wait for both data sources to be available
       if (!usersQuery.data || !teamTasks) {
+        console.log("useTeamTasks: Missing data, returning empty array");
         return [];
       }
 
@@ -114,6 +117,7 @@ export const useTeamTasks = () => {
       console.error('Error fetching team tasks:', parseApiError(error));
     },
     refetchOnWindowFocus: false,
-    refetchOnMount: true,
+    refetchOnMount: false, // Don't refetch on mount to avoid duplicate requests
+    staleTime: 60000, // Consider data fresh for 1 minute
   });
 };

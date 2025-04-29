@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -43,9 +43,14 @@ export function TeamTasksCard({ isLoading: cardIsLoading }: TeamTasksCardProps) 
     refetch
   } = useTeamTasks();
 
-  // Ensure team tasks are loaded
+  // Use a ref to track if we've already fetched - defined at component level
+  const hasFetched = React.useRef(false);
+
+  // Ensure team tasks are loaded - but only once
   useEffect(() => {
-    if (!teamTasks) {
+    if (!teamTasks && !hasFetched.current) {
+      console.log("TeamTasksCard: Fetching team tasks");
+      hasFetched.current = true;
       getTasksByType('team');
     }
   }, [teamTasks, getTasksByType]);

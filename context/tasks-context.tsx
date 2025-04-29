@@ -93,8 +93,8 @@ const createEmptyResponse = (): ApiTasksResponse => ({
 export function TasksProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
 
-  // Track which task types have been requested
-  const [requestedTypes, setRequestedTypes] = useState<Set<TaskType>>(new Set(['my', 'team']));
+  // Track which task types have been requested - start with none to avoid initial double fetching
+  const [requestedTypes, setRequestedTypes] = useState<Set<TaskType>>(new Set([]));
 
   // Track loading states for each task type
   const [loadingStates, setLoadingStates] = useState<TasksLoadingState>({
@@ -186,8 +186,8 @@ export function TasksProvider({ children }: { children: ReactNode }) {
       unassigned: false
     });
 
-    // Reset requested types to initial state
-    setRequestedTypes(new Set(['my', 'team']));
+    // Don't reset requested types to avoid duplicate fetches
+    // setRequestedTypes(new Set(['my', 'team']));
 
     // Reset the initial mount flag
     isInitialMount.current = false;
@@ -283,6 +283,20 @@ export function TasksProvider({ children }: { children: ReactNode }) {
     // Create a flag to track if this operation is still active
     let isActive = true;
 
+    // Generate a cache key based on the params
+    const cacheKey = JSON.stringify(params);
+
+    // Check if we have this data in the cache
+    const cachedData = queryClient.getQueryData(
+      taskKeys.list({ ...params })
+    ) as ApiTasksResponse | undefined;
+
+    // If we have cached data and it's not stale, return it
+    if (cachedData) {
+      console.log("Using cached data for params:", params);
+      return cachedData;
+    }
+
     // Set loading state for 'all' type
     setLoadingStates(prev => ({ ...prev, all: true }));
 
@@ -291,6 +305,9 @@ export function TasksProvider({ children }: { children: ReactNode }) {
       console.log("Making API call to getTasks");
       const result = await getTasks(params);
       console.log("API call to getTasks completed");
+
+      // Cache the result
+      queryClient.setQueryData(taskKeys.list({ ...params }), result);
 
       // Only update state if operation is still active
       if (isActive) {

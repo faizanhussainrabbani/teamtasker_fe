@@ -35,7 +35,6 @@ import { LoadingState, ErrorState, EmptyState } from "@/components/ui/api-state"
 import { useDeleteTask, useUpdateTaskStatus } from "@/lib/api/hooks/useTasks"
 import { TaskStatus, TaskPriority } from "@/lib/api/types/tasks"
 import { useDashboardTasks } from "@/context/tasks-context"
-import { useLoadingState } from "@/context/loading-state-context"
 import {
   Pagination,
   PaginationContent,
@@ -93,8 +92,7 @@ export function TasksList() {
     error: contextErrorData
   } = useDashboardTasks();
 
-  // Use the loading state context
-  const { isLoading: globalIsLoading, startLoading, stopLoading } = useLoadingState();
+  // No global loading state
 
   // State for the filtered tasks data
   const [tasksData, setTasksData] = useState<any>(null);
@@ -117,8 +115,8 @@ export function TasksList() {
   React.useEffect(() => {
     console.log("TasksList component mounted");
 
-    // Reset loading state on mount
-    stopLoading();
+    // Mark component as mounted
+    isMounted.current = true;
 
     // Close menus when clicking outside
     const handleClickOutside = (event) => {
@@ -140,15 +138,12 @@ export function TasksList() {
       // Mark component as unmounted
       isMounted.current = false;
 
-      // Reset loading state on unmount
-      stopLoading();
-
       // Remove event listener
       document.removeEventListener('click', handleClickOutside);
     };
-  }, [stopLoading]);
+  }, []);
 
-  // Function to fetch tasks
+  // Function to fetch tasks with caching
   const fetchTasks = React.useCallback(async () => {
     console.log("fetchTasks called");
 
@@ -160,26 +155,43 @@ export function TasksList() {
     // Create a flag to track if this operation is still active
     let isActive = true;
 
-    // Set both local and global loading states
-    setIsLoading(true);
-    startLoading(); // Start global loading
+    // Build API parameters
+    const params = {
+      status: statusFilter !== "all" ? statusFilter as TaskStatus : undefined,
+      priority: priorityFilter !== "all" ? priorityFilter as TaskPriority : undefined,
+      search: debouncedSearch || undefined,
+      pageNumber: currentPage,
+      pageSize: pageSize,
+      includeTags: true,
+      includeAssignee: true,
+      includeCreator: true,
+    };
 
+    // Create a cache key for this request
+    const cacheKey = JSON.stringify(params);
+
+    // Check if we have a cached result for this exact query
+    const cachedResult = localStorage.getItem(`tasks_cache_${cacheKey}`);
+    const cacheTimestamp = localStorage.getItem(`tasks_cache_timestamp_${cacheKey}`);
+
+    // If we have a cached result that's less than 30 seconds old, use it
+    if (cachedResult && cacheTimestamp) {
+      const age = Date.now() - parseInt(cacheTimestamp);
+      if (age < 30000) { // 30 seconds
+        console.log("Using cached result for", params);
+        if (isMounted.current && isActive) {
+          setTasksData(JSON.parse(cachedResult));
+          return;
+        }
+      }
+    }
+
+    // Set local loading state
+    setIsLoading(true);
     setIsError(false);
     setError(null);
 
     try {
-      // Build API parameters
-      const params = {
-        status: statusFilter !== "all" ? statusFilter as TaskStatus : undefined,
-        priority: priorityFilter !== "all" ? priorityFilter as TaskPriority : undefined,
-        search: debouncedSearch || undefined,
-        pageNumber: currentPage,
-        pageSize: pageSize,
-        includeTags: true,
-        includeAssignee: true,
-        includeCreator: true,
-      };
-
       console.log("Fetching tasks with params:", params);
 
       // Use the ref to get the latest function without causing dependency issues
@@ -187,12 +199,17 @@ export function TasksList() {
 
       console.log("Fetch tasks result received");
 
+      // Cache the result
+      if (result) {
+        localStorage.setItem(`tasks_cache_${cacheKey}`, JSON.stringify(result));
+        localStorage.setItem(`tasks_cache_timestamp_${cacheKey}`, Date.now().toString());
+      }
+
       // Only update state if component is still mounted and operation is active
       if (isMounted.current && isActive) {
         console.log("Setting tasks data and resetting loading state");
         setTasksData(result);
         setIsLoading(false);
-        stopLoading(); // Stop global loading
       }
     } catch (err) {
       console.error("Error fetching tasks:", err);
@@ -201,7 +218,6 @@ export function TasksList() {
         setIsError(true);
         setError(err);
         setIsLoading(false);
-        stopLoading(); // Stop global loading even on error
       }
     }
 
@@ -210,7 +226,6 @@ export function TasksList() {
       if (isMounted.current && isActive) {
         console.log("Final loading state reset");
         setIsLoading(false);
-        stopLoading(); // Final stop of global loading
       }
     }, 100);
 
@@ -218,20 +233,24 @@ export function TasksList() {
     return () => {
       console.log("fetchTasks cleanup");
       isActive = false;
-      stopLoading(); // Ensure global loading is stopped on cleanup
     };
-  }, [statusFilter, priorityFilter, debouncedSearch, currentPage, pageSize, startLoading, stopLoading]); // Removed getFilteredTasks and tasksData from dependencies
+  }, [statusFilter, priorityFilter, debouncedSearch, currentPage, pageSize]); // Removed getFilteredTasks and tasksData from dependencies
 
   // Fetch tasks when filters change or component mounts
   React.useEffect(() => {
     console.log("TasksList useEffect triggered");
 
+    // Skip if component is not mounted
+    if (!isMounted.current) {
+      console.log("Component not mounted, skipping fetch");
+      return;
+    }
+
     // Create a flag to track if this effect is still active
     let isActive = true;
 
-    // Reset loading states when component mounts
+    // Reset loading state when component mounts
     setIsLoading(true);
-    startLoading(); // Start global loading
 
     // Use an async function to handle the fetch
     const loadData = async () => {
@@ -246,7 +265,6 @@ export function TasksList() {
         if (isActive && isMounted.current) {
           console.log("TasksList setting loading to false");
           setIsLoading(false);
-          stopLoading(); // Stop global loading
         }
       }
     };
@@ -265,10 +283,9 @@ export function TasksList() {
       if (isMounted.current) {
         console.log("TasksList cleanup setting loading to false");
         setIsLoading(false);
-        stopLoading(); // Stop global loading on cleanup
       }
     };
-  }, [fetchTasks, startLoading, stopLoading]);
+  }, [fetchTasks]);
 
   // Debounce search input
   React.useEffect(() => {
@@ -305,9 +322,8 @@ export function TasksList() {
     // Create a flag to track if this operation is still active
     let isActive = true;
 
-    // Set both local and global loading states
+    // Set local loading state
     setIsLoading(true);
-    startLoading(); // Start global loading
 
     try {
       console.log("refetchTasks calling fetchTasks");
@@ -320,7 +336,6 @@ export function TasksList() {
       if (isActive && isMounted.current) {
         console.log("refetchTasks setting loading to false");
         setIsLoading(false);
-        stopLoading(); // Stop global loading
       }
     }
 
@@ -328,9 +343,8 @@ export function TasksList() {
     return () => {
       console.log("refetchTasks cleanup");
       isActive = false;
-      stopLoading(); // Ensure global loading is stopped on cleanup
     };
-  }, [fetchTasks, startLoading, stopLoading]);
+  }, [fetchTasks]);
 
   const handleDeleteTask = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
