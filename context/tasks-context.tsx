@@ -192,6 +192,10 @@ export function TasksProvider({ children }: { children: ReactNode }) {
     // Reset the initial mount flag
     isInitialMount.current = false;
 
+    // Force immediate reset of any pending queries
+    queryClient.cancelQueries({ queryKey: taskKeys.all });
+    queryClient.resetQueries({ queryKey: taskKeys.all });
+
     // Cleanup function to reset state when component unmounts
     return () => {
       console.log("TasksProvider unmounted");
@@ -213,6 +217,10 @@ export function TasksProvider({ children }: { children: ReactNode }) {
 
       // Invalidate all task queries to force a refetch when the component is remounted
       queryClient.invalidateQueries({ queryKey: taskKeys.all });
+      queryClient.resetQueries({ queryKey: taskKeys.all });
+
+      // Clear the query cache for tasks
+      queryClient.removeQueries({ queryKey: taskKeys.all });
     };
   }, [queryClient]);
 
@@ -280,17 +288,24 @@ export function TasksProvider({ children }: { children: ReactNode }) {
 
     try {
       // Make a direct API call with the provided parameters
+      console.log("Making API call to getTasks");
       const result = await getTasks(params);
+      console.log("API call to getTasks completed");
 
       // Only update state if operation is still active
       if (isActive) {
+        console.log("Setting loading state to false");
         setLoadingStates(prev => ({ ...prev, all: false }));
         return result;
       }
+      console.log("Operation no longer active, not updating state");
       return undefined;
     } catch (error: any) {
+      console.error("Error in getFilteredTasks:", error);
+
       // Only update state if operation is still active
       if (isActive) {
+        console.log("Setting loading state to false after error");
         setLoadingStates(prev => ({ ...prev, all: false }));
         if (error.response?.status === 404) {
           return createEmptyResponse();
@@ -301,13 +316,16 @@ export function TasksProvider({ children }: { children: ReactNode }) {
       // Ensure loading state is reset even if there's an error
       setTimeout(() => {
         if (isActive) {
+          console.log("Final reset of loading state");
           setLoadingStates(prev => ({ ...prev, all: false }));
         }
-      }, 0);
+      }, 100);
 
       // Return a cleanup function
       return () => {
+        console.log("getFilteredTasks cleanup");
         isActive = false;
+        setLoadingStates(prev => ({ ...prev, all: false }));
       };
     }
   };

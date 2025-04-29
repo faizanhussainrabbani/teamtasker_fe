@@ -1,24 +1,30 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { TasksList } from "@/components/tasks/tasks-list"
 import { TasksKanban } from "@/components/tasks/tasks-kanban"
 import { TasksCalendar } from "@/components/tasks/tasks-calendar"
 import { TasksProvider } from "@/context/tasks-context"
+import { LoadingStateProvider, useLoadingState } from "@/context/loading-state-context"
+import { LoadingState } from "@/components/ui/loading-state"
 
-export function TasksView() {
+// Inner component that uses the loading state
+function TasksViewInner() {
   // Use state to track the active tab
   const [activeTab, setActiveTab] = useState("list");
+  const { resetLoadingState } = useLoadingState();
 
-  // Log when the component mounts and unmounts
-  React.useEffect(() => {
-    console.log("TasksView mounted");
+  // Reset loading state when component mounts or unmounts
+  useEffect(() => {
+    console.log("TasksViewInner mounted");
+    resetLoadingState();
 
     return () => {
-      console.log("TasksView unmounted");
+      console.log("TasksViewInner unmounted");
+      resetLoadingState();
     };
-  }, []);
+  }, [resetLoadingState]);
 
   return (
     <TasksProvider>
@@ -28,6 +34,8 @@ export function TasksView() {
         onValueChange={(value) => {
           console.log("Tab changed to:", value);
           setActiveTab(value);
+          // Reset loading state when changing tabs
+          resetLoadingState();
         }}
       >
         <TabsList>
@@ -56,5 +64,38 @@ export function TasksView() {
         )}
       </Tabs>
     </TasksProvider>
+  )
+}
+
+// Main component that provides the loading state context
+export function TasksView() {
+  // Reset loading state when navigating to this page
+  useEffect(() => {
+    console.log("TasksView mounted");
+
+    return () => {
+      console.log("TasksView unmounted");
+    };
+  }, []);
+
+  return (
+    <LoadingStateProvider>
+      <TasksViewContent />
+    </LoadingStateProvider>
+  )
+}
+
+// Component that shows loading state or content
+function TasksViewContent() {
+  const { isLoading } = useLoadingState();
+
+  return (
+    <>
+      {isLoading ? (
+        <LoadingState message="Loading tasks..." />
+      ) : (
+        <TasksViewInner />
+      )}
+    </>
   )
 }
