@@ -136,6 +136,7 @@ export function TasksList() {
   const fetchTasks = React.useCallback(async () => {
     if (!isMounted.current) return;
 
+    // Set loading state
     setIsLoading(true);
     setIsError(false);
     setError(null);
@@ -156,6 +157,7 @@ export function TasksList() {
       // Use the ref to get the latest function without causing dependency issues
       const result = await getFilteredTasksRef.current(params);
 
+      // Only update state if component is still mounted
       if (isMounted.current) {
         setTasksData(result);
         setIsLoading(false);
@@ -168,16 +170,48 @@ export function TasksList() {
         setIsLoading(false);
       }
     }
+
+    // Return a promise that resolves when the fetch is complete
+    return new Promise<void>((resolve) => {
+      // Use setTimeout to ensure the loading state is properly updated
+      setTimeout(() => {
+        if (isMounted.current) {
+          setIsLoading(false);
+        }
+        resolve();
+      }, 0);
+    });
   }, [statusFilter, priorityFilter, debouncedSearch, currentPage, pageSize]); // Removed getFilteredTasks and tasksData from dependencies
 
-  // Fetch tasks when filters change
+  // Fetch tasks when filters change or component mounts
   React.useEffect(() => {
+    // Create a flag to track if this effect is still active
+    let isActive = true;
+
     // Reset loading state when component mounts
     setIsLoading(true);
-    fetchTasks();
 
-    // Cleanup function to reset state when component unmounts
+    // Use an async function to handle the fetch
+    const loadData = async () => {
+      try {
+        await fetchTasks();
+      } finally {
+        // Only update state if the effect is still active and component is mounted
+        if (isActive && isMounted.current) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    // Call the async function
+    loadData();
+
+    // Cleanup function to reset state when component unmounts or dependencies change
     return () => {
+      // Mark this effect as inactive
+      isActive = false;
+
+      // Reset loading state if component is still mounted
       if (isMounted.current) {
         setIsLoading(false);
       }
@@ -213,8 +247,15 @@ export function TasksList() {
   const updateTaskStatusMutation = useUpdateTaskStatus();
 
   // Refetch tasks after mutations - use the fetchTasks function
-  const refetchTasks = React.useCallback(() => {
-    fetchTasks();
+  const refetchTasks = React.useCallback(async () => {
+    setIsLoading(true);
+    try {
+      await fetchTasks();
+    } finally {
+      if (isMounted.current) {
+        setIsLoading(false);
+      }
+    }
   }, [fetchTasks]);
 
   const handleDeleteTask = async (id: string, e: React.MouseEvent) => {

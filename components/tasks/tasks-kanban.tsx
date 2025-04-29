@@ -54,9 +54,13 @@ export function TasksKanban() {
   // Fetch tasks on component mount
   useEffect(() => {
     let isMounted = true;
+    let isActive = true;
 
     const fetchTasks = async () => {
-      setLocalLoading(true);
+      // Only set loading state if component is still mounted
+      if (isMounted) {
+        setLocalLoading(true);
+      }
 
       try {
         // Use the ref to get the latest function without causing dependency issues
@@ -66,13 +70,13 @@ export function TasksKanban() {
           includeCreator: true,
         });
 
-        // Only update state if component is still mounted
-        if (isMounted) {
+        // Only update state if component is still mounted and effect is active
+        if (isMounted && isActive) {
           setTasksData(result);
           setLocalLoading(false);
         }
       } catch (error) {
-        if (isMounted) {
+        if (isMounted && isActive) {
           console.error("Error fetching tasks:", error);
           setLocalLoading(false);
         }
@@ -81,18 +85,27 @@ export function TasksKanban() {
 
     fetchTasks();
 
-    // Cleanup function to prevent state updates after unmount
+    // Cleanup function to prevent state updates after unmount or when dependencies change
     return () => {
+      isActive = false;
       isMounted = false;
+
+      // Reset loading state
+      setLocalLoading(false);
     };
-  }, []); // Remove getFilteredTasks from dependencies
+  }, []); // Empty dependency array to run only on mount
 
   // Task status update mutation
   const updateTaskStatus = useUpdateTaskStatus()
 
-  // Refetch tasks function
+  // Refetch tasks function with better loading state management
   const refetchTasks = async () => {
+    // Create a flag to track if this operation is still active
+    let isActive = true;
+
+    // Set loading state
     setLocalLoading(true);
+
     try {
       // Use the ref to get the latest function without causing dependency issues
       const result = await getFilteredTasksRef.current({
@@ -100,12 +113,26 @@ export function TasksKanban() {
         includeAssignee: true,
         includeCreator: true,
       });
-      setTasksData(result);
-      setLocalLoading(false);
+
+      // Only update state if operation is still active
+      if (isActive) {
+        setTasksData(result);
+        setLocalLoading(false);
+      }
     } catch (error) {
       console.error("Error refetching tasks:", error);
-      setLocalLoading(false);
+
+      // Only update state if operation is still active
+      if (isActive) {
+        setLocalLoading(false);
+      }
     }
+
+    // Return a cleanup function that can be called if needed
+    return () => {
+      isActive = false;
+      setLocalLoading(false);
+    };
   };
 
   // Filter tasks by status

@@ -178,6 +178,18 @@ export function TasksProvider({ children }: { children: ReactNode }) {
     // On initial mount, reset loading states
     if (isInitialMount.current) {
       isInitialMount.current = false;
+
+      // Reset loading states on mount
+      setLoadingStates({
+        all: false,
+        my: false,
+        team: false,
+        created: false,
+        unassigned: false
+      });
+
+      // Reset requested types to initial state
+      setRequestedTypes(new Set(['my', 'team']));
     }
 
     // Cleanup function to reset state when component unmounts
@@ -193,8 +205,11 @@ export function TasksProvider({ children }: { children: ReactNode }) {
         created: false,
         unassigned: false
       });
+
+      // Cancel any pending queries
+      queryClient.cancelQueries({ queryKey: taskKeys.all });
     };
-  }, []);
+  }, [queryClient]);
 
   // Function to get tasks by type with optional additional parameters
   const getTasksByType = async (

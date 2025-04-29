@@ -55,9 +55,13 @@ export function TasksCalendar() {
   // Fetch tasks on component mount
   useEffect(() => {
     let isMounted = true;
+    let isActive = true;
 
     const fetchTasks = async () => {
-      setLocalLoading(true);
+      // Only set loading state if component is still mounted
+      if (isMounted) {
+        setLocalLoading(true);
+      }
 
       try {
         // Use the ref to get the latest function without causing dependency issues
@@ -67,13 +71,13 @@ export function TasksCalendar() {
           includeCreator: true,
         });
 
-        // Only update state if component is still mounted
-        if (isMounted) {
+        // Only update state if component is still mounted and effect is active
+        if (isMounted && isActive) {
           setTasksData(result);
           setLocalLoading(false);
         }
       } catch (error) {
-        if (isMounted) {
+        if (isMounted && isActive) {
           console.error("Error fetching tasks:", error);
           setLocalLoading(false);
         }
@@ -82,15 +86,24 @@ export function TasksCalendar() {
 
     fetchTasks();
 
-    // Cleanup function to prevent state updates after unmount
+    // Cleanup function to prevent state updates after unmount or when dependencies change
     return () => {
+      isActive = false;
       isMounted = false;
-    };
-  }, []); // Remove getFilteredTasks from dependencies
 
-  // Refetch tasks function
+      // Reset loading state
+      setLocalLoading(false);
+    };
+  }, []); // Empty dependency array to run only on mount
+
+  // Refetch tasks function with better loading state management
   const refetchTasks = async () => {
+    // Create a flag to track if this operation is still active
+    let isActive = true;
+
+    // Set loading state
     setLocalLoading(true);
+
     try {
       // Use the ref to get the latest function without causing dependency issues
       const result = await getFilteredTasksRef.current({
@@ -98,12 +111,26 @@ export function TasksCalendar() {
         includeAssignee: true,
         includeCreator: true,
       });
-      setTasksData(result);
-      setLocalLoading(false);
+
+      // Only update state if operation is still active
+      if (isActive) {
+        setTasksData(result);
+        setLocalLoading(false);
+      }
     } catch (error) {
       console.error("Error refetching tasks:", error);
-      setLocalLoading(false);
+
+      // Only update state if operation is still active
+      if (isActive) {
+        setLocalLoading(false);
+      }
     }
+
+    // Return a cleanup function that can be called if needed
+    return () => {
+      isActive = false;
+      setLocalLoading(false);
+    };
   };
 
   const openTaskDialog = (task: any) => {
