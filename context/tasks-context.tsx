@@ -16,6 +16,12 @@ interface ApiTasksResponse {
   totalPages: number;
   hasPreviousPage: boolean;
   hasNextPage: boolean;
+
+  // Also support the PaginatedResponse structure from the API
+  data?: any[];
+  page?: number;
+  limit?: number;
+  total?: number;
 }
 
 // Define loading states for each task type
@@ -83,7 +89,13 @@ const createEmptyResponse = (): ApiTasksResponse => ({
   totalCount: 0,
   totalPages: 0,
   hasPreviousPage: false,
-  hasNextPage: false
+  hasNextPage: false,
+
+  // Also include the PaginatedResponse format
+  data: [],
+  page: 1,
+  limit: 10,
+  total: 0
 });
 
 /**
@@ -93,8 +105,8 @@ const createEmptyResponse = (): ApiTasksResponse => ({
 export function TasksProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
 
-  // Track which task types have been requested - start with 'my' and 'team' to ensure initial fetching
-  const [requestedTypes, setRequestedTypes] = useState<Set<TaskType>>(new Set(['my', 'team']));
+  // Track which task types have been requested - start with 'all' to reduce multiple API calls
+  const [requestedTypes, setRequestedTypes] = useState<Set<TaskType>>(new Set(['all']));
 
   // Track loading states for each task type
   const [loadingStates, setLoadingStates] = useState<TasksLoadingState>({

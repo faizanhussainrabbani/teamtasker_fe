@@ -445,7 +445,7 @@ export function TasksList() {
               message={`Error loading tasks: ${error?.message || 'Unknown error'}`}
               onRetry={() => refetchTasks()}
             />
-          ) : !tasksData || tasksData.items.length === 0 ? (
+          ) : !tasksData || !tasksData.items || tasksData.items.length === 0 ? (
             <EmptyState
               title="No tasks found"
               description="There are no tasks matching your filters."
@@ -459,7 +459,7 @@ export function TasksList() {
           ) : (
             <div className="space-y-4">
               <div className="space-y-2">
-                {tasksData.items.map((task) => (
+                {(tasksData.items || tasksData.data || []).map((task) => (
                 <div
                   key={task.id}
                   className="flex items-center justify-between rounded-lg border p-3 text-sm cursor-pointer hover:bg-muted/50"
@@ -591,7 +591,7 @@ export function TasksList() {
               </div>
 
               {/* Pagination */}
-              {tasksData && tasksData.totalPages > 1 && (
+              {tasksData && (tasksData.totalPages > 1 || (tasksData.total && tasksData.limit && Math.ceil(tasksData.total / tasksData.limit) > 1)) && (
                 <div className="mt-4">
                   <Pagination>
                     <PaginationContent>
@@ -608,18 +608,19 @@ export function TasksList() {
                       </PaginationItem>
 
                       {/* Page numbers */}
-                      {Array.from({ length: Math.min(5, tasksData.totalPages) }, (_, i) => {
+                      {Array.from({ length: Math.min(5, tasksData.totalPages || Math.ceil((tasksData.total || 0) / (tasksData.limit || 10))) }, (_, i) => {
                         // Show pages around current page
                         let pageNum;
-                        if (tasksData.totalPages <= 5) {
+                        const totalPages = tasksData.totalPages || Math.ceil((tasksData.total || 0) / (tasksData.limit || 10));
+                        if (totalPages <= 5) {
                           // If 5 or fewer pages, show all
                           pageNum = i + 1;
                         } else if (currentPage <= 3) {
                           // If near start, show first 5 pages
                           pageNum = i + 1;
-                        } else if (currentPage >= tasksData.totalPages - 2) {
+                        } else if (currentPage >= totalPages - 2) {
                           // If near end, show last 5 pages
-                          pageNum = tasksData.totalPages - 4 + i;
+                          pageNum = totalPages - 4 + i;
                         } else {
                           // Otherwise show 2 before and 2 after current page
                           pageNum = currentPage - 2 + i;
@@ -647,9 +648,10 @@ export function TasksList() {
                           href="#"
                           onClick={(e) => {
                             e.preventDefault();
-                            if (currentPage < tasksData.totalPages) handlePageChange(currentPage + 1);
+                            const totalPages = tasksData.totalPages || Math.ceil((tasksData.total || 0) / (tasksData.limit || 10));
+                            if (currentPage < totalPages) handlePageChange(currentPage + 1);
                           }}
-                          className={currentPage === tasksData.totalPages ? "pointer-events-none opacity-50" : ""}
+                          className={currentPage === (tasksData.totalPages || Math.ceil((tasksData.total || 0) / (tasksData.limit || 10))) ? "pointer-events-none opacity-50" : ""}
                         />
                       </PaginationItem>
                     </PaginationContent>
