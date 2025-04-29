@@ -134,7 +134,15 @@ export function TasksList() {
 
   // Function to fetch tasks
   const fetchTasks = React.useCallback(async () => {
-    if (!isMounted.current) return;
+    console.log("fetchTasks called");
+
+    if (!isMounted.current) {
+      console.log("Component not mounted, skipping fetchTasks");
+      return;
+    }
+
+    // Create a flag to track if this operation is still active
+    let isActive = true;
 
     // Set loading state
     setIsLoading(true);
@@ -154,37 +162,48 @@ export function TasksList() {
         includeCreator: true,
       };
 
+      console.log("Fetching tasks with params:", params);
+
       // Use the ref to get the latest function without causing dependency issues
       const result = await getFilteredTasksRef.current(params);
 
-      // Only update state if component is still mounted
-      if (isMounted.current) {
+      console.log("Fetch tasks result received");
+
+      // Only update state if component is still mounted and operation is active
+      if (isMounted.current && isActive) {
+        console.log("Setting tasks data and resetting loading state");
         setTasksData(result);
         setIsLoading(false);
       }
     } catch (err) {
-      if (isMounted.current) {
-        console.error("Error fetching tasks:", err);
+      console.error("Error fetching tasks:", err);
+
+      if (isMounted.current && isActive) {
         setIsError(true);
         setError(err);
         setIsLoading(false);
       }
     }
 
-    // Return a promise that resolves when the fetch is complete
-    return new Promise<void>((resolve) => {
-      // Use setTimeout to ensure the loading state is properly updated
-      setTimeout(() => {
-        if (isMounted.current) {
-          setIsLoading(false);
-        }
-        resolve();
-      }, 0);
-    });
+    // Ensure loading state is reset
+    setTimeout(() => {
+      if (isMounted.current && isActive) {
+        console.log("Final loading state reset");
+        setIsLoading(false);
+      }
+    }, 100);
+
+    // Return a cleanup function
+    return () => {
+      console.log("fetchTasks cleanup");
+      isActive = false;
+    };
   }, [statusFilter, priorityFilter, debouncedSearch, currentPage, pageSize]); // Removed getFilteredTasks and tasksData from dependencies
 
   // Fetch tasks when filters change or component mounts
   React.useEffect(() => {
+    console.log("TasksList useEffect triggered");
+
     // Create a flag to track if this effect is still active
     let isActive = true;
 
@@ -194,10 +213,15 @@ export function TasksList() {
     // Use an async function to handle the fetch
     const loadData = async () => {
       try {
+        console.log("TasksList loadData started");
         await fetchTasks();
+        console.log("TasksList loadData completed");
+      } catch (error) {
+        console.error("TasksList loadData error:", error);
       } finally {
         // Only update state if the effect is still active and component is mounted
         if (isActive && isMounted.current) {
+          console.log("TasksList setting loading to false");
           setIsLoading(false);
         }
       }
@@ -208,11 +232,14 @@ export function TasksList() {
 
     // Cleanup function to reset state when component unmounts or dependencies change
     return () => {
+      console.log("TasksList useEffect cleanup");
+
       // Mark this effect as inactive
       isActive = false;
 
       // Reset loading state if component is still mounted
       if (isMounted.current) {
+        console.log("TasksList cleanup setting loading to false");
         setIsLoading(false);
       }
     };
@@ -248,14 +275,32 @@ export function TasksList() {
 
   // Refetch tasks after mutations - use the fetchTasks function
   const refetchTasks = React.useCallback(async () => {
+    console.log("refetchTasks called");
+
+    // Create a flag to track if this operation is still active
+    let isActive = true;
+
     setIsLoading(true);
+
     try {
+      console.log("refetchTasks calling fetchTasks");
       await fetchTasks();
+      console.log("refetchTasks fetchTasks completed");
+    } catch (error) {
+      console.error("refetchTasks error:", error);
     } finally {
-      if (isMounted.current) {
+      // Only update state if operation is still active and component is mounted
+      if (isActive && isMounted.current) {
+        console.log("refetchTasks setting loading to false");
         setIsLoading(false);
       }
     }
+
+    // Return a cleanup function
+    return () => {
+      console.log("refetchTasks cleanup");
+      isActive = false;
+    };
   }, [fetchTasks]);
 
   const handleDeleteTask = async (id: string, e: React.MouseEvent) => {

@@ -175,25 +175,27 @@ export function TasksProvider({ children }: { children: ReactNode }) {
 
   // Handle component mount and unmount
   React.useEffect(() => {
-    // On initial mount, reset loading states
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
+    console.log("TasksProvider mounted");
 
-      // Reset loading states on mount
-      setLoadingStates({
-        all: false,
-        my: false,
-        team: false,
-        created: false,
-        unassigned: false
-      });
+    // Always reset loading states on mount
+    setLoadingStates({
+      all: false,
+      my: false,
+      team: false,
+      created: false,
+      unassigned: false
+    });
 
-      // Reset requested types to initial state
-      setRequestedTypes(new Set(['my', 'team']));
-    }
+    // Reset requested types to initial state
+    setRequestedTypes(new Set(['my', 'team']));
+
+    // Reset the initial mount flag
+    isInitialMount.current = false;
 
     // Cleanup function to reset state when component unmounts
     return () => {
+      console.log("TasksProvider unmounted");
+
       // Reset the initial mount flag so next time it mounts it will reset states
       isInitialMount.current = true;
 
@@ -208,6 +210,9 @@ export function TasksProvider({ children }: { children: ReactNode }) {
 
       // Cancel any pending queries
       queryClient.cancelQueries({ queryKey: taskKeys.all });
+
+      // Invalidate all task queries to force a refetch when the component is remounted
+      queryClient.invalidateQueries({ queryKey: taskKeys.all });
     };
   }, [queryClient]);
 
@@ -265,20 +270,45 @@ export function TasksProvider({ children }: { children: ReactNode }) {
   const getFilteredTasks = async (
     params: Partial<ExtendedTasksQueryParams>
   ): Promise<ApiTasksResponse | undefined> => {
+    console.log("getFilteredTasks called with params:", params);
+
+    // Create a flag to track if this operation is still active
+    let isActive = true;
+
     // Set loading state for 'all' type
     setLoadingStates(prev => ({ ...prev, all: true }));
 
     try {
       // Make a direct API call with the provided parameters
       const result = await getTasks(params);
-      setLoadingStates(prev => ({ ...prev, all: false }));
-      return result;
+
+      // Only update state if operation is still active
+      if (isActive) {
+        setLoadingStates(prev => ({ ...prev, all: false }));
+        return result;
+      }
+      return undefined;
     } catch (error: any) {
-      setLoadingStates(prev => ({ ...prev, all: false }));
-      if (error.response?.status === 404) {
-        return createEmptyResponse();
+      // Only update state if operation is still active
+      if (isActive) {
+        setLoadingStates(prev => ({ ...prev, all: false }));
+        if (error.response?.status === 404) {
+          return createEmptyResponse();
+        }
       }
       throw error;
+    } finally {
+      // Ensure loading state is reset even if there's an error
+      setTimeout(() => {
+        if (isActive) {
+          setLoadingStates(prev => ({ ...prev, all: false }));
+        }
+      }, 0);
+
+      // Return a cleanup function
+      return () => {
+        isActive = false;
+      };
     }
   };
 
