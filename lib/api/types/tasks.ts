@@ -58,9 +58,11 @@ export interface TaskCreateRequest {
   status: TaskStatus;
   priority: TaskPriority;
   dueDate?: string;
-  assigneeId?: string;
-  teamMemberId?: number;
+  assigneeId?: string | null;
+  teamMemberId?: number | null;
   tags?: string[];
+  progress?: number;
+  projectId?: number | null;
 }
 
 export interface TaskUpdateRequest {
@@ -88,6 +90,20 @@ export interface TasksQueryParams {
   sortBy?: string;
   sortDirection?: 'asc' | 'desc';
   type?: TaskType;
+
+  // Additional parameters used in our application
+  pageNumber?: number;
+  pageSize?: number;
+  includeTags?: boolean;
+  includeAssignee?: boolean;
+  includeCreator?: boolean;
+  includeProject?: boolean;
+  dueDate?: string;
+  dueDateFrom?: string;
+  dueDateTo?: string;
+  projectId?: number;
+  teamId?: number;
+  progress?: number;
 }
 
-export type TasksResponse = PaginatedResponse<Task>;
+export type TasksResponse = PaginatedResponse<Task> | Task[] | Task;

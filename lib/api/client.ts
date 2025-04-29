@@ -41,6 +41,48 @@ apiClient.interceptors.request.use(request => {
 
 apiClient.interceptors.response.use(response => {
   console.log('✅ API Response:', response.status, response.config.method?.toUpperCase(), response.config.url);
+
+  // Transform response data if it's a tasks endpoint
+  if (response.config.url?.includes('/tasks') && response.data) {
+    console.log('🔄 Transforming tasks response data');
+
+    // If response.data is an array, wrap it
+    if (Array.isArray(response.data)) {
+      console.log('🔄 Response is a direct array, wrapping it');
+      response.data = {
+        items: response.data,
+        data: response.data,
+        pageNumber: 1,
+        page: 1,
+        pageSize: response.data.length,
+        limit: response.data.length,
+        totalCount: response.data.length,
+        total: response.data.length,
+        totalPages: 1,
+        hasPreviousPage: false,
+        hasNextPage: false
+      };
+    }
+    // If response.data is a single task object (not in an array)
+    else if (response.data && response.data.id && !Array.isArray(response.data) &&
+             !response.data.items && !response.data.data) {
+      console.log('🔄 Response is a single task object, wrapping it in an array');
+      response.data = {
+        items: [response.data],
+        data: [response.data],
+        pageNumber: 1,
+        page: 1,
+        pageSize: 1,
+        limit: 1,
+        totalCount: 1,
+        total: 1,
+        totalPages: 1,
+        hasPreviousPage: false,
+        hasNextPage: false
+      };
+    }
+  }
+
   return response;
 }, error => {
   console.error('❌ API Error:', parseApiError(error));

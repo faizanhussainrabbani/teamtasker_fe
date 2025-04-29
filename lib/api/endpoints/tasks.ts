@@ -73,24 +73,123 @@ export const getTasks = async (params?: TasksQueryParams): Promise<TasksResponse
       return wrappedResponse;
     }
 
-    // Normalize the response to match our expected format
-    const normalizedResponse = {
-      // If the API returns items, use that, otherwise use data
-      items: response.data.items || response.data.data || [],
-      // Map pagination fields
-      pageNumber: response.data.pageNumber || response.data.page || 1,
-      pageSize: response.data.pageSize || response.data.limit || 10,
-      totalCount: response.data.totalCount || response.data.total || 0,
-      totalPages: response.data.totalPages || Math.ceil((response.data.total || 0) / (response.data.limit || 10)),
-      hasPreviousPage: response.data.hasPreviousPage || ((response.data.page || 1) > 1),
-      hasNextPage: response.data.hasNextPage || ((response.data.page || 1) < Math.ceil((response.data.total || 0) / (response.data.limit || 10))),
 
-      // Also include the original fields for compatibility
-      data: response.data.data || response.data.items || [],
-      page: response.data.page || response.data.pageNumber || 1,
-      limit: response.data.limit || response.data.pageSize || 10,
-      total: response.data.total || response.data.totalCount || 0
-    };
+
+    // Check if the response is a single task object (not in an array)
+    if (response.data && response.data.id && !Array.isArray(response.data)) {
+      console.log('🔍 Response is a single task object, wrapping it in an array');
+      const wrappedResponse = {
+        items: [response.data],
+        data: [response.data],
+        pageNumber: 1,
+        page: 1,
+        pageSize: 1,
+        limit: 1,
+        totalCount: 1,
+        total: 1,
+        totalPages: 1,
+        hasPreviousPage: false,
+        hasNextPage: false
+      };
+      console.log('✅ Wrapped single task response:', wrappedResponse);
+      return wrappedResponse;
+    }
+
+    // Normalize the response to match our expected format
+    let normalizedResponse;
+
+    // Based on the screenshot, the API might be returning an array inside a 'items' property
+    if (response.data && response.data.items && Array.isArray(response.data.items)) {
+      console.log('🔍 Response has items array property');
+      normalizedResponse = {
+        items: response.data.items,
+        data: response.data.items,
+        pageNumber: response.data.pageNumber || 1,
+        page: response.data.page || 1,
+        pageSize: response.data.pageSize || response.data.items.length || 10,
+        limit: response.data.limit || response.data.items.length || 10,
+        totalCount: response.data.totalCount || response.data.items.length || 0,
+        total: response.data.total || response.data.items.length || 0,
+        totalPages: response.data.totalPages || 1,
+        hasPreviousPage: response.data.hasPreviousPage || false,
+        hasNextPage: response.data.hasNextPage || false
+      };
+    }
+    // Check if the response has a 'data' property that is an array
+    else if (response.data && response.data.data && Array.isArray(response.data.data)) {
+      console.log('🔍 Response has data array property');
+      normalizedResponse = {
+        items: response.data.data,
+        data: response.data.data,
+        pageNumber: response.data.pageNumber || response.data.page || 1,
+        page: response.data.page || response.data.pageNumber || 1,
+        pageSize: response.data.pageSize || response.data.limit || 10,
+        limit: response.data.limit || response.data.pageSize || 10,
+        totalCount: response.data.totalCount || response.data.total || 0,
+        total: response.data.total || response.data.totalCount || 0,
+        totalPages: response.data.totalPages || Math.ceil((response.data.total || 0) / (response.data.limit || 10)),
+        hasPreviousPage: response.data.hasPreviousPage || ((response.data.page || 1) > 1),
+        hasNextPage: response.data.hasNextPage || ((response.data.page || 1) < Math.ceil((response.data.total || 0) / (response.data.limit || 10)))
+      };
+    }
+    // If the response itself is an object with task-like properties but not in an array
+    else if (response.data && typeof response.data === 'object' && !Array.isArray(response.data)) {
+      console.log('🔍 Response is an object with task-like properties');
+
+      // Check if it has task-like properties
+      const hasTaskProperties = response.data.id ||
+                               response.data.title ||
+                               response.data.status ||
+                               response.data.priority;
+
+      if (hasTaskProperties) {
+        normalizedResponse = {
+          items: [response.data],
+          data: [response.data],
+          pageNumber: 1,
+          page: 1,
+          pageSize: 1,
+          limit: 1,
+          totalCount: 1,
+          total: 1,
+          totalPages: 1,
+          hasPreviousPage: false,
+          hasNextPage: false
+        };
+      } else {
+        // Default fallback
+        normalizedResponse = {
+          items: [],
+          data: [],
+          pageNumber: 1,
+          page: 1,
+          pageSize: 10,
+          limit: 10,
+          totalCount: 0,
+          total: 0,
+          totalPages: 0,
+          hasPreviousPage: false,
+          hasNextPage: false
+        };
+      }
+    }
+    // Default fallback
+    else {
+      console.log('🔍 Using default response format');
+      normalizedResponse = {
+        items: [],
+        data: [],
+        pageNumber: 1,
+        page: 1,
+        pageSize: 10,
+        limit: 10,
+        totalCount: 0,
+        total: 0,
+        totalPages: 0,
+        hasPreviousPage: false,
+        hasNextPage: false
+      };
+    }
 
     console.log('✅ Normalized response:', normalizedResponse);
 

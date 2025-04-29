@@ -3,11 +3,25 @@
  */
 
 export interface PaginatedResponse<T> {
-  data: T[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
+  // Support both data and items properties
+  data?: T[];
+  items?: T[];
+
+  // Support both naming conventions for pagination
+  total?: number;
+  totalCount?: number;
+
+  page?: number;
+  pageNumber?: number;
+
+  limit?: number;
+  pageSize?: number;
+
+  totalPages?: number;
+
+  // Additional pagination helpers
+  hasPreviousPage?: boolean;
+  hasNextPage?: boolean;
 }
 
 export interface ApiResponse<T> {

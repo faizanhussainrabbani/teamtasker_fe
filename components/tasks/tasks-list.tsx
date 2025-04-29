@@ -10,6 +10,8 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { isAuthenticated } from "@/lib/auth"
 import { setMockAuth, isDevelopment } from "@/lib/mock-auth"
+import { createTestTask } from "@/lib/create-test-task"
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -115,14 +117,11 @@ export function TasksList() {
 
   // Handle component mount and unmount
   React.useEffect(() => {
-    console.log("TasksList component mounted");
-
     // Mark component as mounted
     isMounted.current = true;
 
     // Set up mock authentication for development if not authenticated
     if (isDevelopment() && !isAuthenticated()) {
-      console.log('Setting up mock authentication for development in TasksList');
       setMockAuth();
     }
 
@@ -141,8 +140,6 @@ export function TasksList() {
     document.addEventListener('click', handleClickOutside);
 
     return () => {
-      console.log("TasksList component unmounted");
-
       // Mark component as unmounted
       isMounted.current = false;
 
@@ -153,10 +150,7 @@ export function TasksList() {
 
   // Function to fetch tasks with caching
   const fetchTasks = React.useCallback(async () => {
-    console.log("fetchTasks called");
-
     if (!isMounted.current) {
-      console.log("Component not mounted, skipping fetchTasks");
       return;
     }
 
@@ -186,7 +180,7 @@ export function TasksList() {
     if (cachedResult && cacheTimestamp) {
       const age = Date.now() - parseInt(cacheTimestamp);
       if (age < 30000) { // 30 seconds
-        console.log("Using cached result for", params);
+
         if (isMounted.current && isActive) {
           setTasksData(JSON.parse(cachedResult));
           return;
@@ -200,36 +194,58 @@ export function TasksList() {
     setError(null);
 
     try {
-      console.log("🔍 Fetching tasks with params:", params);
-
       // Use the ref to get the latest function without causing dependency issues
-      console.log("🔍 Calling getFilteredTasks function");
       const result = await getFilteredTasksRef.current(params);
 
-      console.log("✅ Fetch tasks result received:", result);
-      console.log("✅ Result type:", typeof result);
-      console.log("✅ Result has items:", !!result?.items);
-      console.log("✅ Result has data:", !!result?.data);
-      console.log("✅ Items length:", result?.items?.length || 0);
-      console.log("✅ Data length:", result?.data?.length || 0);
-      console.log("✅ Result keys:", result ? Object.keys(result) : []);
+      // Process the result to ensure it's in a usable format
+      let processedResult;
 
-      // Cache the result
-      if (result) {
-        console.log("✅ Caching result");
-        localStorage.setItem(`tasks_cache_${cacheKey}`, JSON.stringify(result));
-        localStorage.setItem(`tasks_cache_timestamp_${cacheKey}`, Date.now().toString());
-      } else {
-        console.error("❌ No result to cache");
+      // Check if result is a function (cleanup function) or invalid
+      if (!result || typeof result === 'function') {
+        processedResult = {
+          items: [],
+          data: [],
+          pageNumber: 1,
+          pageSize: 10,
+          totalCount: 0,
+          totalPages: 0
+        };
       }
+      // If result is an array, wrap it
+      else if (Array.isArray(result)) {
+        processedResult = {
+          items: result,
+          data: result,
+          pageNumber: 1,
+          pageSize: result.length,
+          totalCount: result.length,
+          totalPages: 1
+        };
+      }
+      // If result is a single task object (not an array and has id and title)
+      else if (result && !Array.isArray(result) && result.id && result.title && !result.items && !result.data) {
+        processedResult = {
+          items: [result],
+          data: [result],
+          pageNumber: 1,
+          pageSize: 1,
+          totalCount: 1,
+          totalPages: 1
+        };
+      }
+      // If it's a valid object with the expected structure
+      else {
+        processedResult = result;
+      }
+
+      // Cache the processed result
+      localStorage.setItem(`tasks_cache_${cacheKey}`, JSON.stringify(processedResult));
+      localStorage.setItem(`tasks_cache_timestamp_${cacheKey}`, Date.now().toString());
 
       // Only update state if component is still mounted and operation is active
       if (isMounted.current && isActive) {
-        console.log("✅ Setting tasks data and resetting loading state");
-        setTasksData(result);
+        setTasksData(processedResult);
         setIsLoading(false);
-      } else {
-        console.log("❌ Component not mounted or operation not active, not updating state");
       }
     } catch (err) {
       console.error("Error fetching tasks:", err);
@@ -244,25 +260,47 @@ export function TasksList() {
     // Ensure loading state is reset
     setTimeout(() => {
       if (isMounted.current && isActive) {
-        console.log("Final loading state reset");
         setIsLoading(false);
       }
     }, 100);
 
     // Return a cleanup function
     return () => {
-      console.log("fetchTasks cleanup");
       isActive = false;
     };
   }, [statusFilter, priorityFilter, debouncedSearch, currentPage, pageSize]); // Removed getFilteredTasks and tasksData from dependencies
 
+  // Function to create a test task if none are found
+  const createTestTaskIfNeeded = React.useCallback(async (currentTasksData) => {
+    if (!isDevelopment()) return;
+
+
+
+    try {
+      // Only create a test task if we have no tasks
+      // Use the passed data parameter instead of the state variable
+      if (currentTasksData &&
+          ((!currentTasksData.items || currentTasksData.items.length === 0) &&
+           (!currentTasksData.data || currentTasksData.data.length === 0))) {
+
+        await createTestTask();
+        // Return true to indicate a test task was created
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Error creating test task:", error);
+      return false;
+    }
+  }, []);
+
   // Fetch tasks when filters change or component mounts
   React.useEffect(() => {
-    console.log("TasksList useEffect triggered");
+
 
     // Skip if component is not mounted
     if (!isMounted.current) {
-      console.log("Component not mounted, skipping fetch");
+
       return;
     }
 
@@ -275,15 +313,22 @@ export function TasksList() {
     // Use an async function to handle the fetch
     const loadData = async () => {
       try {
-        console.log("TasksList loadData started");
         await fetchTasks();
-        console.log("TasksList loadData completed");
+
+        // Check if we need to create a test task after loading
+        if (isDevelopment() && isActive && isMounted.current) {
+          const testTaskCreated = await createTestTaskIfNeeded(tasksData);
+          // Only refetch if a test task was created
+          if (testTaskCreated && isActive && isMounted.current) {
+            await fetchTasks();
+          }
+        }
       } catch (error) {
         console.error("TasksList loadData error:", error);
       } finally {
         // Only update state if the effect is still active and component is mounted
         if (isActive && isMounted.current) {
-          console.log("TasksList setting loading to false");
+
           setIsLoading(false);
         }
       }
@@ -294,18 +339,15 @@ export function TasksList() {
 
     // Cleanup function to reset state when component unmounts or dependencies change
     return () => {
-      console.log("TasksList useEffect cleanup");
-
       // Mark this effect as inactive
       isActive = false;
 
       // Reset loading states if component is still mounted
       if (isMounted.current) {
-        console.log("TasksList cleanup setting loading to false");
         setIsLoading(false);
       }
     };
-  }, [fetchTasks]);
+  }, [fetchTasks]); // Removed createTestTaskIfNeeded from dependencies
 
   // Debounce search input
   React.useEffect(() => {
@@ -337,8 +379,6 @@ export function TasksList() {
 
   // Refetch tasks after mutations - use the fetchTasks function
   const refetchTasks = React.useCallback(async () => {
-    console.log("refetchTasks called");
-
     // Create a flag to track if this operation is still active
     let isActive = true;
 
@@ -346,22 +386,19 @@ export function TasksList() {
     setIsLoading(true);
 
     try {
-      console.log("refetchTasks calling fetchTasks");
       await fetchTasks();
-      console.log("refetchTasks fetchTasks completed");
     } catch (error) {
       console.error("refetchTasks error:", error);
     } finally {
       // Only update state if operation is still active and component is mounted
       if (isActive && isMounted.current) {
-        console.log("refetchTasks setting loading to false");
+
         setIsLoading(false);
       }
     }
 
     // Return a cleanup function
     return () => {
-      console.log("refetchTasks cleanup");
       isActive = false;
     };
   }, [fetchTasks]);
@@ -458,6 +495,8 @@ export function TasksList() {
             </div>
           </div>
 
+
+
           {isLoading ? (
             <LoadingState message="Loading tasks..." />
           ) : isError ? (
@@ -465,21 +504,76 @@ export function TasksList() {
               message={`Error loading tasks: ${error?.message || 'Unknown error'}`}
               onRetry={() => refetchTasks()}
             />
-          ) : !tasksData || (!tasksData.items && !tasksData.data) || ((tasksData.items?.length || 0) === 0 && (tasksData.data?.length || 0) === 0) ? (
+          ) : (function() {
+            // Comprehensive check for empty data
+            if (!tasksData) {
+              return true;
+            }
+
+            // Check if it's an array
+            if (Array.isArray(tasksData)) {
+              return tasksData.length === 0;
+            }
+
+            // Check items property
+            if (tasksData.items) {
+              if (Array.isArray(tasksData.items) && tasksData.items.length > 0) {
+                return false;
+              }
+            }
+
+            // Check data property
+            if (tasksData.data) {
+              if (Array.isArray(tasksData.data) && tasksData.data.length > 0) {
+                return false;
+              }
+            }
+
+            // Check if it's a single task object
+            if (tasksData.id && tasksData.title) {
+              return false;
+            }
+
+            return true;
+          })() ? (
             <EmptyState
               title="No tasks found"
               description="There are no tasks matching your filters."
               action={
-                <Button onClick={() => { setSelectedTask(null); setIsDialogOpen(true); }}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Create Task
-                </Button>
+                <div className="flex flex-col space-y-2">
+                  <Button onClick={() => { setSelectedTask(null); setIsDialogOpen(true); }}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Create Task
+                  </Button>
+
+
+                </div>
               }
             />
           ) : (
             <div className="space-y-4">
               <div className="space-y-2">
-                {(tasksData.items || tasksData.data || []).map((task) => (
+                {(function() {
+                  // Get the tasks array from wherever it exists
+                  let tasksToRender = [];
+
+                  if (tasksData.items && Array.isArray(tasksData.items) && tasksData.items.length > 0) {
+                    tasksToRender = tasksData.items;
+                  } else if (tasksData.data && Array.isArray(tasksData.data) && tasksData.data.length > 0) {
+                    tasksToRender = tasksData.data;
+                  } else if (Array.isArray(tasksData)) {
+                    tasksToRender = tasksData;
+                  } else {
+                    // Check if tasksData itself is a task object
+                    if (tasksData && tasksData.id && tasksData.title) {
+                      tasksToRender = [tasksData];
+                    } else {
+                      tasksToRender = [];
+                    }
+                  }
+
+                  return tasksToRender;
+                })().map((task) => (
                 <div
                   key={task.id}
                   className="flex items-center justify-between rounded-lg border p-3 text-sm cursor-pointer hover:bg-muted/50"

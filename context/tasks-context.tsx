@@ -341,6 +341,27 @@ export function TasksProvider({ children }: { children: ReactNode }) {
       console.log("✅ Items length:", result?.items?.length || 0);
       console.log("✅ Data length:", result?.data?.length || 0);
 
+      // Ensure we have a valid result with either items or data
+      if (!result) {
+        console.warn("⚠️ No result returned from getTasks, creating empty response");
+        const emptyResponse = createEmptyResponse();
+
+        // Cache the empty result
+        queryClient.setQueryData(taskKeys.list({ ...params }), emptyResponse);
+
+        if (isActive) {
+          setLoadingStates(prev => ({ ...prev, all: false }));
+          return emptyResponse;
+        }
+        return undefined;
+      }
+
+      // Ensure the result has either items or data
+      if ((!result.items || result.items.length === 0) &&
+          (!result.data || result.data.length === 0)) {
+        console.log("⚠️ Result has no items or data, but is a valid response object");
+      }
+
       // Cache the result
       queryClient.setQueryData(taskKeys.list({ ...params }), result);
 
@@ -359,9 +380,18 @@ export function TasksProvider({ children }: { children: ReactNode }) {
       if (isActive) {
         console.log("Setting loading state to false after error");
         setLoadingStates(prev => ({ ...prev, all: false }));
+
+        // Handle 404 errors by returning an empty response
         if (error.response?.status === 404) {
-          return createEmptyResponse();
+          const emptyResponse = createEmptyResponse();
+          // Cache the empty result
+          queryClient.setQueryData(taskKeys.list({ ...params }), emptyResponse);
+          return emptyResponse;
         }
+
+        // For other errors, create an empty response but don't cache it
+        const emptyResponse = createEmptyResponse();
+        return emptyResponse;
       }
       throw error;
     } finally {
@@ -372,14 +402,16 @@ export function TasksProvider({ children }: { children: ReactNode }) {
           setLoadingStates(prev => ({ ...prev, all: false }));
         }
       }, 100);
-
-      // Return a cleanup function
-      return () => {
-        console.log("getFilteredTasks cleanup");
-        isActive = false;
-        setLoadingStates(prev => ({ ...prev, all: false }));
-      };
     }
+
+    // Create a cleanup function but don't use it as the return value
+    const cleanup = () => {
+      isActive = false;
+      setLoadingStates(prev => ({ ...prev, all: false }));
+    };
+
+    // Return the actual result, not the cleanup function
+    return result;
   };
 
   // Function to go to a specific page for a task type
