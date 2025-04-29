@@ -20,8 +20,11 @@ import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { X } from "lucide-react"
 
-// Sample team members for assignee selection
-const teamMembers = [
+import { useUsers } from "@/lib/api/hooks/useUsers"
+import { useTeams, useTeam } from "@/lib/api/hooks/useTeams"
+
+// Sample team members for assignee selection (fallback)
+const sampleTeamMembers = [
   {
     id: "user-1",
     name: "Jane Doe",
@@ -35,27 +38,6 @@ const teamMembers = [
     role: "Frontend Developer",
     avatar: "/placeholder.svg?height=32&width=32",
     initials: "JS",
-  },
-  {
-    id: "user-3",
-    name: "Emily Chen",
-    role: "Backend Developer",
-    avatar: "/placeholder.svg?height=32&width=32",
-    initials: "EC",
-  },
-  {
-    id: "user-4",
-    name: "Michael Brown",
-    role: "DevOps Engineer",
-    avatar: "/placeholder.svg?height=32&width=32",
-    initials: "MB",
-  },
-  {
-    id: "user-5",
-    name: "Sarah Wilson",
-    role: "Product Manager",
-    avatar: "/placeholder.svg?height=32&width=32",
-    initials: "SW",
   },
 ]
 
@@ -91,6 +73,8 @@ export function TaskDialog({ task, open, onOpenChange }: TaskDialogProps) {
     dueDate: "",
     progress: 0,
     assigneeId: "",
+    teamMemberId: undefined as number | undefined,
+    assignmentType: "direct" as "direct" | "team", // "direct" for assigneeId, "team" for teamMemberId
     tags: [] as string[],
   })
 
@@ -98,6 +82,9 @@ export function TaskDialog({ task, open, onOpenChange }: TaskDialogProps) {
 
   useEffect(() => {
     if (task) {
+      // Determine assignment type based on existing task data
+      const assignmentType = task.teamMemberId ? "team" : "direct";
+
       setFormData({
         title: task.title || "",
         description: task.description || "",
@@ -106,6 +93,8 @@ export function TaskDialog({ task, open, onOpenChange }: TaskDialogProps) {
         dueDate: task.dueDate || "",
         progress: task.progress || 0,
         assigneeId: task.assignee?.id || "",
+        teamMemberId: task.teamMemberId,
+        assignmentType,
         tags: task.tags || [],
       })
     } else {
@@ -118,6 +107,8 @@ export function TaskDialog({ task, open, onOpenChange }: TaskDialogProps) {
         dueDate: new Date().toISOString().split("T")[0],
         progress: 0,
         assigneeId: "",
+        teamMemberId: undefined,
+        assignmentType: "direct",
         tags: [],
       })
     }
@@ -138,10 +129,145 @@ export function TaskDialog({ task, open, onOpenChange }: TaskDialogProps) {
     setFormData((prev) => ({ ...prev, tags: prev.tags.filter((t) => t !== tag) }))
   }
 
+  // Component for selecting a user directly
+  function AssignToUserSelect({ value, onChange }: { value: string, onChange: (value: string) => void }) {
+    // Fetch users
+    const { data: usersData, isLoading: usersLoading } = useUsers();
+    const users = usersData?.items || sampleTeamMembers;
+
+    return (
+      <div className="space-y-2">
+        <Label htmlFor="assignee">Assign to User</Label>
+        <Select
+          value={value}
+          onValueChange={onChange}
+        >
+          <SelectTrigger id="assignee">
+            <SelectValue placeholder="Select user" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">Unassigned</SelectItem>
+            {users.map((user) => (
+              <SelectItem key={user.id} value={user.id.toString()}>
+                <div className="flex items-center gap-2">
+                  <Avatar className="h-6 w-6">
+                    <AvatarImage src={user.avatar} alt={user.name} />
+                    <AvatarFallback>{user.initials || user.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <span>{user.name}</span>
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {usersLoading && <p className="text-xs text-muted-foreground">Loading users...</p>}
+      </div>
+    );
+  }
+
+  // Component for selecting a team member
+  function AssignToTeamMemberSelect({ value, onChange }: { value: number | undefined, onChange: (value: number | undefined) => void }) {
+    // Fetch teams
+    const { data: teamsData, isLoading: teamsLoading } = useTeams();
+    const teams = teamsData?.items || [];
+
+    // State for selected team
+    const [selectedTeam, setSelectedTeam] = useState<number | undefined>(undefined);
+
+    // Fetch team details including members when a team is selected
+    const { data: teamDetails, isLoading: teamDetailsLoading } = useTeam(selectedTeam || 0);
+    const teamMembers = teamDetails?.members || [];
+
+    return (
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="team">Select Team</Label>
+          <Select
+            value={selectedTeam?.toString() || ""}
+            onValueChange={(value) => {
+              setSelectedTeam(value ? parseInt(value) : undefined);
+              // Reset team member selection when team changes
+              onChange(undefined);
+            }}
+          >
+            <SelectTrigger id="team">
+              <SelectValue placeholder="Select team" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">No team</SelectItem>
+              {teams.map((team) => (
+                <SelectItem key={team.id} value={team.id.toString()}>
+                  {team.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {teamsLoading && <p className="text-xs text-muted-foreground">Loading teams...</p>}
+        </div>
+
+        {selectedTeam && (
+          <div className="space-y-2">
+            <Label htmlFor="teamMember">Select Team Member</Label>
+            <Select
+              value={value?.toString() || ""}
+              onValueChange={(value) => onChange(value ? parseInt(value) : undefined)}
+              disabled={teamDetailsLoading || teamMembers.length === 0}
+            >
+              <SelectTrigger id="teamMember">
+                <SelectValue placeholder="Select team member" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Unassigned</SelectItem>
+                {teamMembers.map((member) => (
+                  <SelectItem key={member.id} value={member.id.toString()}>
+                    <div className="flex items-center gap-2">
+                      <Avatar className="h-6 w-6">
+                        <AvatarImage src={member.user.avatar} alt={member.user.name} />
+                        <AvatarFallback>
+                          {member.user.initials || member.user.name.substring(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <span>{member.user.name}</span>
+                        <span className="ml-2 text-xs text-muted-foreground">({member.role})</span>
+                      </div>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {teamDetailsLoading && <p className="text-xs text-muted-foreground">Loading team members...</p>}
+            {!teamDetailsLoading && teamMembers.length === 0 && (
+              <p className="text-xs text-muted-foreground">No members in this team</p>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   const handleSubmit = () => {
+    // Prepare the data for submission
+    const taskData = {
+      title: formData.title,
+      description: formData.description,
+      status: formData.status,
+      priority: formData.priority,
+      dueDate: formData.dueDate,
+      progress: formData.progress,
+      tags: formData.tags,
+    };
+
+    // Add the appropriate assignment field based on assignment type
+    if (formData.assignmentType === "direct") {
+      Object.assign(taskData, { assigneeId: formData.assigneeId || undefined });
+    } else {
+      Object.assign(taskData, { teamMemberId: formData.teamMemberId });
+    }
+
     // Here you would typically save the task data
-    console.log("Saving task:", formData)
-    onOpenChange(false)
+    console.log("Saving task:", taskData);
+    onOpenChange(false);
   }
 
   return (
@@ -225,30 +351,33 @@ export function TaskDialog({ task, open, onOpenChange }: TaskDialogProps) {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="assignee">Assignee</Label>
+                <Label htmlFor="assignmentType">Assignment Type</Label>
                 <Select
-                  value={formData.assigneeId}
-                  onValueChange={(value) => handleChange("assigneeId", value)}
+                  value={formData.assignmentType}
+                  onValueChange={(value) => handleChange("assignmentType", value as "direct" | "team")}
                 >
-                  <SelectTrigger id="assignee">
-                    <SelectValue placeholder="Select assignee" />
+                  <SelectTrigger id="assignmentType">
+                    <SelectValue placeholder="Select assignment type" />
                   </SelectTrigger>
                   <SelectContent>
-                    {teamMembers.map((member) => (
-                      <SelectItem key={member.id} value={member.id}>
-                        <div className="flex items-center gap-2">
-                          <Avatar className="h-6 w-6">
-                            <AvatarImage src={member.avatar} alt={member.name} />
-                            <AvatarFallback>{member.initials}</AvatarFallback>
-                          </Avatar>
-                          <span>{member.name}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
+                    <SelectItem value="direct">Direct User Assignment</SelectItem>
+                    <SelectItem value="team">Team Member Assignment</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
+
+            {formData.assignmentType === "direct" ? (
+              <AssignToUserSelect
+                value={formData.assigneeId}
+                onChange={(value) => handleChange("assigneeId", value)}
+              />
+            ) : (
+              <AssignToTeamMemberSelect
+                value={formData.teamMemberId}
+                onChange={(value) => handleChange("teamMemberId", value)}
+              />
+            )}
           </TabsContent>
           <TabsContent value="advanced" className="space-y-4 pt-4">
             <div className="space-y-2">

@@ -27,9 +27,26 @@ interface TasksLoadingState {
   unassigned: boolean;
 }
 
+// Extended query parameters for tasks
+interface ExtendedTasksQueryParams extends TasksQueryParams {
+  includeTags?: boolean;
+  includeAssignee?: boolean;
+  includeCreator?: boolean;
+  includeProject?: boolean;
+  status?: string;
+  priority?: string;
+  dueDate?: string;
+  dueDateFrom?: string;
+  dueDateTo?: string;
+  projectId?: number;
+}
+
 interface TasksContextType {
   // Task data getters - these will fetch data on demand if not already loaded
-  getTasksByType: (type: TaskType) => Promise<ApiTasksResponse | undefined>;
+  getTasksByType: (type: TaskType, params?: Partial<ExtendedTasksQueryParams>) => Promise<ApiTasksResponse | undefined>;
+
+  // Get filtered tasks with advanced filtering options
+  getFilteredTasks: (params: Partial<ExtendedTasksQueryParams>) => Promise<ApiTasksResponse | undefined>;
 
   // Direct access to already fetched data (won't trigger new fetches)
   allTasks: ApiTasksResponse | undefined;
@@ -46,10 +63,14 @@ interface TasksContextType {
 
   // Refetch functions
   refetch: () => Promise<any>;
-  refetchType: (type: TaskType) => Promise<any>;
+  refetchType: (type: TaskType, params?: Partial<ExtendedTasksQueryParams>) => Promise<any>;
 
   // Prefetch a specific task type (useful for preloading data)
-  prefetchTaskType: (type: TaskType) => Promise<void>;
+  prefetchTaskType: (type: TaskType, params?: Partial<ExtendedTasksQueryParams>) => Promise<void>;
+
+  // Pagination helpers
+  goToPage: (type: TaskType, page: number) => Promise<ApiTasksResponse | undefined>;
+  currentPage: Record<TaskType, number>;
 }
 
 const TasksContext = createContext<TasksContextType | undefined>(undefined);
@@ -84,16 +105,40 @@ export function TasksProvider({ children }: { children: ReactNode }) {
     unassigned: false
   });
 
+  // Track current page for each task type
+  const [currentPage, setCurrentPage] = useState<Record<TaskType, number>>({
+    all: 1,
+    my: 1,
+    team: 1,
+    created: 1,
+    unassigned: 1
+  });
+
+  // Track query parameters for each task type
+  const [queryParams, setQueryParams] = useState<Record<TaskType, ExtendedTasksQueryParams>>({
+    all: { pageNumber: 1, pageSize: 10 },
+    my: { pageNumber: 1, pageSize: 10 },
+    team: { pageNumber: 1, pageSize: 10 },
+    created: { pageNumber: 1, pageSize: 10 },
+    unassigned: { pageNumber: 1, pageSize: 10 }
+  });
+
   // Create query functions for each task type
   const createTaskQuery = (type: TaskType) => {
     return useQuery({
-      queryKey: taskKeys.list({ type }),
+      queryKey: taskKeys.list({ type, ...queryParams[type] }),
       queryFn: async () => {
         try {
           // Update loading state
           setLoadingStates(prev => ({ ...prev, [type]: true }));
 
-          const result = await getTasks({ type });
+          // Combine type with other query parameters
+          const params = {
+            type,
+            ...queryParams[type]
+          };
+
+          const result = await getTasks(params);
 
           // Update loading state
           setLoadingStates(prev => ({ ...prev, [type]: false }));
@@ -125,8 +170,19 @@ export function TasksProvider({ children }: { children: ReactNode }) {
   const createdTasksQuery = createTaskQuery('created');
   const unassignedTasksQuery = createTaskQuery('unassigned');
 
-  // Function to get tasks by type, fetching them if not already loaded
-  const getTasksByType = async (type: TaskType): Promise<ApiTasksResponse | undefined> => {
+  // Function to get tasks by type with optional additional parameters
+  const getTasksByType = async (
+    type: TaskType,
+    params?: Partial<ExtendedTasksQueryParams>
+  ): Promise<ApiTasksResponse | undefined> => {
+    // If additional params are provided, update the query params for this type
+    if (params) {
+      setQueryParams(prev => ({
+        ...prev,
+        [type]: { ...prev[type], ...params }
+      }));
+    }
+
     // If this type hasn't been requested yet, mark it as requested and trigger the query
     if (!requestedTypes.has(type)) {
       setRequestedTypes(prev => new Set([...prev, type]));
@@ -149,6 +205,9 @@ export function TasksProvider({ children }: { children: ReactNode }) {
           await unassignedTasksQuery.refetch();
           return unassignedTasksQuery.data;
       }
+    } else if (params) {
+      // If this type has been requested but params changed, refetch
+      return await refetchType(type, params);
     }
 
     // Return the already loaded data
@@ -161,22 +220,88 @@ export function TasksProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Function to get filtered tasks with advanced filtering
+  const getFilteredTasks = async (
+    params: Partial<ExtendedTasksQueryParams>
+  ): Promise<ApiTasksResponse | undefined> => {
+    // Set loading state for 'all' type
+    setLoadingStates(prev => ({ ...prev, all: true }));
+
+    try {
+      // Make a direct API call with the provided parameters
+      const result = await getTasks(params);
+      setLoadingStates(prev => ({ ...prev, all: false }));
+      return result;
+    } catch (error: any) {
+      setLoadingStates(prev => ({ ...prev, all: false }));
+      if (error.response?.status === 404) {
+        return createEmptyResponse();
+      }
+      throw error;
+    }
+  };
+
+  // Function to go to a specific page for a task type
+  const goToPage = async (
+    type: TaskType,
+    page: number
+  ): Promise<ApiTasksResponse | undefined> => {
+    // Update current page for this type
+    setCurrentPage(prev => ({ ...prev, [type]: page }));
+
+    // Update query params with the new page number
+    setQueryParams(prev => ({
+      ...prev,
+      [type]: { ...prev[type], pageNumber: page }
+    }));
+
+    // Refetch with the new page number
+    return await refetchType(type, { pageNumber: page });
+  };
+
   // Function to prefetch a task type without waiting for the result
-  const prefetchTaskType = async (type: TaskType): Promise<void> => {
+  const prefetchTaskType = async (
+    type: TaskType,
+    params?: Partial<ExtendedTasksQueryParams>
+  ): Promise<void> => {
+    // If additional params are provided, update the query params for this type
+    const queryParamsToUse = params
+      ? { ...queryParams[type], ...params }
+      : queryParams[type];
+
     await queryClient.prefetchQuery({
-      queryKey: taskKeys.list({ type }),
-      queryFn: () => getTasks({ type })
+      queryKey: taskKeys.list({ type, ...queryParamsToUse }),
+      queryFn: () => getTasks({ type, ...queryParamsToUse })
     });
 
     // Mark this type as requested
     setRequestedTypes(prev => new Set([...prev, type]));
+
+    // Update query params if provided
+    if (params) {
+      setQueryParams(prev => ({
+        ...prev,
+        [type]: { ...prev[type], ...params }
+      }));
+    }
   };
 
-  // Function to refetch tasks of a specific type
-  const refetchType = async (type: TaskType) => {
+  // Function to refetch tasks of a specific type with optional parameters
+  const refetchType = async (
+    type: TaskType,
+    params?: Partial<ExtendedTasksQueryParams>
+  ) => {
     // Make sure this type is marked as requested
     if (!requestedTypes.has(type)) {
       setRequestedTypes(prev => new Set([...prev, type]));
+    }
+
+    // If additional params are provided, update the query params for this type
+    if (params) {
+      setQueryParams(prev => ({
+        ...prev,
+        [type]: { ...prev[type], ...params }
+      }));
     }
 
     // Update loading state
@@ -249,6 +374,7 @@ export function TasksProvider({ children }: { children: ReactNode }) {
       value={{
         // Task data getters
         getTasksByType,
+        getFilteredTasks,
 
         // Direct access to already fetched data
         allTasks: allTasksQuery.data,
@@ -268,7 +394,11 @@ export function TasksProvider({ children }: { children: ReactNode }) {
         refetchType,
 
         // Prefetch function
-        prefetchTaskType
+        prefetchTaskType,
+
+        // Pagination helpers
+        goToPage,
+        currentPage
       }}
     >
       {children}

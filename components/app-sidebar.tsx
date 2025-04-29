@@ -25,8 +25,8 @@ const mainNavItems = [
     icon: BarChart3,
   },
   {
-    title: "Team Overview",
-    href: "/team",
+    title: "Teams",
+    href: "/teams",
     icon: Users,
   },
   {

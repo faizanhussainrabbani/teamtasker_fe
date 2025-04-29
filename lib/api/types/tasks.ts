@@ -10,12 +10,29 @@ export interface Task {
   status: TaskStatus;
   priority: TaskPriority;
   dueDate: string;
-  assigneeId: string;
+  assigneeId?: string;
   assignee?: {
     id: string;
     name: string;
     avatar: string;
     initials: string;
+  };
+  teamMemberId?: number;
+  teamMember?: {
+    id: number;
+    userId: number;
+    teamId: number;
+    role: string;
+    user: {
+      id: number;
+      name: string;
+      avatar?: string;
+      initials?: string;
+    };
+    team: {
+      id: number;
+      name: string;
+    };
   };
   creatorId?: string;
   creator?: {
@@ -42,6 +59,7 @@ export interface TaskCreateRequest {
   priority: TaskPriority;
   dueDate?: string;
   assigneeId?: string;
+  teamMemberId?: number;
   tags?: string[];
 }
 
@@ -52,6 +70,7 @@ export interface TaskUpdateRequest {
   priority?: TaskPriority;
   dueDate?: string;
   assigneeId?: string;
+  teamMemberId?: number;
   tags?: string[];
   progress?: number;
 }

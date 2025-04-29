@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -26,12 +26,23 @@ import {
   Search,
   SortAsc,
   Trash2,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { TaskDialog } from "@/components/tasks/task-dialog"
 import { LoadingState, ErrorState, EmptyState } from "@/components/ui/api-state"
-import { useTasks, useDeleteTask, useUpdateTaskStatus } from "@/lib/api/hooks/useTasks"
+import { useDeleteTask, useUpdateTaskStatus } from "@/lib/api/hooks/useTasks"
 import { TaskStatus, TaskPriority } from "@/lib/api/types/tasks"
+import { useDashboardTasks } from "@/context/tasks-context"
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious
+} from "@/components/ui/pagination"
 
 // This would be replaced by API data
 
@@ -69,22 +80,125 @@ export function TasksList() {
   const [priorityFilter, setPriorityFilter] = useState<string>("all")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [selectedTask, setSelectedTask] = useState<any>(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
+  const [debouncedSearch, setDebouncedSearch] = useState("")
 
-  // Convert UI filters to API parameters
-  const apiParams = {
-    status: statusFilter !== "all" ? statusFilter as TaskStatus : undefined,
-    priority: priorityFilter !== "all" ? priorityFilter as TaskPriority : undefined,
-    search: searchQuery || undefined,
-  };
-
-  // Fetch tasks with React Query
+  // Use the enhanced TasksContext
   const {
-    data,
-    isLoading,
-    isError,
-    error,
-    refetch
-  } = useTasks(apiParams);
+    getFilteredTasks,
+    isLoading: contextLoading,
+    isError: contextError,
+    error: contextErrorData
+  } = useDashboardTasks();
+
+  // State for the filtered tasks data
+  const [tasksData, setTasksData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
+  const [error, setError] = useState<any>(null);
+
+  // Use a ref to track if the component is mounted
+  const isMounted = React.useRef(true);
+
+  // Store the getFilteredTasks function in a ref to prevent it from causing infinite loops
+  const getFilteredTasksRef = React.useRef(getFilteredTasks);
+
+  // Update the ref when getFilteredTasks changes
+  React.useEffect(() => {
+    getFilteredTasksRef.current = getFilteredTasks;
+  }, [getFilteredTasks]);
+
+  // Set up cleanup on unmount and handle click outside for menus
+  React.useEffect(() => {
+    // Close menus when clicking outside
+    const handleClickOutside = (event) => {
+      const menus = document.querySelectorAll('[id^="task-menu-"]');
+      menus.forEach((menu) => {
+        if (menu.style.display === 'block' && !menu.contains(event.target) &&
+            !event.target.closest('button')?.getAttribute('aria-label')?.includes('More options')) {
+          menu.style.display = 'none';
+        }
+      });
+    };
+
+    // Add event listener
+    document.addEventListener('click', handleClickOutside);
+
+    return () => {
+      isMounted.current = false;
+      // Remove event listener
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, []);
+
+  // Function to fetch tasks
+  const fetchTasks = React.useCallback(async () => {
+    if (!isMounted.current) return;
+
+    // Only set loading state if we don't have data yet
+    if (!tasksData) {
+      setIsLoading(true);
+    }
+    setIsError(false);
+    setError(null);
+
+    try {
+      // Build API parameters
+      const params = {
+        status: statusFilter !== "all" ? statusFilter as TaskStatus : undefined,
+        priority: priorityFilter !== "all" ? priorityFilter as TaskPriority : undefined,
+        search: debouncedSearch || undefined,
+        pageNumber: currentPage,
+        pageSize: pageSize,
+        includeTags: true,
+        includeAssignee: true,
+        includeCreator: true,
+      };
+
+      // Use the ref to get the latest function without causing dependency issues
+      const result = await getFilteredTasksRef.current(params);
+
+      if (isMounted.current) {
+        setTasksData(result);
+        setIsLoading(false);
+      }
+    } catch (err) {
+      if (isMounted.current) {
+        console.error("Error fetching tasks:", err);
+        setIsError(true);
+        setError(err);
+        setIsLoading(false);
+      }
+    }
+  }, [statusFilter, priorityFilter, debouncedSearch, currentPage, pageSize, tasksData]); // Removed getFilteredTasks from dependencies
+
+  // Fetch tasks when filters change
+  React.useEffect(() => {
+    fetchTasks();
+  }, [fetchTasks]);
+
+  // Debounce search input
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      if (isMounted.current) {
+        setDebouncedSearch(searchQuery);
+        // Reset to first page when search changes
+        setCurrentPage(1);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Handle page change
+  const handlePageChange = (page: number) => {
+    if (page === currentPage) return; // Avoid unnecessary updates
+
+    setCurrentPage(page);
+    // Scroll to top of the list
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   // Delete task mutation
   const deleteTaskMutation = useDeleteTask();
@@ -92,16 +206,33 @@ export function TasksList() {
   // Update task status mutation
   const updateTaskStatusMutation = useUpdateTaskStatus();
 
-  const handleDeleteTask = (id: string, e: React.MouseEvent) => {
+  // Refetch tasks after mutations - use the fetchTasks function
+  const refetchTasks = React.useCallback(() => {
+    fetchTasks();
+  }, [fetchTasks]);
+
+  const handleDeleteTask = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     if (confirm("Are you sure you want to delete this task?")) {
-      deleteTaskMutation.mutate(id);
+      try {
+        await deleteTaskMutation.mutateAsync(id);
+        // Refetch tasks after successful deletion
+        refetchTasks();
+      } catch (error) {
+        console.error("Error deleting task:", error);
+      }
     }
   };
 
-  const handleStatusChange = (id: string, status: TaskStatus, e: React.MouseEvent) => {
+  const handleStatusChange = async (id: string, status: TaskStatus, e: React.MouseEvent) => {
     e.stopPropagation();
-    updateTaskStatusMutation.mutate({ id, status });
+    try {
+      await updateTaskStatusMutation.mutateAsync({ id, status });
+      // Refetch tasks after successful status update
+      refetchTasks();
+    } catch (error) {
+      console.error("Error updating task status:", error);
+    }
   };
 
   const openTaskDialog = (task: any) => {
@@ -135,30 +266,40 @@ export function TasksList() {
               />
             </div>
             <div className="flex items-center space-x-2">
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[130px]">
-                  <Filter className="mr-2 h-4 w-4" />
-                  <span>Status</span>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Statuses</SelectItem>
-                  <SelectItem value="todo">To Do</SelectItem>
-                  <SelectItem value="in-progress">In Progress</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-                <SelectTrigger className="w-[130px]">
-                  <SortAsc className="mr-2 h-4 w-4" />
-                  <span>Priority</span>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Priorities</SelectItem>
-                  <SelectItem value="high">High</SelectItem>
-                  <SelectItem value="medium">Medium</SelectItem>
-                  <SelectItem value="low">Low</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="flex items-center space-x-2 w-[130px]">
+                <Filter className="h-4 w-4 text-muted-foreground" />
+                <select
+                  className="flex-1 rounded-md border border-input bg-background px-3 py-1 text-sm"
+                  value={statusFilter}
+                  onChange={(e) => {
+                    if (isMounted.current) {
+                      setStatusFilter(e.target.value);
+                    }
+                  }}
+                >
+                  <option value="all">All Statuses</option>
+                  <option value="todo">To Do</option>
+                  <option value="in-progress">In Progress</option>
+                  <option value="completed">Completed</option>
+                </select>
+              </div>
+              <div className="flex items-center space-x-2 w-[130px]">
+                <SortAsc className="h-4 w-4 text-muted-foreground" />
+                <select
+                  className="flex-1 rounded-md border border-input bg-background px-3 py-1 text-sm"
+                  value={priorityFilter}
+                  onChange={(e) => {
+                    if (isMounted.current) {
+                      setPriorityFilter(e.target.value);
+                    }
+                  }}
+                >
+                  <option value="all">All Priorities</option>
+                  <option value="high">High</option>
+                  <option value="medium">Medium</option>
+                  <option value="low">Low</option>
+                </select>
+              </div>
             </div>
           </div>
 
@@ -167,9 +308,9 @@ export function TasksList() {
           ) : isError ? (
             <ErrorState
               message={`Error loading tasks: ${error?.message || 'Unknown error'}`}
-              onRetry={() => refetch()}
+              onRetry={() => refetchTasks()}
             />
-          ) : data?.data.length === 0 ? (
+          ) : !tasksData || tasksData.items.length === 0 ? (
             <EmptyState
               title="No tasks found"
               description="There are no tasks matching your filters."
@@ -181,8 +322,9 @@ export function TasksList() {
               }
             />
           ) : (
-            <div className="space-y-2">
-              {data?.data.map((task) => (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                {tasksData.items.map((task) => (
                 <div
                   key={task.id}
                   className="flex items-center justify-between rounded-lg border p-3 text-sm cursor-pointer hover:bg-muted/50"
@@ -230,33 +372,176 @@ export function TasksList() {
                       <AvatarImage src={task.assignee?.avatar} alt={task.assignee?.name} />
                       <AvatarFallback>{task.assignee?.initials}</AvatarFallback>
                     </Avatar>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
-                          <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">More options</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); openTaskDialog(task); }}>Edit Task</DropdownMenuItem>
-                        <DropdownMenuItem onClick={(e) => handleStatusChange(task.id, task.status === "todo" ? "in-progress" : "todo", e)}>
-                          {task.status === "todo" ? "Mark as In Progress" : "Mark as To Do"}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={(e) => handleStatusChange(task.id, task.status === "completed" ? "in-progress" : "completed", e)}>
-                          {task.status === "completed" ? "Mark as In Progress" : "Mark as Completed"}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          className="text-destructive focus:text-destructive"
-                          onClick={(e) => handleDeleteTask(task.id, e)}
-                        >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Delete Task
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <div className="relative">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        aria-label="More options"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          // Use a simple approach instead of DropdownMenu
+                          const menu = document.getElementById(`task-menu-${task.id}`);
+                          if (menu) {
+                            // Close all other menus first
+                            document.querySelectorAll('[id^="task-menu-"]').forEach((m) => {
+                              if (m.id !== `task-menu-${task.id}`) {
+                                m.style.display = 'none';
+                              }
+                            });
+                            // Toggle this menu
+                            menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+                          }
+                        }}
+                      >
+                        <MoreHorizontal className="h-4 w-4" />
+                        <span className="sr-only">More options</span>
+                      </Button>
+
+                      {/* Simple menu implementation */}
+                      <div
+                        id={`task-menu-${task.id}`}
+                        className="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+                        style={{ display: 'none' }}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <div className="py-1">
+                          <button
+                            className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openTaskDialog(task);
+                              document.getElementById(`task-menu-${task.id}`).style.display = 'none';
+                            }}
+                          >
+                            Edit Task
+                          </button>
+                          <button
+                            className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleStatusChange(task.id, task.status === "todo" ? "in-progress" : "todo", e);
+                              document.getElementById(`task-menu-${task.id}`).style.display = 'none';
+                            }}
+                          >
+                            {task.status === "todo" ? "Mark as In Progress" : "Mark as To Do"}
+                          </button>
+                          <button
+                            className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleStatusChange(task.id, task.status === "completed" ? "in-progress" : "completed", e);
+                              document.getElementById(`task-menu-${task.id}`).style.display = 'none';
+                            }}
+                          >
+                            {task.status === "completed" ? "Mark as In Progress" : "Mark as Completed"}
+                          </button>
+                          <button
+                            className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteTask(task.id, e);
+                              document.getElementById(`task-menu-${task.id}`).style.display = 'none';
+                            }}
+                          >
+                            <Trash2 className="inline-block mr-2 h-4 w-4" />
+                            Delete Task
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}
+              </div>
+
+              {/* Pagination */}
+              {tasksData && tasksData.totalPages > 1 && (
+                <div className="mt-4">
+                  <Pagination>
+                    <PaginationContent>
+                      {/* Previous page button */}
+                      <PaginationItem>
+                        <PaginationPrevious
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            if (currentPage > 1) handlePageChange(currentPage - 1);
+                          }}
+                          className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+                        />
+                      </PaginationItem>
+
+                      {/* Page numbers */}
+                      {Array.from({ length: Math.min(5, tasksData.totalPages) }, (_, i) => {
+                        // Show pages around current page
+                        let pageNum;
+                        if (tasksData.totalPages <= 5) {
+                          // If 5 or fewer pages, show all
+                          pageNum = i + 1;
+                        } else if (currentPage <= 3) {
+                          // If near start, show first 5 pages
+                          pageNum = i + 1;
+                        } else if (currentPage >= tasksData.totalPages - 2) {
+                          // If near end, show last 5 pages
+                          pageNum = tasksData.totalPages - 4 + i;
+                        } else {
+                          // Otherwise show 2 before and 2 after current page
+                          pageNum = currentPage - 2 + i;
+                        }
+
+                        return (
+                          <PaginationItem key={pageNum}>
+                            <PaginationLink
+                              href="#"
+                              isActive={currentPage === pageNum}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                handlePageChange(pageNum);
+                              }}
+                            >
+                              {pageNum}
+                            </PaginationLink>
+                          </PaginationItem>
+                        );
+                      })}
+
+                      {/* Next page button */}
+                      <PaginationItem>
+                        <PaginationNext
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            if (currentPage < tasksData.totalPages) handlePageChange(currentPage + 1);
+                          }}
+                          className={currentPage === tasksData.totalPages ? "pointer-events-none opacity-50" : ""}
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                </div>
+              )}
+
+              {/* Page size selector */}
+              <div className="flex items-center justify-end mt-2 text-sm text-muted-foreground">
+                <span className="mr-2">Rows per page:</span>
+                <select
+                  className="h-8 w-[70px] rounded-md border border-input bg-background px-3 py-1 text-sm"
+                  value={pageSize}
+                  onChange={(e) => {
+                    if (isMounted.current) {
+                      const newSize = parseInt(e.target.value);
+                      setPageSize(newSize);
+                      setCurrentPage(1); // Reset to first page when changing page size
+                    }
+                  }}
+                >
+                  <option value="5">5</option>
+                  <option value="10">10</option>
+                  <option value="20">20</option>
+                  <option value="50">50</option>
+                </select>
+              </div>
             </div>
           )}
         </div>
@@ -265,7 +550,13 @@ export function TasksList() {
         <TaskDialog
           task={selectedTask}
           open={isDialogOpen}
-          onOpenChange={setIsDialogOpen}
+          onOpenChange={(open) => {
+            setIsDialogOpen(open);
+            if (!open) {
+              // Refetch tasks when dialog is closed to reflect any changes
+              refetchTasks();
+            }
+          }}
         />
       )}
     </Card>

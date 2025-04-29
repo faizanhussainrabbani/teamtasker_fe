@@ -17,21 +17,35 @@ import { useAuth } from "@/context/auth-context"
 
 interface DashboardHeaderProps {
   isLoading?: boolean;
+  heading?: string;
+  description?: string;
+  action?: React.ReactNode;
 }
 
-export function DashboardHeader({ isLoading }: DashboardHeaderProps) {
+export function DashboardHeader({
+  isLoading,
+  heading = "Dashboard",
+  description,
+  action
+}: DashboardHeaderProps) {
   const [notifications, setNotifications] = useState(3)
   const { user } = useAuth();
 
   const firstName = user?.name?.split(' ')[0] || 'User';
+  const defaultDescription = `Welcome back, ${firstName}. You have ${notifications} new notifications.`;
 
   return (
     <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-4">
       <SidebarTrigger className="md:hidden" />
       <div className="flex-1">
-        <h1 className="text-xl font-semibold">Dashboard</h1>
-        <p className="text-sm text-muted-foreground">Welcome back, {firstName}. You have {notifications} new notifications.</p>
+        <h1 className="text-xl font-semibold">{heading}</h1>
+        <p className="text-sm text-muted-foreground">{description || defaultDescription}</p>
       </div>
+      {action && (
+        <div className="flex-shrink-0">
+          {action}
+        </div>
+      )}
       <div className="flex items-center gap-2">
         <Button variant="outline" size="icon">
           <Calendar className="h-4 w-4" />

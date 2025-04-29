@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Calendar } from "@/components/ui/calendar"
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react"
 import { TaskDialog } from "@/components/tasks/task-dialog"
-import { useTasks } from "@/lib/api/hooks/useTasks"
+import { useDashboardTasks } from "@/context/tasks-context"
 import { LoadingState, ErrorState, EmptyState } from "@/components/ui/api-state"
 
 // Function to get priority color
@@ -30,8 +30,81 @@ export function TasksCalendar() {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [selectedTask, setSelectedTask] = useState<any>(null)
 
-  // Fetch all tasks
-  const { data, isLoading, isError, error, refetch } = useTasks()
+  // Use the enhanced TasksContext
+  const {
+    getFilteredTasks,
+    isLoading,
+    isError,
+    error
+  } = useDashboardTasks();
+
+  // State for the filtered tasks data
+  const [tasksData, setTasksData] = useState<any>(null);
+
+  // Store the getFilteredTasks function in a ref to prevent it from causing infinite loops
+  const getFilteredTasksRef = React.useRef(getFilteredTasks);
+
+  // Update the ref when getFilteredTasks changes
+  React.useEffect(() => {
+    getFilteredTasksRef.current = getFilteredTasks;
+  }, [getFilteredTasks]);
+
+  // State for local loading
+  const [localLoading, setLocalLoading] = useState(false);
+
+  // Fetch tasks on component mount
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchTasks = async () => {
+      // Only set loading if we don't have data yet
+      if (!tasksData && isMounted) {
+        setLocalLoading(true);
+      }
+
+      try {
+        // Use the ref to get the latest function without causing dependency issues
+        const result = await getFilteredTasksRef.current({
+          includeTags: true,
+          includeAssignee: true,
+          includeCreator: true,
+        });
+
+        // Only update state if component is still mounted
+        if (isMounted) {
+          setTasksData(result);
+          setLocalLoading(false);
+        }
+      } catch (error) {
+        if (isMounted) {
+          console.error("Error fetching tasks:", error);
+          setLocalLoading(false);
+        }
+      }
+    };
+
+    fetchTasks();
+
+    // Cleanup function to prevent state updates after unmount
+    return () => {
+      isMounted = false;
+    };
+  }, []); // Remove getFilteredTasks from dependencies
+
+  // Refetch tasks function
+  const refetchTasks = async () => {
+    try {
+      // Use the ref to get the latest function without causing dependency issues
+      const result = await getFilteredTasksRef.current({
+        includeTags: true,
+        includeAssignee: true,
+        includeCreator: true,
+      });
+      setTasksData(result);
+    } catch (error) {
+      console.error("Error refetching tasks:", error);
+    }
+  };
 
   const openTaskDialog = (task: any) => {
     setSelectedTask(task)
@@ -41,8 +114,8 @@ export function TasksCalendar() {
   // Group tasks by date
   const tasksByDate: Record<string, any[]> = {}
 
-  if (data?.data) {
-    data.data.forEach((task) => {
+  if (tasksData?.items) {
+    tasksData.items.forEach((task) => {
       const dateStr = task.dueDate
       if (!tasksByDate[dateStr]) {
         tasksByDate[dateStr] = []
@@ -68,14 +141,14 @@ export function TasksCalendar() {
         </Button>
       </CardHeader>
       <CardContent>
-        {isLoading ? (
+        {localLoading ? (
           <LoadingState message="Loading tasks..." />
         ) : isError ? (
           <ErrorState
             message={`Error loading tasks: ${error?.message || 'Unknown error'}`}
-            onRetry={() => refetch()}
+            onRetry={() => refetchTasks()}
           />
-        ) : !data?.data || data.data.length === 0 ? (
+        ) : !tasksData?.items || tasksData.items.length === 0 ? (
           <EmptyState
             title="No tasks found"
             description="There are no tasks in the system."
@@ -177,7 +250,13 @@ export function TasksCalendar() {
         <TaskDialog
           task={selectedTask}
           open={isDialogOpen}
-          onOpenChange={setIsDialogOpen}
+          onOpenChange={(open) => {
+            setIsDialogOpen(open);
+            if (!open) {
+              // Refetch tasks when dialog is closed to reflect any changes
+              refetchTasks();
+            }
+          }}
         />
       )}
     </Card>
