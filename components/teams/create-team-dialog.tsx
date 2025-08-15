@@ -32,9 +32,9 @@ interface CreateTeamDialogProps {
 
 export function CreateTeamDialog({ open, onOpenChange, onSuccess }: CreateTeamDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
-  
-  // Get users for lead selection
-  const { data: usersData, isLoading: usersLoading } = useUsers()
+
+  // Get users for lead selection - only fetch when dialog is open
+  const { data: usersData, isLoading: usersLoading } = useUsers(undefined, { enabled: open })
   const users = usersData?.items || []
   
   // Create team mutation
@@ -143,8 +143,8 @@ export function CreateTeamDialog({ open, onOpenChange, onSuccess }: CreateTeamDi
                 <FormItem>
                   <FormLabel>Team Lead</FormLabel>
                   <Select
-                    onValueChange={(value) => field.onChange(value ? parseInt(value) : undefined)}
-                    value={field.value?.toString() || ""}
+                    onValueChange={(value) => field.onChange(value === "none" ? undefined : parseInt(value))}
+                    value={field.value?.toString() || "none"}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -152,7 +152,7 @@ export function CreateTeamDialog({ open, onOpenChange, onSuccess }: CreateTeamDi
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">No lead</SelectItem>
+                      <SelectItem value="none">No lead</SelectItem>
                       {users.map((user) => (
                         <SelectItem key={user.id} value={user.id.toString()}>
                           {user.name}

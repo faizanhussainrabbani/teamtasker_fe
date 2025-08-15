@@ -2,17 +2,17 @@ import { PaginatedResponse } from './common';
 import { User } from './users';
 
 export interface Announcement {
-  id: string;
+  id: number;
   title: string;
   content: string;
   author: {
-    id: string;
+    id: number;
     name: string;
     role?: string;
     avatar: string;
     initials: string;
   };
-  date: string;
+  createdDate: string;
   isPinned: boolean;
   likes: number;
   hasLiked: boolean;

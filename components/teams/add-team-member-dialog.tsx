@@ -35,8 +35,8 @@ interface AddTeamMemberDialogProps {
 export function AddTeamMemberDialog({ teamId, open, onOpenChange, onSuccess }: AddTeamMemberDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   
-  // Get users for selection
-  const { data: usersData, isLoading: usersLoading } = useUsers()
+  // Get users for selection - only fetch when dialog is open
+  const { data: usersData, isLoading: usersLoading, error: usersError } = useUsers(undefined, { enabled: open })
   const users = usersData?.items || []
   
   // Add team member mutation
@@ -94,20 +94,39 @@ export function AddTeamMemberDialog({ teamId, open, onOpenChange, onSuccess }: A
                   <Select
                     onValueChange={(value) => field.onChange(parseInt(value))}
                     value={field.value?.toString()}
+                    disabled={usersLoading}
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a user" />
+                        <SelectValue
+                          placeholder={
+                            usersLoading ? "Loading users..." :
+                            usersError ? "Error loading users" :
+                            users.length === 0 ? "No users available" :
+                            "Select a user"
+                          }
+                        />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {users.map((user) => (
-                        <SelectItem key={user.id} value={user.id.toString()}>
-                          {user.name}
-                        </SelectItem>
-                      ))}
+                      {!usersLoading && !usersError && users.length > 0 && users.map((user) => {
+                        const displayName = user.fullName || `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email || `User ${user.id}`;
+                        return (
+                          <SelectItem
+                            key={user.id}
+                            value={user.id.toString()}
+                          >
+                            {displayName}
+                          </SelectItem>
+                        );
+                      })}
                     </SelectContent>
                   </Select>
+                  {usersError && (
+                    <p className="text-sm text-red-500 mt-1">
+                      Failed to load users. Please try again.
+                    </p>
+                  )}
                   <FormDescription>
                     Select the user you want to add to the team.
                   </FormDescription>
@@ -125,6 +144,7 @@ export function AddTeamMemberDialog({ teamId, open, onOpenChange, onSuccess }: A
                   <Select
                     onValueChange={field.onChange}
                     value={field.value}
+                    defaultValue="Member"
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -153,7 +173,10 @@ export function AddTeamMemberDialog({ teamId, open, onOpenChange, onSuccess }: A
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isSubmitting}>
+              <Button
+                type="submit"
+                disabled={isSubmitting || usersLoading || !form.watch('userId')}
+              >
                 {isSubmitting ? "Adding..." : "Add Member"}
               </Button>
             </DialogFooter>

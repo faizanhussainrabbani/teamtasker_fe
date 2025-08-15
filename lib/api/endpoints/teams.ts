@@ -11,8 +11,16 @@ import {
 /**
  * Get all teams with optional filtering
  */
-export const getTeams = async (params?: TeamsQueryParams) => {
-  const response = await apiClient.get('/api/teams', { params });
+export const getTeams = async (params?: TeamsQueryParams): Promise<TeamDto[]> => {
+  const response = await apiClient.get('/teams', { params });
+  return response.data;
+};
+
+/**
+ * Get teams where the current user is a member
+ */
+export const getMyTeams = async (): Promise<TeamDto[]> => {
+  const response = await apiClient.get('/teams', { params: { myTeams: true } });
   return response.data;
 };
 
@@ -20,7 +28,7 @@ export const getTeams = async (params?: TeamsQueryParams) => {
  * Get a specific team by ID with detailed information including members
  */
 export const getTeamById = async (id: number): Promise<TeamDetailDto> => {
-  const response = await apiClient.get(`/api/teams/${id}`);
+  const response = await apiClient.get(`/teams/${id}`);
   return response.data;
 };
 
@@ -28,7 +36,7 @@ export const getTeamById = async (id: number): Promise<TeamDetailDto> => {
  * Create a new team
  */
 export const createTeam = async (team: TeamCreateUpdateDto): Promise<TeamDto> => {
-  const response = await apiClient.post('/api/teams', team);
+  const response = await apiClient.post('/teams', team);
   return response.data;
 };
 
@@ -36,21 +44,21 @@ export const createTeam = async (team: TeamCreateUpdateDto): Promise<TeamDto> =>
  * Update an existing team
  */
 export const updateTeam = async (id: number, team: TeamCreateUpdateDto): Promise<void> => {
-  await apiClient.put(`/api/teams/${id}`, team);
+  await apiClient.put(`/teams/${id}`, team);
 };
 
 /**
  * Delete a team
  */
 export const deleteTeam = async (id: number): Promise<void> => {
-  await apiClient.delete(`/api/teams/${id}`);
+  await apiClient.delete(`/teams/${id}`);
 };
 
 /**
  * Get all members of a specific team
  */
 export const getTeamMembers = async (teamId: number): Promise<TeamMemberDto[]> => {
-  const response = await apiClient.get(`/api/teams/${teamId}/members`);
+  const response = await apiClient.get(`/teams/${teamId}/members`);
   return response.data;
 };
 
@@ -58,10 +66,10 @@ export const getTeamMembers = async (teamId: number): Promise<TeamMemberDto[]> =
  * Add a user to a team
  */
 export const addTeamMember = async (
-  teamId: number, 
+  teamId: number,
   member: TeamMemberCreateUpdateDto
 ): Promise<TeamMemberDto> => {
-  const response = await apiClient.post(`/api/teams/${teamId}/members`, member);
+  const response = await apiClient.post(`/teams/${teamId}/members`, member);
   return response.data;
 };
 
@@ -69,16 +77,16 @@ export const addTeamMember = async (
  * Update a team member's role
  */
 export const updateTeamMember = async (
-  teamId: number, 
-  memberId: number, 
+  teamId: number,
+  memberId: number,
   role: string
 ): Promise<void> => {
-  await apiClient.put(`/api/teams/${teamId}/members/${memberId}`, { role });
+  await apiClient.put(`/teams/${teamId}/members/${memberId}`, { role });
 };
 
 /**
  * Remove a member from a team
  */
 export const removeTeamMember = async (teamId: number, memberId: number): Promise<void> => {
-  await apiClient.delete(`/api/teams/${teamId}/members/${memberId}`);
+  await apiClient.delete(`/teams/${teamId}/members/${memberId}`);
 };

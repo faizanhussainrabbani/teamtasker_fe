@@ -1,6 +1,7 @@
 'use client';
 
 import { useAuth } from '@/context/auth-context';
+import { TasksProvider } from '@/context/tasks-context';
 import { AppSidebar } from '@/components/app-sidebar';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -30,11 +31,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const showSidebar = true; // Always show sidebar for now
 
   return (
-    <div className="flex h-screen w-full overflow-hidden">
-      {showSidebar ? <AppSidebar className="shrink-0" /> : null}
-      <main className="flex-1 w-full overflow-hidden">
-        {children}
-      </main>
-    </div>
+    <TasksProvider>
+      <div className="flex h-screen w-full overflow-hidden">
+        {showSidebar ? <AppSidebar className="shrink-0" /> : null}
+        <main className="flex-1 w-full overflow-hidden">
+          {children}
+        </main>
+      </div>
+    </TasksProvider>
   );
 }

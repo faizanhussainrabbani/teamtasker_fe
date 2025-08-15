@@ -25,7 +25,7 @@ export const getUsers = async (params?: UsersQueryParams): Promise<UsersResponse
 /**
  * Get a user by ID
  */
-export const getUserById = async (id: string): Promise<User> => {
+export const getUserById = async (id: number): Promise<User> => {
   const response = await apiClient.get(`${USERS_ENDPOINT}/${id}`);
   return response.data;
 };
@@ -41,7 +41,7 @@ export const createUser = async (user: UserCreateRequest): Promise<User> => {
 /**
  * Update an existing user
  */
-export const updateUser = async (id: string, user: UserUpdateRequest): Promise<User> => {
+export const updateUser = async (id: number, user: UserUpdateRequest): Promise<User> => {
   const response = await apiClient.patch(`${USERS_ENDPOINT}/${id}`, user);
   return response.data;
 };
@@ -49,7 +49,7 @@ export const updateUser = async (id: string, user: UserUpdateRequest): Promise<U
 /**
  * Delete a user
  */
-export const deleteUser = async (id: string): Promise<void> => {
+export const deleteUser = async (id: number): Promise<void> => {
   await apiClient.delete(`${USERS_ENDPOINT}/${id}`);
 };
 
@@ -57,7 +57,9 @@ export const deleteUser = async (id: string): Promise<void> => {
  * Get current user profile
  */
 export const getCurrentUserProfile = async (): Promise<UserProfile> => {
+  console.log('🔍 getCurrentUserProfile called, endpoint:', PROFILE_ENDPOINT);
   const response = await apiClient.get(PROFILE_ENDPOINT);
+  console.log('✅ getCurrentUserProfile response:', response.data);
   return response.data;
 };
 
@@ -73,7 +75,16 @@ export const updateCurrentUserProfile = async (profile: UserUpdateRequest): Prom
  * Update user skills
  */
 export const updateUserSkills = async (skills: UserSkill[]): Promise<UserSkill[]> => {
-  const response = await apiClient.put(`${PROFILE_ENDPOINT}/skills`, { skills });
+  // Transform frontend UserSkill format to backend UpdateUserSkillsRequest format
+  const requestData = {
+    Skills: skills.map(skill => ({
+      Name: skill.name,
+      Level: skill.level,
+      YearsOfExperience: skill.yearsOfExperience
+    }))
+  };
+
+  const response = await apiClient.put(`${PROFILE_ENDPOINT}/skills`, requestData);
   return response.data;
 };
 

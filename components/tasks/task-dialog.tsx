@@ -22,18 +22,20 @@ import { X } from "lucide-react"
 
 import { useUsers } from "@/lib/api/hooks/useUsers"
 import { useTeams, useTeam } from "@/lib/api/hooks/useTeams"
+import { useCreateTask, useUpdateTask } from "@/lib/api/hooks/useTasks"
+import { TaskCreateRequest, TaskUpdateRequest } from "@/lib/api/types/tasks"
 
 // Sample team members for assignee selection (fallback)
 const sampleTeamMembers = [
   {
-    id: "user-1",
+    id: 1,
     name: "Jane Doe",
     role: "Senior Developer",
     avatar: "/placeholder.svg?height=32&width=32",
     initials: "JD",
   },
   {
-    id: "user-2",
+    id: 2,
     name: "John Smith",
     role: "Frontend Developer",
     avatar: "/placeholder.svg?height=32&width=32",
@@ -65,6 +67,10 @@ interface TaskDialogProps {
 export function TaskDialog({ task, open, onOpenChange }: TaskDialogProps) {
   const isNewTask = !task
 
+  // Mutation hooks for creating and updating tasks
+  const createTaskMutation = useCreateTask()
+  const updateTaskMutation = useUpdateTask()
+
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -72,7 +78,8 @@ export function TaskDialog({ task, open, onOpenChange }: TaskDialogProps) {
     priority: "medium",
     dueDate: "",
     progress: 0,
-    assigneeId: "",
+    projectId: 1, // Default to first project, will be updated when projects load
+    assigneeId: undefined as number | undefined,
     teamMemberId: undefined as number | undefined,
     assignmentType: "direct" as "direct" | "team", // "direct" for assigneeId, "team" for teamMemberId
     tags: [] as string[],
@@ -92,7 +99,8 @@ export function TaskDialog({ task, open, onOpenChange }: TaskDialogProps) {
         priority: task.priority || "medium",
         dueDate: task.dueDate || "",
         progress: task.progress || 0,
-        assigneeId: task.assignee?.id || "",
+        projectId: task.projectId || 1, // Default to project ID 1
+        assigneeId: task.assignee?.id || undefined,
         teamMemberId: task.teamMemberId,
         assignmentType,
         tags: task.tags || [],
@@ -106,7 +114,8 @@ export function TaskDialog({ task, open, onOpenChange }: TaskDialogProps) {
         priority: "medium",
         dueDate: new Date().toISOString().split("T")[0],
         progress: 0,
-        assigneeId: "",
+        projectId: 1, // Default to project ID 1
+        assigneeId: undefined,
         teamMemberId: undefined,
         assignmentType: "direct",
         tags: [],
@@ -130,37 +139,54 @@ export function TaskDialog({ task, open, onOpenChange }: TaskDialogProps) {
   }
 
   // Component for selecting a user directly
-  function AssignToUserSelect({ value, onChange }: { value: string | undefined, onChange: (value: string | undefined) => void }) {
+  function AssignToUserSelect({ value, onChange }: { value: number | undefined, onChange: (value: number | undefined) => void }) {
     // Fetch users
-    const { data: usersData, isLoading: usersLoading } = useUsers();
-    const users = usersData?.items || sampleTeamMembers;
+    const { data: usersData, isLoading: usersLoading, error: usersError } = useUsers();
+
+    // Debug logging
+    console.log("Users data:", usersData);
+    console.log("Users loading:", usersLoading);
+    console.log("Users error:", usersError);
+
+    // Use real user data if available, otherwise fall back to sample data
+    const users = usersData?.items || usersData || sampleTeamMembers;
 
     return (
       <div className="space-y-2">
         <Label htmlFor="assignee">Assign to User</Label>
         <Select
-          value={value || "unassigned"}
-          onValueChange={(val) => onChange(val === "unassigned" ? undefined : val)}
+          value={value ? value.toString() : "unassigned"}
+          onValueChange={(val) => onChange(val === "unassigned" ? undefined : parseInt(val, 10))}
         >
           <SelectTrigger id="assignee">
             <SelectValue placeholder="Select user" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="unassigned">Unassigned</SelectItem>
-            {users.map((user) => (
-              <SelectItem key={user.id} value={user.id.toString()}>
-                <div className="flex items-center gap-2">
-                  <Avatar className="h-6 w-6">
-                    <AvatarImage src={user.avatar} alt={user.name} />
-                    <AvatarFallback>{user.initials || user.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-                  </Avatar>
-                  <span>{user.name}</span>
-                </div>
-              </SelectItem>
-            ))}
+            {users.map((user) => {
+              // Ensure we have proper user data
+              const userName = user.fullName || user.name || `User ${user.id}`;
+              const userInitials = user.initials || userName.substring(0, 2).toUpperCase();
+
+              return (
+                <SelectItem key={user.id} value={user.id.toString()}>
+                  <div className="flex items-center gap-2">
+                    <Avatar className="h-6 w-6">
+                      <AvatarImage src={user.avatar} alt={userName} />
+                      <AvatarFallback>{userInitials}</AvatarFallback>
+                    </Avatar>
+                    <span>{userName}</span>
+                  </div>
+                </SelectItem>
+              );
+            })}
           </SelectContent>
         </Select>
         {usersLoading && <p className="text-xs text-muted-foreground">Loading users...</p>}
+        {usersError && <p className="text-xs text-red-500">Error loading users: {usersError.message}</p>}
+        {!usersLoading && !usersError && users.length === 0 && (
+          <p className="text-xs text-muted-foreground">No users available</p>
+        )}
       </div>
     );
   }
@@ -246,28 +272,48 @@ export function TaskDialog({ task, open, onOpenChange }: TaskDialogProps) {
     );
   }
 
-  const handleSubmit = () => {
-    // Prepare the data for submission
-    const taskData = {
-      title: formData.title,
-      description: formData.description,
-      status: formData.status,
-      priority: formData.priority,
-      dueDate: formData.dueDate,
-      progress: formData.progress,
-      tags: formData.tags,
-    };
+  const handleSubmit = async () => {
+    try {
+      // Prepare the data for submission
+      const taskData = {
+        title: formData.title,
+        description: formData.description,
+        status: formData.status,
+        priority: formData.priority,
+        dueDate: formData.dueDate,
+        progress: formData.progress,
+        projectId: formData.projectId,
+        tags: formData.tags,
+      };
 
-    // Add the appropriate assignment field based on assignment type
-    if (formData.assignmentType === "direct") {
-      Object.assign(taskData, { assigneeId: formData.assigneeId || undefined });
-    } else {
-      Object.assign(taskData, { teamMemberId: formData.teamMemberId });
+      // Add the appropriate assignment field based on assignment type
+      if (formData.assignmentType === "direct") {
+        Object.assign(taskData, { assigneeId: formData.assigneeId || undefined });
+      } else {
+        Object.assign(taskData, { teamMemberId: formData.teamMemberId });
+      }
+
+      console.log("Saving task:", taskData);
+
+      if (isNewTask) {
+        // Create new task
+        await createTaskMutation.mutateAsync(taskData as TaskCreateRequest);
+        console.log("✅ Task created successfully");
+      } else {
+        // Update existing task
+        await updateTaskMutation.mutateAsync({
+          id: task.id,
+          task: taskData as TaskUpdateRequest
+        });
+        console.log("✅ Task updated successfully");
+      }
+
+      // Close the dialog on success
+      onOpenChange(false);
+    } catch (error) {
+      console.error("❌ Error saving task:", error);
+      // Keep dialog open on error so user can retry
     }
-
-    // Here you would typically save the task data
-    console.log("Saving task:", taskData);
-    onOpenChange(false);
   }
 
   return (
@@ -437,8 +483,14 @@ export function TaskDialog({ task, open, onOpenChange }: TaskDialogProps) {
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button onClick={handleSubmit} disabled={!formData.title.trim()}>
-            {isNewTask ? "Create Task" : "Save Changes"}
+          <Button
+            onClick={handleSubmit}
+            disabled={!formData.title.trim() || createTaskMutation.isPending || updateTaskMutation.isPending}
+          >
+            {createTaskMutation.isPending || updateTaskMutation.isPending
+              ? "Saving..."
+              : isNewTask ? "Create Task" : "Save Changes"
+            }
           </Button>
         </DialogFooter>
       </DialogContent>

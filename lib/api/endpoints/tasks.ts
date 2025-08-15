@@ -203,7 +203,7 @@ export const getTasks = async (params?: TasksQueryParams): Promise<TasksResponse
 /**
  * Get a task by ID
  */
-export const getTaskById = async (id: string): Promise<Task> => {
+export const getTaskById = async (id: number): Promise<Task> => {
   const response = await apiClient.get(`${TASKS_ENDPOINT}/${id}`);
   return response.data;
 };
@@ -219,7 +219,7 @@ export const createTask = async (task: TaskCreateRequest): Promise<Task> => {
 /**
  * Update an existing task
  */
-export const updateTask = async (id: string, task: TaskUpdateRequest): Promise<Task> => {
+export const updateTask = async (id: number, task: TaskUpdateRequest): Promise<Task> => {
   const response = await apiClient.patch(`${TASKS_ENDPOINT}/${id}`, task);
   return response.data;
 };
@@ -227,14 +227,14 @@ export const updateTask = async (id: string, task: TaskUpdateRequest): Promise<T
 /**
  * Delete a task
  */
-export const deleteTask = async (id: string): Promise<void> => {
+export const deleteTask = async (id: number): Promise<void> => {
   await apiClient.delete(`${TASKS_ENDPOINT}/${id}`);
 };
 
 /**
  * Update task status
  */
-export const updateTaskStatus = async (id: string, status: string): Promise<Task> => {
+export const updateTaskStatus = async (id: number, status: string): Promise<Task> => {
   const response = await apiClient.patch(`${TASKS_ENDPOINT}/${id}/status`, { status });
   return response.data;
 };
@@ -242,7 +242,7 @@ export const updateTaskStatus = async (id: string, status: string): Promise<Task
 /**
  * Update task progress
  */
-export const updateTaskProgress = async (id: string, progress: number): Promise<Task> => {
+export const updateTaskProgress = async (id: number, progress: number): Promise<Task> => {
   const response = await apiClient.patch(`${TASKS_ENDPOINT}/${id}/progress`, { progress });
   return response.data;
 };

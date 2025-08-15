@@ -1,7 +1,7 @@
 import { PaginatedResponse } from './common';
 
 export interface User {
-  id: string;
+  id: number;
   name: string;
   email: string;
   role: string;
@@ -10,22 +10,47 @@ export interface User {
   bio?: string;
   phone?: string;
   location?: string;
-  createdAt: string;
-  updatedAt: string;
+  createdDate: string;
+  updatedDate: string;
 }
 
 export interface UserSkill {
+  id: number;
   name: string;
   level: number;
+  yearsOfExperience: number;
 }
 
-export interface UserProfile extends User {
+export interface Address {
+  street: string;
+  city: string;
+  state: string;
+  country: string;
+  zipCode: string;
+}
+
+export interface UserProfile {
+  id: number;
+  firstName: string;
+  lastName: string;
+  fullName: string;
+  email: string;
+  username: string;
+  role: string;
+  avatar: string;
+  initials: string;
+  department: string;
+  bio: string;
+  location: string;
+  phone: string;
+  address: Address;
   skills: UserSkill[];
-  developmentGoals: DevelopmentGoal[];
+  createdDate: string;
+  updatedDate: string;
 }
 
 export interface DevelopmentGoal {
-  id: string;
+  id: number;
   title: string;
   description: string;
   category: string;
@@ -42,12 +67,20 @@ export interface UserCreateRequest {
 }
 
 export interface UserUpdateRequest {
-  name?: string;
+  firstName?: string;
+  lastName?: string;
   email?: string;
-  role?: string;
+  department?: string;
   bio?: string;
-  phone?: string;
   location?: string;
+  phone?: string;
+  address?: {
+    street?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+    zipCode?: string;
+  };
 }
 
 export interface UsersQueryParams {

@@ -23,7 +23,7 @@ export const userKeys = {
   lists: () => [...userKeys.all, 'list'] as const,
   list: (filters: UsersQueryParams) => [...userKeys.lists(), filters] as const,
   details: () => [...userKeys.all, 'detail'] as const,
-  detail: (id: string) => [...userKeys.details(), id] as const,
+  detail: (id: number) => [...userKeys.details(), id] as const,
   profile: () => [...userKeys.all, 'profile'] as const,
   skills: () => [...userKeys.profile(), 'skills'] as const,
 };
@@ -31,10 +31,11 @@ export const userKeys = {
 /**
  * Hook for fetching users with filters
  */
-export const useUsers = (params?: UsersQueryParams) => {
+export const useUsers = (params?: UsersQueryParams, options?: { enabled?: boolean }) => {
   return useQuery({
     queryKey: userKeys.list(params || {}),
     queryFn: () => getUsers(params),
+    enabled: options?.enabled !== false, // Default to true unless explicitly disabled
     onError: (error) => {
       console.error('Error fetching users:', parseApiError(error));
     },
@@ -44,7 +45,7 @@ export const useUsers = (params?: UsersQueryParams) => {
 /**
  * Hook for fetching a single user
  */
-export const useUser = (id: string) => {
+export const useUser = (id: number) => {
   return useQuery({
     queryKey: userKeys.detail(id),
     queryFn: () => getUserById(id),
@@ -80,7 +81,7 @@ export const useUpdateUser = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, user }: { id: string; user: UserUpdateRequest }) =>
+    mutationFn: ({ id, user }: { id: number; user: UserUpdateRequest }) =>
       updateUser(id, user),
     onSuccess: (updatedUser) => {
       // Update the user in the cache
@@ -101,7 +102,7 @@ export const useDeleteUser = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => deleteUser(id),
+    mutationFn: (id: number) => deleteUser(id),
     onSuccess: (_, id) => {
       // Remove the user from the cache
       queryClient.removeQueries({ queryKey: userKeys.detail(id) });
@@ -120,7 +121,14 @@ export const useDeleteUser = () => {
 export const useCurrentUserProfile = () => {
   return useQuery({
     queryKey: userKeys.profile(),
-    queryFn: () => getCurrentUserProfile(),
+    queryFn: () => {
+      console.log('🔍 useCurrentUserProfile queryFn called');
+      return getCurrentUserProfile();
+    },
+    refetchOnMount: true, // Always refetch when component mounts
+    refetchOnWindowFocus: false, // Don't refetch on window focus
+    staleTime: 0, // Always consider data stale to ensure fresh data
+    enabled: true, // Explicitly enable the query
     onError: (error) => {
       console.error('Error fetching user profile:', parseApiError(error));
     },

@@ -21,26 +21,40 @@ export const taskKeys = {
   lists: () => [...taskKeys.all, 'list'] as const,
   list: (filters: TasksQueryParams) => [...taskKeys.lists(), filters] as const,
   details: () => [...taskKeys.all, 'detail'] as const,
-  detail: (id: string) => [...taskKeys.details(), id] as const,
+  detail: (id: number) => [...taskKeys.details(), id] as const,
 };
 
 /**
  * Hook for fetching tasks with filters
  */
 export const useTasks = (params?: TasksQueryParams) => {
+  // Normalize params to ensure consistent query keys
+  const normalizedParams = params ? { ...params } : {};
+
   return useQuery({
-    queryKey: taskKeys.list(params || {}),
+    queryKey: taskKeys.list(normalizedParams),
     queryFn: async () => {
       try {
         return await getTasks(params);
       } catch (error: any) {
         // If it's a 404 error, return empty data instead of throwing
         if (error.response?.status === 404) {
-          return { data: [], total: 0, page: 1, limit: params?.limit || 10 };
+          return {
+            items: [],
+            data: [],
+            pageNumber: 1,
+            pageSize: params?.pageSize || 10,
+            totalCount: 0,
+            totalPages: 1,
+            hasPreviousPage: false,
+            hasNextPage: false
+          };
         }
         throw error;
       }
     },
+    staleTime: 30000, // Consider data fresh for 30 seconds
+    cacheTime: 300000, // Keep in cache for 5 minutes
     onError: (error) => {
       console.error('Error fetching tasks:', parseApiError(error));
     },
@@ -50,7 +64,7 @@ export const useTasks = (params?: TasksQueryParams) => {
 /**
  * Hook for fetching a single task
  */
-export const useTask = (id: string) => {
+export const useTask = (id: number) => {
   return useQuery({
     queryKey: taskKeys.detail(id),
     queryFn: () => getTaskById(id),
@@ -70,8 +84,14 @@ export const useCreateTask = () => {
   return useMutation({
     mutationFn: (newTask: TaskCreateRequest) => createTask(newTask),
     onSuccess: () => {
-      // Invalidate and refetch tasks list
+      // Invalidate all task-related queries to ensure UI refreshes
+      queryClient.invalidateQueries({ queryKey: taskKeys.all });
       queryClient.invalidateQueries({ queryKey: taskKeys.lists() });
+
+      // Also invalidate specific task type queries that might be cached
+      queryClient.invalidateQueries({ queryKey: ['tasks', 'list'] });
+
+      console.log('✅ Task created - cache invalidated');
     },
     onError: (error) => {
       console.error('Error creating task:', parseApiError(error));
@@ -86,7 +106,7 @@ export const useUpdateTask = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, task }: { id: string; task: TaskUpdateRequest }) =>
+    mutationFn: ({ id, task }: { id: number; task: TaskUpdateRequest }) =>
       updateTask(id, task),
     onSuccess: (updatedTask) => {
       // Update the task in the cache
@@ -107,7 +127,7 @@ export const useDeleteTask = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => deleteTask(id),
+    mutationFn: (id: number) => deleteTask(id),
     onSuccess: (_, id) => {
       // Remove the task from the cache
       queryClient.removeQueries({ queryKey: taskKeys.detail(id) });
@@ -127,7 +147,7 @@ export const useUpdateTaskStatus = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, status }: { id: string; status: string }) =>
+    mutationFn: ({ id, status }: { id: number; status: string }) =>
       updateTaskStatus(id, status),
     onSuccess: (updatedTask) => {
       // Update the task in the cache
@@ -148,7 +168,7 @@ export const useUpdateTaskProgress = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, progress }: { id: string; progress: number }) =>
+    mutationFn: ({ id, progress }: { id: number; progress: number }) =>
       updateTaskProgress(id, progress),
     onSuccess: (updatedTask) => {
       // Update the task in the cache

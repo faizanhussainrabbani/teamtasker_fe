@@ -154,8 +154,8 @@ export function EditTeamDialog({ team, open, onOpenChange, onSuccess }: EditTeam
                 <FormItem>
                   <FormLabel>Team Lead</FormLabel>
                   <Select
-                    onValueChange={(value) => field.onChange(value ? parseInt(value) : undefined)}
-                    value={field.value?.toString() || ""}
+                    onValueChange={(value) => field.onChange(value === "none" ? undefined : parseInt(value))}
+                    value={field.value?.toString() || "none"}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -163,7 +163,7 @@ export function EditTeamDialog({ team, open, onOpenChange, onSuccess }: EditTeam
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">No lead</SelectItem>
+                      <SelectItem value="none">No lead</SelectItem>
                       {users.map((user) => (
                         <SelectItem key={user.id} value={user.id.toString()}>
                           {user.name}

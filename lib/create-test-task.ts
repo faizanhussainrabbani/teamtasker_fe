@@ -55,8 +55,8 @@ export const createTestTask = async (): Promise<any> => {
       tags: ['test', 'development', 'local'],
       progress: 0,
       assignee: { name: 'Unassigned', initials: 'UA', avatar: null },
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      createdDate: new Date().toISOString(),
+      updatedDate: new Date().toISOString()
     };
   }
 };

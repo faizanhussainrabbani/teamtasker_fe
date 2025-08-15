@@ -92,3 +92,64 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* Fix for Select component text visibility */
+@layer components {
+  [data-radix-select-content] {
+    background-color: white !important;
+    color: black !important;
+    border: 1px solid #ccc !important;
+  }
+
+  [data-radix-select-item] {
+    color: black !important;
+    background-color: white !important;
+  }
+
+  [data-radix-select-item] span {
+    color: black !important;
+  }
+
+  [data-radix-select-item]:hover,
+  [data-radix-select-item]:focus {
+    background-color: #f3f4f6 !important;
+    color: black !important;
+  }
+
+  [data-radix-select-item][data-highlighted] {
+    background-color: #f3f4f6 !important;
+    color: black !important;
+  }
+
+  [data-radix-select-item-text] {
+    color: black !important;
+  }
+
+  /* Force all text inside select items to be black */
+  [data-radix-select-content] * {
+    color: black !important;
+  }
+
+  /* Force all select elements to have visible text */
+  select {
+    background-color: white !important;
+    color: black !important;
+    border: 2px solid black !important;
+  }
+
+  select option {
+    background-color: white !important;
+    color: black !important;
+    font-weight: bold !important;
+    font-size: 16px !important;
+  }
+
+  /* Force all dialog content to have proper colors */
+  [role="dialog"] select,
+  [role="dialog"] select option {
+    background-color: white !important;
+    color: black !important;
+    font-weight: bold !important;
+    font-size: 16px !important;
+  }
+}

@@ -14,7 +14,7 @@ export const activityKeys = {
   lists: () => [...activityKeys.all, 'list'] as const,
   list: (filters: ActivitiesQueryParams) => [...activityKeys.lists(), filters] as const,
   details: () => [...activityKeys.all, 'detail'] as const,
-  detail: (id: string) => [...activityKeys.details(), id] as const,
+  detail: (id: number) => [...activityKeys.details(), id] as const,
 };
 
 /**
@@ -49,7 +49,7 @@ export const useActivities = (
 /**
  * Hook for fetching a single activity
  */
-export const useActivity = (id: string) => {
+export const useActivity = (id: number) => {
   return useQuery({
     queryKey: activityKeys.detail(id),
     queryFn: () => getActivityById(id),

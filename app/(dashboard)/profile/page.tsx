@@ -9,9 +9,9 @@ export const metadata: Metadata = {
 
 export default function ProfilePage() {
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col h-full">
       <PageHeader title="My Profile" description="View and manage your profile, skills, and development goals" />
-      <div className="p-4">
+      <div className="flex-1 overflow-auto p-4">
         <ProfileView />
       </div>
     </div>

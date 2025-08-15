@@ -4,28 +4,28 @@ import { User } from './users';
 export type ActivityType = 'completed' | 'commented' | 'assigned' | 'updated' | 'created' | 'deleted';
 
 export interface Activity {
-  id: string;
+  id: number;
   user: User;
   action: ActivityType;
   target: string;
-  targetId?: string;
+  targetId?: number;
   targetType?: string;
-  assigneeId?: string;
+  assigneeId?: number;
   assignee?: {
-    id: string;
+    id: number;
     name: string;
     avatar: string;
     initials: string;
   };
   comment?: string;
-  createdAt: string;
+  createdDate: string;
   timestamp: string; // Formatted time (e.g., "2 hours ago")
 }
 
 export interface ActivitiesQueryParams {
-  userId?: string;
+  userId?: number;
   targetType?: string;
-  targetId?: string;
+  targetId?: number;
   action?: ActivityType;
   page?: number;
   limit?: number;

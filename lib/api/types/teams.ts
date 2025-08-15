@@ -13,9 +13,9 @@ export interface TeamDto {
   description: string;
   department: string;
   leadId: number;
-  memberCount: number;
-  createdAt: string;
-  updatedAt: string;
+  memberCount?: number;
+  createdDate: string;
+  updatedDate: string;
 }
 
 /**
@@ -38,7 +38,7 @@ export interface TeamMemberDto {
   userId: number;
   role: string;
   user: UserMinimalDto;
-  joinedAt: string;
+  joinedDate: string;
 }
 
 /**

@@ -19,7 +19,7 @@ export const getActivities = async (params?: ActivitiesQueryParams): Promise<Act
 /**
  * Get a activity by ID
  */
-export const getActivityById = async (id: string): Promise<Activity> => {
+export const getActivityById = async (id: number): Promise<Activity> => {
   const response = await apiClient.get(`${ACTIVITIES_ENDPOINT}/${id}`);
   return response.data;
 };

@@ -174,7 +174,7 @@ export function DirectMessages() {
   )
 
   const handleSendMessage = () => {
-    if (newMessage.trim() === "") return
+    if (newMessage.trim() === "" || !selectedUser) return
 
     const message = {
       id: `msg-${Date.now()}`,
@@ -233,7 +233,7 @@ export function DirectMessages() {
                 {filteredMembers.map((member) => (
                   <Button
                     key={member.id}
-                    variant={selectedUser.id === member.id ? "secondary" : "ghost"}
+                    variant={selectedUser?.id === member.id ? "secondary" : "ghost"}
                     className="w-full justify-start"
                     onClick={() => setSelectedUser(member)}
                   >
@@ -271,26 +271,27 @@ export function DirectMessages() {
         </div>
 
         {/* Chat area */}
-        <div className="flex flex-1 flex-col">
-          <div className="border-b p-3">
-            <div className="flex items-center gap-2">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={selectedUser.avatar} alt={selectedUser.name} />
-                <AvatarFallback>{selectedUser.initials}</AvatarFallback>
-              </Avatar>
-              <div>
-                <div className="font-medium">{selectedUser.name}</div>
-                <div className="flex items-center gap-1">
-                  <span
-                    className={`h-2 w-2 rounded-full ${getStatusColor(selectedUser.status)}`}
-                  />
-                  <span className="text-xs text-muted-foreground">
-                    {selectedUser.status === "online" ? "Online" : `Last seen ${selectedUser.lastSeen}`}
-                  </span>
+        {selectedUser ? (
+          <div className="flex flex-1 flex-col">
+            <div className="border-b p-3">
+              <div className="flex items-center gap-2">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={selectedUser.avatar} alt={selectedUser.name} />
+                  <AvatarFallback>{selectedUser.initials}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <div className="font-medium">{selectedUser.name}</div>
+                  <div className="flex items-center gap-1">
+                    <span
+                      className={`h-2 w-2 rounded-full ${getStatusColor(selectedUser.status)}`}
+                    />
+                    <span className="text-xs text-muted-foreground">
+                      {selectedUser.status === "online" ? "Online" : `Last seen ${selectedUser.lastSeen}`}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
           <ScrollArea className="flex-1 p-4">
             <div className="space-y-4">
@@ -349,7 +350,11 @@ export function DirectMessages() {
               </Button>
             </div>
           </div>
-        </div>
+        ) : (
+          <div className="flex flex-1 items-center justify-center">
+            <p className="text-muted-foreground">Select a contact to start messaging</p>
+          </div>
+        )}
       </CardContent>
     </Card>
   )

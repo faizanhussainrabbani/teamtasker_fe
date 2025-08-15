@@ -103,8 +103,12 @@ apiClient.interceptors.response.use(response => {
 apiClient.interceptors.request.use(
   (config) => {
     const token = getAuthToken();
+    console.log('🔐 Auth token check:', token ? 'Token found' : 'No token found');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+      console.log('🔐 Authorization header set');
+    } else {
+      console.log('🔐 No authorization header set - no token available');
     }
 
     // Add CORS headers

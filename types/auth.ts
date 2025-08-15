@@ -37,12 +37,12 @@ export interface User {
   /**
    * When the user was created
    */
-  createdAt: string;
-  
+  createdDate: string;
+
   /**
    * When the user was last updated
    */
-  updatedAt: string;
+  updatedDate: string;
 }
 
 /**

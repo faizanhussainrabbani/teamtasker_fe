@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useTeam, useDeleteTeam } from "@/lib/api/hooks/useTeams"
+import { TeamDetailDto } from "@/lib/api/types/teams"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -15,28 +16,48 @@ import { TeamMembersList } from "@/components/teams/team-members-list"
 import { EditTeamDialog } from "@/components/teams/edit-team-dialog"
 import { AddTeamMemberDialog } from "@/components/teams/add-team-member-dialog"
 
-export default function TeamDetailPage({ params }: { params: { id: string } }) {
+interface PageProps {
+  params: Promise<{ id: string }>
+}
+
+export default function TeamDetailPage({ params }: PageProps) {
   const router = useRouter()
-  const teamId = parseInt(params.id)
+  const [teamId, setTeamId] = useState<number | null>(null)
+
+  // Handle async params
+  useState(() => {
+    params.then(p => setTeamId(parseInt(p.id)))
+  })
   
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isAddMemberDialogOpen, setIsAddMemberDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   
   // Fetch team data
-  const { data: team, isLoading, isError, refetch } = useTeam(teamId)
-  
+  const { data: team, isLoading, isError, refetch } = useTeam(teamId || 0) as {
+    data: TeamDetailDto | undefined;
+    isLoading: boolean;
+    isError: boolean;
+    refetch: () => void;
+  }
+
   // Delete team mutation
   const deleteTeamMutation = useDeleteTeam()
-  
+
   // Handle team deletion
   const handleDeleteTeam = async () => {
+    if (!teamId) return
     try {
       await deleteTeamMutation.mutateAsync(teamId)
       router.push("/teams")
     } catch (error) {
       console.error("Error deleting team:", error)
     }
+  }
+
+  // Show loading while parsing params
+  if (teamId === null) {
+    return <LoadingState message="Loading..." />
   }
   
   return (
@@ -124,7 +145,7 @@ export default function TeamDetailPage({ params }: { params: { id: string } }) {
                 <div>
                   <h3 className="text-sm font-medium">Created</h3>
                   <p className="text-sm text-muted-foreground">
-                    {new Date(team.createdAt).toLocaleDateString()}
+                    {new Date(team.createdDate).toLocaleDateString()}
                   </p>
                 </div>
               </CardContent>

@@ -5,6 +5,7 @@ import { parseApiError } from '@/lib/error-handling';
 import { TasksQueryParams } from '../types/tasks';
 import {
   getTeams,
+  getMyTeams,
   getTeamById,
   createTeam,
   updateTeam,
@@ -113,6 +114,19 @@ export const useTeams = (params?: TeamsQueryParams) => {
     queryFn: () => getTeams(params),
     onError: (error) => {
       console.error('Error fetching teams:', parseApiError(error));
+    },
+  });
+};
+
+/**
+ * Hook for fetching teams where the current user is a member
+ */
+export const useMyTeams = () => {
+  return useQuery({
+    queryKey: ['my-teams'],
+    queryFn: () => getMyTeams(),
+    onError: (error) => {
+      console.error('Error fetching my teams:', parseApiError(error));
     },
   });
 };

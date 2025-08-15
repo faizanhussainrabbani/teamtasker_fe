@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, ReactNode, useState, useEffect } from 'react';
+import React, { createContext, useContext, ReactNode, useState, useEffect, useMemo, useCallback } from 'react';
 import { useQuery, useQueryClient, QueryObserverResult } from '@tanstack/react-query';
 import { getTasks } from '@/lib/api/endpoints/tasks';
 import { TasksQueryParams, TaskType } from '@/lib/api/types/tasks';
@@ -107,8 +107,8 @@ const createEmptyResponse = (): ApiTasksResponse => ({
 export function TasksProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
 
-  // Track which task types have been requested - start with 'all' to reduce multiple API calls
-  const [requestedTypes, setRequestedTypes] = useState<Set<TaskType>>(new Set(['all']));
+  // Track which task types have been requested - start empty to prevent immediate queries
+  const [requestedTypes, setRequestedTypes] = useState<Set<TaskType>>(new Set());
 
   // Set up mock authentication for development if not authenticated
   useEffect(() => {
@@ -159,7 +159,7 @@ export function TasksProvider({ children }: { children: ReactNode }) {
 
           // Combine type with other query parameters
           const params = {
-            type,
+            taskType: type,
             ...queryParams[type]
           };
 
@@ -255,7 +255,7 @@ export function TasksProvider({ children }: { children: ReactNode }) {
   }, [queryClient]);
 
   // Function to get tasks by type with optional additional parameters
-  const getTasksByType = async (
+  const getTasksByType = useCallback(async (
     type: TaskType,
     params?: Partial<ExtendedTasksQueryParams>
   ): Promise<ApiTasksResponse | undefined> => {
@@ -290,8 +290,15 @@ export function TasksProvider({ children }: { children: ReactNode }) {
           return unassignedTasksQuery.data;
       }
     } else if (params) {
-      // If this type has been requested but params changed, refetch
-      return await refetchType(type, params);
+      // If this type has been requested but params changed, we'll handle this later
+      // For now, just return the existing data
+      switch (type) {
+        case 'all': return allTasksQuery.data;
+        case 'my': return myTasksQuery.data;
+        case 'team': return teamTasksQuery.data;
+        case 'created': return createdTasksQuery.data;
+        case 'unassigned': return unassignedTasksQuery.data;
+      }
     }
 
     // Return the already loaded data
@@ -302,117 +309,54 @@ export function TasksProvider({ children }: { children: ReactNode }) {
       case 'created': return createdTasksQuery.data;
       case 'unassigned': return unassignedTasksQuery.data;
     }
-  };
+  }, [requestedTypes, allTasksQuery, myTasksQuery, teamTasksQuery, createdTasksQuery, unassignedTasksQuery, queryParams]);
 
-  // Function to get filtered tasks with advanced filtering
-  const getFilteredTasks = async (
+  // Function to get filtered tasks with advanced filtering using React Query
+  const getFilteredTasks = useCallback(async (
     params: Partial<ExtendedTasksQueryParams>
   ): Promise<ApiTasksResponse | undefined> => {
     console.log("getFilteredTasks called with params:", params);
 
-    // Create a flag to track if this operation is still active
-    let isActive = true;
-
-    // Generate a cache key based on the params
-    const cacheKey = JSON.stringify(params);
-
-    // Check if we have this data in the cache
-    const cachedData = queryClient.getQueryData(
-      taskKeys.list({ ...params })
-    ) as ApiTasksResponse | undefined;
-
-    // If we have cached data and it's not stale, return it
-    if (cachedData) {
-      console.log("Using cached data for params:", params);
-      return cachedData;
-    }
-
-    // Set loading state for 'all' type
-    setLoadingStates(prev => ({ ...prev, all: true }));
+    // Use React Query to fetch and cache the data
+    const queryKey = taskKeys.list({ ...params });
 
     try {
-      // Make a direct API call with the provided parameters
-      console.log("🔍 Making API call to getTasks with params:", params);
-      const result = await getTasks(params);
-      console.log("✅ API call to getTasks completed");
-      console.log("✅ Result:", result);
-      console.log("✅ Result has items:", !!result?.items);
-      console.log("✅ Result has data:", !!result?.data);
-      console.log("✅ Items length:", result?.items?.length || 0);
-      console.log("✅ Data length:", result?.data?.length || 0);
+      // Check if we already have this data in cache
+      const cachedData = queryClient.getQueryData(queryKey) as ApiTasksResponse | undefined;
 
-      // Ensure we have a valid result with either items or data
-      if (!result) {
-        console.warn("⚠️ No result returned from getTasks, creating empty response");
-        const emptyResponse = createEmptyResponse();
-
-        // Cache the empty result
-        queryClient.setQueryData(taskKeys.list({ ...params }), emptyResponse);
-
-        if (isActive) {
-          setLoadingStates(prev => ({ ...prev, all: false }));
-          return emptyResponse;
-        }
-        return undefined;
+      if (cachedData) {
+        console.log("Using cached data for params:", params);
+        return cachedData;
       }
 
-      // Ensure the result has either items or data
-      if ((!result.items || result.items.length === 0) &&
-          (!result.data || result.data.length === 0)) {
-        console.log("⚠️ Result has no items or data, but is a valid response object");
-      }
+      // Fetch data using React Query
+      const result = await queryClient.fetchQuery({
+        queryKey,
+        queryFn: async () => {
+          console.log("🔍 Making API call to getTasks with params:", params);
+          const response = await getTasks(params);
+          console.log("✅ API call to getTasks completed:", response);
+          return response || createEmptyResponse();
+        },
+        staleTime: 30000, // Consider data fresh for 30 seconds
+      });
 
-      // Cache the result
-      queryClient.setQueryData(taskKeys.list({ ...params }), result);
-
-      // Only update state if operation is still active
-      if (isActive) {
-        console.log("Setting loading state to false");
-        setLoadingStates(prev => ({ ...prev, all: false }));
-        return result;
-      }
-      console.log("Operation no longer active, not updating state");
-      return undefined;
+      return result;
     } catch (error: any) {
       console.error("Error in getFilteredTasks:", error);
 
-      // Only update state if operation is still active
-      if (isActive) {
-        console.log("Setting loading state to false after error");
-        setLoadingStates(prev => ({ ...prev, all: false }));
-
-        // Handle 404 errors by returning an empty response
-        if (error.response?.status === 404) {
-          const emptyResponse = createEmptyResponse();
-          // Cache the empty result
-          queryClient.setQueryData(taskKeys.list({ ...params }), emptyResponse);
-          return emptyResponse;
-        }
-
-        // For other errors, create an empty response but don't cache it
+      // Handle 404 errors by returning an empty response
+      if (error.response?.status === 404) {
         const emptyResponse = createEmptyResponse();
+        // Cache the empty result
+        queryClient.setQueryData(queryKey, emptyResponse);
         return emptyResponse;
       }
-      throw error;
-    } finally {
-      // Ensure loading state is reset even if there's an error
-      setTimeout(() => {
-        if (isActive) {
-          console.log("Final reset of loading state");
-          setLoadingStates(prev => ({ ...prev, all: false }));
-        }
-      }, 100);
+
+      // For other errors, create an empty response but don't cache it
+      return createEmptyResponse();
     }
-
-    // Create a cleanup function but don't use it as the return value
-    const cleanup = () => {
-      isActive = false;
-      setLoadingStates(prev => ({ ...prev, all: false }));
-    };
-
-    // Return the actual result, not the cleanup function
-    return result;
-  };
+  }, [queryClient]);
 
   // Function to go to a specific page for a task type
   const goToPage = async (
@@ -443,8 +387,8 @@ export function TasksProvider({ children }: { children: ReactNode }) {
       : queryParams[type];
 
     await queryClient.prefetchQuery({
-      queryKey: taskKeys.list({ type, ...queryParamsToUse }),
-      queryFn: () => getTasks({ type, ...queryParamsToUse })
+      queryKey: taskKeys.list({ taskType: type, ...queryParamsToUse }),
+      queryFn: () => getTasks({ taskType: type, ...queryParamsToUse })
     });
 
     // Mark this type as requested
@@ -542,38 +486,56 @@ export function TasksProvider({ children }: { children: ReactNode }) {
     (requestedTypes.has('created') && createdTasksQuery.error) ||
     (requestedTypes.has('unassigned') && unassignedTasksQuery.error);
 
+  // Memoize the context value to prevent unnecessary re-renders
+  const contextValue = useMemo(() => ({
+    // Task data getters
+    getTasksByType,
+    getFilteredTasks,
+
+    // Direct access to already fetched data
+    allTasks: allTasksQuery.data,
+    myTasks: myTasksQuery.data,
+    teamTasks: teamTasksQuery.data,
+    createdTasks: createdTasksQuery.data,
+    unassignedTasks: unassignedTasksQuery.data,
+
+    // Loading and error states
+    isLoading,
+    isLoadingType,
+    isError,
+    error: error as Error | null,
+
+    // Refetch functions
+    refetch: refetchAll,
+    refetchType,
+
+    // Prefetch function
+    prefetchTaskType,
+
+    // Pagination helpers
+    goToPage,
+    currentPage
+  }), [
+    getTasksByType,
+    getFilteredTasks,
+    allTasksQuery.data,
+    myTasksQuery.data,
+    teamTasksQuery.data,
+    createdTasksQuery.data,
+    unassignedTasksQuery.data,
+    isLoading,
+    isLoadingType,
+    isError,
+    error,
+    refetchAll,
+    refetchType,
+    prefetchTaskType,
+    goToPage,
+    currentPage
+  ]);
+
   return (
-    <TasksContext.Provider
-      value={{
-        // Task data getters
-        getTasksByType,
-        getFilteredTasks,
-
-        // Direct access to already fetched data
-        allTasks: allTasksQuery.data,
-        myTasks: myTasksQuery.data,
-        teamTasks: teamTasksQuery.data,
-        createdTasks: createdTasksQuery.data,
-        unassignedTasks: unassignedTasksQuery.data,
-
-        // Loading and error states
-        isLoading,
-        isLoadingType,
-        isError,
-        error: error as Error | null,
-
-        // Refetch functions
-        refetch: refetchAll,
-        refetchType,
-
-        // Prefetch function
-        prefetchTaskType,
-
-        // Pagination helpers
-        goToPage,
-        currentPage
-      }}
-    >
+    <TasksContext.Provider value={contextValue}>
       {children}
     </TasksContext.Provider>
   );

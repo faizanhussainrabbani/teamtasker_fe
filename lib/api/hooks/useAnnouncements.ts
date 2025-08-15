@@ -21,7 +21,7 @@ export const announcementKeys = {
   lists: () => [...announcementKeys.all, 'list'] as const,
   list: (filters: AnnouncementsQueryParams) => [...announcementKeys.lists(), filters] as const,
   details: () => [...announcementKeys.all, 'detail'] as const,
-  detail: (id: string) => [...announcementKeys.details(), id] as const,
+  detail: (id: number) => [...announcementKeys.details(), id] as const,
 };
 
 /**
@@ -40,7 +40,7 @@ export const useAnnouncements = (params?: AnnouncementsQueryParams) => {
 /**
  * Hook for fetching a single announcement
  */
-export const useAnnouncement = (id: string) => {
+export const useAnnouncement = (id: number) => {
   return useQuery({
     queryKey: announcementKeys.detail(id),
     queryFn: () => getAnnouncementById(id),
@@ -76,7 +76,7 @@ export const useUpdateAnnouncement = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: AnnouncementUpdateRequest }) => 
+    mutationFn: ({ id, data }: { id: number; data: AnnouncementUpdateRequest }) =>
       updateAnnouncement(id, data),
     onSuccess: (updatedAnnouncement) => {
       // Update the announcement in the cache
@@ -100,7 +100,7 @@ export const useDeleteAnnouncement = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: (id: string) => deleteAnnouncement(id),
+    mutationFn: (id: number) => deleteAnnouncement(id),
     onSuccess: (_, id) => {
       // Remove the announcement from the cache
       queryClient.removeQueries({ queryKey: announcementKeys.detail(id) });
@@ -120,7 +120,7 @@ export const useToggleAnnouncementPin = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: (id: string) => toggleAnnouncementPin(id),
+    mutationFn: (id: number) => toggleAnnouncementPin(id),
     onSuccess: (updatedAnnouncement) => {
       // Update the announcement in the cache
       queryClient.setQueryData(
@@ -143,7 +143,7 @@ export const useToggleAnnouncementLike = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: (id: string) => toggleAnnouncementLike(id),
+    mutationFn: (id: number) => toggleAnnouncementLike(id),
     onSuccess: (updatedAnnouncement) => {
       // Update the announcement in the cache
       queryClient.setQueryData(

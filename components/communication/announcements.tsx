@@ -27,10 +27,16 @@ export function Announcements() {
   const { data: currentUser } = useCurrentUser()
   
   // Fetch announcements with React Query
-  const { data, isLoading, isError, error, refetch } = useAnnouncements({ 
+  const { data, isLoading, isError, error, refetch } = useAnnouncements({
     search: searchQuery || undefined,
     limit: 20
-  })
+  }) as {
+    data: any;
+    isLoading: boolean;
+    isError: boolean;
+    error: any;
+    refetch: () => void;
+  }
   
   // Mutations for creating and updating announcements
   const createAnnouncementMutation = useCreateAnnouncement()
@@ -52,11 +58,11 @@ export function Announcements() {
     })
   }
   
-  const handleTogglePinned = (id: string) => {
+  const handleTogglePinned = (id: number) => {
     togglePinMutation.mutate(id)
   }
-  
-  const handleToggleLike = (id: string) => {
+
+  const handleToggleLike = (id: number) => {
     toggleLikeMutation.mutate(id)
   }
 
@@ -144,7 +150,7 @@ export function Announcements() {
             message={`Error loading announcements: ${error?.message || 'Unknown error'}`}
             onRetry={() => refetch()}
           />
-        ) : !data?.data || data.data.length === 0 ? (
+        ) : !data || (Array.isArray(data) ? data.length === 0 : (!data.data || data.data.length === 0)) ? (
           <EmptyState
             title="No announcements found"
             description="There are no announcements to display."
@@ -158,7 +164,7 @@ export function Announcements() {
         ) : (
           <ScrollArea className="h-full px-4 pb-4">
             <div className="space-y-4">
-              {data.data.map((announcement) => (
+              {(Array.isArray(data) ? data : data.data).map((announcement: any) => (
                 <Card key={announcement.id} className={announcement.isPinned ? "border-primary" : ""}>
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
@@ -199,7 +205,7 @@ export function Announcements() {
                       </Avatar>
                       <div className="text-xs">
                         <span className="font-medium">{announcement.author.name}</span>
-                        <span className="text-muted-foreground"> • {formatDate(announcement.date)}</span>
+                        <span className="text-muted-foreground"> • {formatDate(announcement.createdDate)}</span>
                       </div>
                     </div>
                     <Button

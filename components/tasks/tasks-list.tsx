@@ -159,6 +159,7 @@ export function TasksList() {
 
     // Build API parameters
     const params = {
+      taskType: 'my', // Security fix: Always specify taskType to prevent data leakage
       status: statusFilter !== "all" ? statusFilter as TaskStatus : undefined,
       priority: priorityFilter !== "all" ? priorityFilter as TaskPriority : undefined,
       search: debouncedSearch || undefined,
@@ -347,7 +348,7 @@ export function TasksList() {
         setIsLoading(false);
       }
     };
-  }, [fetchTasks]); // Removed createTestTaskIfNeeded from dependencies
+  }, [statusFilter, priorityFilter, debouncedSearch, currentPage, pageSize]); // Use individual dependencies instead of fetchTasks
 
   // Debounce search input
   React.useEffect(() => {
@@ -436,8 +437,8 @@ export function TasksList() {
     <Card>
       <CardHeader className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
         <div>
-          <CardTitle>All Tasks</CardTitle>
-          <CardDescription>Manage and track your team's tasks</CardDescription>
+          <CardTitle>My Tasks</CardTitle>
+          <CardDescription>Manage and track your assigned tasks</CardDescription>
         </div>
         <Button onClick={() => { setSelectedTask(null); setIsDialogOpen(true); }}>
           <Plus className="mr-2 h-4 w-4" />

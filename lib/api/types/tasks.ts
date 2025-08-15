@@ -4,19 +4,37 @@ export type TaskStatus = 'todo' | 'in-progress' | 'completed';
 export type TaskPriority = 'low' | 'medium' | 'high';
 
 export interface Task {
-  id: string;
+  id: number;
   title: string;
   description: string;
   status: TaskStatus;
   priority: TaskPriority;
   dueDate: string;
-  assigneeId?: string;
+  progress: number;
+
+  // Project information
+  projectId: number;
+  projectName: string;
+  project?: {
+    id: number;
+    name: string;
+    color?: string;
+  };
+
+  // Assignee information (new structure)
+  assigneeTeamMemberId?: number;
+  assigneeId?: number; // Deprecated but kept for compatibility
   assignee?: {
-    id: string;
+    id: number;
     name: string;
     avatar: string;
     initials: string;
+    teamMemberId?: number;
+    teamId?: number;
+    teamRole?: string;
   };
+
+  // Legacy team member structure (kept for compatibility)
   teamMemberId?: number;
   teamMember?: {
     id: number;
@@ -34,22 +52,25 @@ export interface Task {
       name: string;
     };
   };
-  creatorId?: string;
+
+  // Creator information (new structure)
+  creatorTeamMemberId?: number;
+  creatorId?: number; // Deprecated but kept for compatibility
   creator?: {
-    id: string;
+    id: number;
     name: string;
     avatar: string;
     initials: string;
+    teamMemberId?: number;
+    teamId?: number;
+    teamRole?: string;
   };
-  project?: {
-    id: string;
-    name: string;
-    color?: string;
-  };
+
+  // Task metadata
   tags: string[];
-  progress: number;
-  createdAt: string;
-  updatedAt: string;
+  createdDate: string;
+  updatedDate: string;
+  completedDate?: string;
 }
 
 export interface TaskCreateRequest {
@@ -58,11 +79,15 @@ export interface TaskCreateRequest {
   status: TaskStatus;
   priority: TaskPriority;
   dueDate?: string;
-  assigneeId?: string | null;
-  teamMemberId?: number | null;
-  tags?: string[];
   progress?: number;
   projectId?: number | null;
+
+  // Assignment options (use either assigneeId OR assigneeTeamMemberId)
+  assigneeId?: number | null; // Deprecated but kept for compatibility
+  assigneeTeamMemberId?: number | null; // Preferred method
+  teamMemberId?: number | null; // Legacy field
+
+  tags?: string[];
 }
 
 export interface TaskUpdateRequest {
@@ -71,10 +96,14 @@ export interface TaskUpdateRequest {
   status?: TaskStatus;
   priority?: TaskPriority;
   dueDate?: string;
-  assigneeId?: string;
-  teamMemberId?: number;
-  tags?: string[];
   progress?: number;
+
+  // Assignment options (use either assigneeId OR assigneeTeamMemberId)
+  assigneeId?: number; // Deprecated but kept for compatibility
+  assigneeTeamMemberId?: number; // Preferred method
+  teamMemberId?: number; // Legacy field
+
+  tags?: string[];
 }
 
 export type TaskType = 'my' | 'team' | 'created' | 'unassigned' | 'all';
@@ -82,14 +111,14 @@ export type TaskType = 'my' | 'team' | 'created' | 'unassigned' | 'all';
 export interface TasksQueryParams {
   status?: TaskStatus;
   priority?: TaskPriority;
-  assigneeId?: string;
+  assigneeId?: number;
   search?: string;
   tags?: string[];
   page?: number;
   limit?: number;
   sortBy?: string;
   sortDirection?: 'asc' | 'desc';
-  type?: TaskType;
+  taskType?: TaskType;
 
   // Additional parameters used in our application
   pageNumber?: number;

@@ -15,8 +15,12 @@ export default function Template({ children }: { children: React.ReactNode }) {
     defaultOptions: {
       queries: {
         staleTime: 60 * 1000, // 1 minute
+        cacheTime: 300 * 1000, // 5 minutes
         retry: 1,
         refetchOnWindowFocus: false,
+        refetchOnMount: false, // Don't refetch on mount if data exists
+        refetchOnReconnect: false, // Don't refetch on reconnect
+        notifyOnChangeProps: ['data', 'error', 'isLoading'], // Only notify on specific prop changes
       },
     },
   }));

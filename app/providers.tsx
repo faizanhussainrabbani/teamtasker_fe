@@ -9,15 +9,18 @@ import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/context/auth-context';
 import ErrorBoundary from '@/components/error-boundary';
 import ApiErrorListener from '@/components/api-error-listener';
-import { AuthenticatedLayout } from '@/components/layout/authenticated-layout';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient({
     defaultOptions: {
       queries: {
         staleTime: 60 * 1000, // 1 minute
+        cacheTime: 300 * 1000, // 5 minutes
         retry: 1,
         refetchOnWindowFocus: false,
+        refetchOnMount: false, // Don't refetch on mount if data exists
+        refetchOnReconnect: false, // Don't refetch on reconnect
+        notifyOnChangeProps: ['data', 'error', 'isLoading'], // Only notify on specific prop changes
       },
     },
   }));
@@ -28,9 +31,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <AuthProvider>
             <SidebarProvider>
-              <AuthenticatedLayout>
-                {children}
-              </AuthenticatedLayout>
+              {children}
               <ApiErrorListener />
               <Toaster />
             </SidebarProvider>
