@@ -15,7 +15,7 @@ export const API = {
   /**
    * API timeout in milliseconds
    */
-  TIMEOUT: 30000,
+  TIMEOUT: 15000,
   
   /**
    * API version

@@ -6,7 +6,6 @@ import { useAuth } from '@/context/auth-context';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
 import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
@@ -105,7 +104,7 @@ export default function LoginPage() {
         </Button>
 
         <div className="text-center text-sm mt-4">
-          Don't have an account?{' '}
+          Don&apos;t have an account?{' '}
           <Button
             variant="link"
             className="px-0 font-normal h-auto py-0"

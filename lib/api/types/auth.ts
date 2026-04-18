@@ -1,5 +1,3 @@
-import { User } from './users';
-
 /**
  * Auth request payload for login
  * Matches TeamTasker.Application.Auth.Models.AuthRequest
@@ -18,7 +16,10 @@ export interface AuthResponse {
   username: string;
   email: string;
   fullName: string;
-  token: string;
+  role?: string | null;
+  token?: string | null;
+  refreshToken?: string | null;
+  expiresAt?: string | null;
 }
 
 // Alias for backward compatibility

@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
@@ -10,8 +10,22 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Slider } from "@/components/ui/slider"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PlusCircle, TrendingUp } from "lucide-react"
+
+interface SkillProgressEntry {
+  date: string
+  level: number
+}
+
+interface SkillItem {
+  id: string
+  name: string
+  category: string
+  currentLevel: number
+  targetLevel: number
+  progress: SkillProgressEntry[]
+}
 
 // Sample skill categories
 const skillCategories = [
@@ -22,7 +36,7 @@ const skillCategories = [
 ]
 
 // Sample skills data
-const initialSkills = [
+const initialSkills: SkillItem[] = [
   {
     id: "skill-1",
     name: "React",
@@ -140,7 +154,7 @@ export function SkillsTracker() {
     targetLevel: 80,
   })
   const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false)
-  const [selectedSkill, setSelectedSkill] = useState<any>(null)
+  const [selectedSkill, setSelectedSkill] = useState<SkillItem | null>(null)
   const [newLevel, setNewLevel] = useState(0)
 
   // Filter skills by category
@@ -151,7 +165,9 @@ export function SkillsTracker() {
   const handleAddSkill = () => {
     if (newSkill.name.trim() === "") return
 
-    const skill = {
+    const createdDate = new Date().toISOString().split("T")[0] || new Date().toISOString()
+
+    const skill: SkillItem = {
       id: `skill-${Date.now()}`,
       name: newSkill.name,
       category: newSkill.category,
@@ -159,7 +175,7 @@ export function SkillsTracker() {
       targetLevel: newSkill.targetLevel,
       progress: [
         {
-          date: new Date().toISOString().split("T")[0],
+          date: createdDate,
           level: newSkill.currentLevel,
         },
       ],
@@ -175,7 +191,7 @@ export function SkillsTracker() {
     setIsDialogOpen(false)
   }
 
-  const handleOpenUpdateDialog = (skill: any) => {
+  const handleOpenUpdateDialog = (skill: SkillItem) => {
     setSelectedSkill(skill)
     setNewLevel(skill.currentLevel)
     setIsUpdateDialogOpen(true)
@@ -184,7 +200,7 @@ export function SkillsTracker() {
   const handleUpdateSkill = () => {
     if (!selectedSkill) return
 
-    const today = new Date().toISOString().split("T")[0]
+    const today = new Date().toISOString().split("T")[0] || new Date().toISOString()
 
     setSkills(
       skills.map((skill) => {
@@ -306,7 +322,7 @@ export function SkillsTracker() {
                   step={5}
                   value={[newSkill.currentLevel]}
                   onValueChange={(value) =>
-                    setNewSkill({ ...newSkill, currentLevel: value[0] })
+                    setNewSkill({ ...newSkill, currentLevel: value[0] ?? newSkill.currentLevel })
                   }
                 />
               </div>
@@ -326,7 +342,7 @@ export function SkillsTracker() {
                   step={5}
                   value={[newSkill.targetLevel]}
                   onValueChange={(value) =>
-                    setNewSkill({ ...newSkill, targetLevel: value[0] })
+                    setNewSkill({ ...newSkill, targetLevel: value[0] ?? newSkill.targetLevel })
                   }
                 />
               </div>
@@ -369,7 +385,7 @@ export function SkillsTracker() {
                   max={100}
                   step={5}
                   value={[newLevel]}
-                  onValueChange={(value) => setNewLevel(value[0])}
+                  onValueChange={(value) => setNewLevel(value[0] ?? newLevel)}
                 />
               </div>
               <div className="rounded-lg border p-3">

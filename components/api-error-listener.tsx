@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/ui/use-toast';
-import { UNAUTHORIZED_EVENT, SERVER_ERROR_EVENT, NETWORK_ERROR_EVENT } from '@/lib/api/client';
+import { UNAUTHORIZED_EVENT, FORBIDDEN_EVENT, SERVER_ERROR_EVENT, NETWORK_ERROR_EVENT } from '@/lib/api/client';
 
 export function ApiErrorListener() {
   const { toast } = useToast();
@@ -33,6 +33,15 @@ export function ApiErrorListener() {
       });
     };
 
+    // Handle forbidden errors (403)
+    const handleForbidden = () => {
+      toast({
+        title: 'Access Denied',
+        description: 'You do not have permission to perform this action.',
+        variant: 'destructive',
+      });
+    };
+
     // Handle network errors (no internet connection, etc.)
     const handleNetworkError = () => {
       toast({
@@ -44,12 +53,14 @@ export function ApiErrorListener() {
 
     // Add event listeners
     window.addEventListener(UNAUTHORIZED_EVENT, handleUnauthorized as EventListener);
+    window.addEventListener(FORBIDDEN_EVENT, handleForbidden as EventListener);
     window.addEventListener(SERVER_ERROR_EVENT, handleServerError as EventListener);
     window.addEventListener(NETWORK_ERROR_EVENT, handleNetworkError as EventListener);
 
     // Clean up event listeners
     return () => {
       window.removeEventListener(UNAUTHORIZED_EVENT, handleUnauthorized as EventListener);
+      window.removeEventListener(FORBIDDEN_EVENT, handleForbidden as EventListener);
       window.removeEventListener(SERVER_ERROR_EVENT, handleServerError as EventListener);
       window.removeEventListener(NETWORK_ERROR_EVENT, handleNetworkError as EventListener);
     };

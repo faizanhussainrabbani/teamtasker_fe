@@ -43,8 +43,12 @@ export function useFormValidation<T extends Record<string, any>>(
     (field: keyof T, value: any): boolean => {
       try {
         // Create a partial schema for just this field
-        const fieldSchema = schema.pick({ [field]: true });
-        fieldSchema.parse({ [field]: value });
+        const schemaWithPick = schema as unknown as {
+          pick: (shape: Record<string, true>) => ZodSchema<unknown>;
+        };
+        const fieldKey = field as string;
+        const fieldSchema = schemaWithPick.pick({ [fieldKey]: true });
+        fieldSchema.parse({ [fieldKey]: value });
         
         // Clear errors for this field if validation passes
         setErrors(prev => {

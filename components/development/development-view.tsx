@@ -1,6 +1,5 @@
 "use client"
 
-import { useState } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { LearningResources } from "@/components/development/learning-resources"
 import { SkillsTracker } from "@/components/development/skills-tracker"

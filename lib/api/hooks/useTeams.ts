@@ -1,13 +1,153 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  addTeamMember,
+  createTeam,
+  deleteTeam,
+  getTeamById,
+  getTeams,
+  removeTeamMember,
+  updateTeam,
+} from '../endpoints/teams';
+import {
+  AddTeamMemberRequest,
+  TeamCreateRequest,
+  TeamsQueryParams,
+  TeamUpdateRequest,
+} from '../types/teams';
 import { useTasks } from './useTasks';
 import { useUsers } from './useUsers';
+import { Task } from '../types/tasks';
 import { parseApiError } from '@/lib/error-handling';
-import { TasksQueryParams } from '../types/tasks';
 
 // Query keys
 export const teamKeys = {
   all: ['teams'] as const,
+  lists: () => [...teamKeys.all, 'list'] as const,
+  list: (filters: TeamsQueryParams) => [...teamKeys.lists(), filters] as const,
+  details: () => [...teamKeys.all, 'detail'] as const,
+  detail: (id: string) => [...teamKeys.details(), id] as const,
   workload: () => [...teamKeys.all, 'workload'] as const,
+};
+
+/**
+ * Hook for fetching teams with optional filtering.
+ */
+export const useTeams = (params?: TeamsQueryParams) => {
+  return useQuery({
+    queryKey: teamKeys.list(params || {}),
+    queryFn: () => getTeams(params),
+  });
+};
+
+/**
+ * Hook for fetching a single team detail by id.
+ */
+export const useTeam = (id: string) => {
+  return useQuery({
+    queryKey: teamKeys.detail(id),
+    queryFn: () => getTeamById(id),
+    enabled: !!id,
+  });
+};
+
+/**
+ * Hook for creating a team.
+ */
+export const useCreateTeam = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: TeamCreateRequest) => createTeam(payload),
+    onSuccess: (team) => {
+      queryClient.setQueryData(teamKeys.detail(team.id), team);
+      queryClient.invalidateQueries({ queryKey: teamKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: teamKeys.workload() });
+    },
+    onError: (error) => {
+      console.error('Error creating team:', parseApiError(error));
+    },
+  });
+};
+
+/**
+ * Hook for updating a team.
+ */
+export const useUpdateTeam = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: TeamUpdateRequest) => updateTeam(payload),
+    onSuccess: (team) => {
+      queryClient.setQueryData(teamKeys.detail(team.id), team);
+      queryClient.invalidateQueries({ queryKey: teamKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: teamKeys.workload() });
+    },
+    onError: (error, team) => {
+      console.error(`Error updating team ${team.id}:`, parseApiError(error));
+    },
+  });
+};
+
+/**
+ * Hook for deleting a team.
+ */
+export const useDeleteTeam = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => deleteTeam(id),
+    onSuccess: (_, id) => {
+      queryClient.removeQueries({ queryKey: teamKeys.detail(id) });
+      queryClient.invalidateQueries({ queryKey: teamKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: teamKeys.workload() });
+    },
+    onError: (error, id) => {
+      console.error(`Error deleting team ${id}:`, parseApiError(error));
+    },
+  });
+};
+
+/**
+ * Hook for adding a member to a team.
+ */
+export const useAddTeamMember = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ teamId, payload }: { teamId: string; payload: AddTeamMemberRequest }) =>
+      addTeamMember(teamId, payload),
+    onSuccess: (_, { teamId }) => {
+      queryClient.invalidateQueries({ queryKey: teamKeys.detail(teamId) });
+      queryClient.invalidateQueries({ queryKey: teamKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: teamKeys.workload() });
+    },
+    onError: (error, { teamId }) => {
+      console.error(`Error adding team member to team ${teamId}:`, parseApiError(error));
+    },
+  });
+};
+
+/**
+ * Hook for removing a member from a team.
+ */
+export const useRemoveTeamMember = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ teamId, userId }: { teamId: string; userId: string }) =>
+      removeTeamMember(teamId, userId),
+    onSuccess: (_, { teamId }) => {
+      queryClient.invalidateQueries({ queryKey: teamKeys.detail(teamId) });
+      queryClient.invalidateQueries({ queryKey: teamKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: teamKeys.workload() });
+    },
+    onError: (error, { teamId, userId }) => {
+      console.error(
+        `Error removing user ${userId} from team ${teamId}:`,
+        parseApiError(error),
+      );
+    },
+  });
 };
 
 /**
@@ -41,8 +181,8 @@ export const useTeamWorkload = () => {
         // Calculate workload based on number of tasks and their priority
         const workload = calculateWorkload(userTasks);
         
-        // Get top skills from user profile (if available)
-        const skills = user.skills?.slice(0, 3).map(skill => skill.name) || [];
+        // Expose basic profile tags until backend user-skills are available.
+        const skills = [user.department, user.role].filter(Boolean) as string[];
         
         return {
           id: user.id,
@@ -57,14 +197,11 @@ export const useTeamWorkload = () => {
       });
     },
     enabled: usersQuery.isSuccess && tasksQuery.isSuccess,
-    onError: (error) => {
-      console.error('Error calculating team workload:', parseApiError(error));
-    },
   });
 };
 
 // Helper function to calculate workload percentage based on tasks
-const calculateWorkload = (tasks: any[]) => {
+const calculateWorkload = (tasks: Task[]) => {
   if (tasks.length === 0) return 0;
   
   // Simple calculation: base workload on number of tasks and their priority

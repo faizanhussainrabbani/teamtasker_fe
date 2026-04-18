@@ -54,7 +54,7 @@ The following API endpoints are documented:
 
 All API endpoints are relative to the base URL:
 ```
-http://localhost:3002/api
+http://localhost:5220/api
 ```
 
 This can be configured in the frontend application through the `NEXT_PUBLIC_API_URL` environment variable.

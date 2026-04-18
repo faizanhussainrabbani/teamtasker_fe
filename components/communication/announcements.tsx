@@ -10,9 +10,8 @@ import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
-import { Megaphone, Pin, PlusCircle, ThumbsUp } from "lucide-react"
+import { Pin, PlusCircle, ThumbsUp } from "lucide-react"
 import { useAnnouncements, useCreateAnnouncement, useToggleAnnouncementPin, useToggleAnnouncementLike } from "@/lib/api/hooks/useAnnouncements"
-import { useCurrentUser } from "@/lib/api/hooks/useAuth"
 import { LoadingState, ErrorState, EmptyState } from "@/components/ui/api-state"
 
 export function Announcements() {
@@ -22,9 +21,6 @@ export function Announcements() {
     content: "",
   })
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  
-  // Fetch current user
-  const { data: currentUser } = useCurrentUser()
   
   // Fetch announcements with React Query
   const { data, isLoading, isError, error, refetch } = useAnnouncements({ 

@@ -9,11 +9,14 @@ import { Calendar } from "@/components/ui/calendar"
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react"
 import { TaskDialog } from "@/components/tasks/task-dialog"
 import { useTasks } from "@/lib/api/hooks/useTasks"
+import { Task } from "@/lib/api/types/tasks"
 import { LoadingState, ErrorState, EmptyState } from "@/components/ui/api-state"
 
 // Function to get priority color
 const getPriorityColor = (priority: string) => {
   switch (priority) {
+    case "critical":
+      return "text-rose-600 border-rose-200 bg-rose-50 dark:bg-rose-950 dark:border-rose-800"
     case "high":
       return "text-red-500 border-red-200 bg-red-50 dark:bg-red-950 dark:border-red-800"
     case "medium":
@@ -28,22 +31,22 @@ const getPriorityColor = (priority: string) => {
 export function TasksCalendar() {
   const [date, setDate] = useState<Date | undefined>(new Date())
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [selectedTask, setSelectedTask] = useState<any>(null)
+  const [selectedTask, setSelectedTask] = useState<Task | undefined>(undefined)
 
   // Fetch all tasks
   const { data, isLoading, isError, error, refetch } = useTasks()
 
-  const openTaskDialog = (task: any) => {
+  const openTaskDialog = (task: Task) => {
     setSelectedTask(task)
     setIsDialogOpen(true)
   }
 
   // Group tasks by date
-  const tasksByDate: Record<string, any[]> = {}
+  const tasksByDate: Record<string, Task[]> = {}
 
   if (data?.data) {
     data.data.forEach((task) => {
-      const dateStr = task.dueDate
+      const dateStr = task.dueDate || ""
       if (!tasksByDate[dateStr]) {
         tasksByDate[dateStr] = []
       }
@@ -52,7 +55,7 @@ export function TasksCalendar() {
   }
 
   // Get tasks for selected date
-  const selectedDateStr = date ? date.toISOString().split("T")[0] : ""
+  const selectedDateStr = date ? (date.toISOString().split("T")[0] || "") : ""
   const tasksForSelectedDate = tasksByDate[selectedDateStr] || []
 
   return (
@@ -62,7 +65,7 @@ export function TasksCalendar() {
           <CardTitle>Calendar View</CardTitle>
           <CardDescription>View tasks by due date</CardDescription>
         </div>
-        <Button onClick={() => { setSelectedTask(null); setIsDialogOpen(true); }}>
+        <Button onClick={() => { setSelectedTask(undefined); setIsDialogOpen(true); }}>
           <Plus className="mr-2 h-4 w-4" />
           New Task
         </Button>
@@ -80,7 +83,7 @@ export function TasksCalendar() {
             title="No tasks found"
             description="There are no tasks in the system."
             action={
-              <Button onClick={() => { setSelectedTask(null); setIsDialogOpen(true); }}>
+              <Button onClick={() => { setSelectedTask(undefined); setIsDialogOpen(true); }}>
                 <Plus className="mr-2 h-4 w-4" />
                 Create Task
               </Button>
@@ -151,8 +154,8 @@ export function TasksCalendar() {
                           )}
                         </div>
                         <Avatar className="h-6 w-6">
-                          <AvatarImage src={task.assignee.avatar} alt={task.assignee.name} />
-                          <AvatarFallback>{task.assignee.initials}</AvatarFallback>
+                          <AvatarImage src={task.assignee?.avatar} alt={task.assignee?.name} />
+                          <AvatarFallback>{task.assignee?.initials ?? "NA"}</AvatarFallback>
                         </Avatar>
                       </div>
                     </div>
@@ -162,7 +165,7 @@ export function TasksCalendar() {
                 <div className="flex h-[200px] items-center justify-center rounded-lg border border-dashed">
                   <div className="text-center">
                     <p className="text-sm text-muted-foreground">No tasks due on this date</p>
-                    <Button variant="outline" className="mt-2" onClick={() => { setSelectedTask(null); setIsDialogOpen(true); }}>
+                    <Button variant="outline" className="mt-2" onClick={() => { setSelectedTask(undefined); setIsDialogOpen(true); }}>
                       <Plus className="mr-2 h-4 w-4" />
                       Add Task
                     </Button>

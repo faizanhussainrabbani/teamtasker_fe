@@ -1,5 +1,4 @@
 import { PaginatedResponse } from './common';
-import { User } from './users';
 
 export interface Announcement {
   id: string;

@@ -6,23 +6,30 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { TeamWorkloadView } from "@/components/team/team-workload-view"
 import { TeamSkillsMatrix } from "@/components/team/team-skills-matrix"
 import { TeamCapacityView } from "@/components/team/team-capacity-view"
+import { TeamManagementView } from "@/components/team/team-management-view"
 
 export function TeamOverview() {
-  const [activeTab, setActiveTab] = useState("workload")
+  const [activeTab, setActiveTab] = useState("management")
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Team Performance</CardTitle>
-        <CardDescription>Analyze workload distribution, skills, and capacity across your team</CardDescription>
+        <CardTitle>Team Workspace</CardTitle>
+        <CardDescription>
+          Manage team structure and review workload, skills, and capacity insights
+        </CardDescription>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="workload" value={activeTab} onValueChange={setActiveTab}>
+        <Tabs defaultValue="management" value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-4">
+            <TabsTrigger value="management">Team Management</TabsTrigger>
             <TabsTrigger value="workload">Workload Distribution</TabsTrigger>
             <TabsTrigger value="skills">Skills Matrix</TabsTrigger>
             <TabsTrigger value="capacity">Capacity Planning</TabsTrigger>
           </TabsList>
+          <TabsContent value="management">
+            <TeamManagementView />
+          </TabsContent>
           <TabsContent value="workload">
             <TeamWorkloadView />
           </TabsContent>

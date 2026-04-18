@@ -1,22 +1,16 @@
 "use client"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { ChevronRight } from "lucide-react"
-import { useActivities } from "@/lib/api/hooks/useActivities"
-import { LoadingState, ErrorState, EmptyState } from "@/components/ui/api-state"
+import { EmptyState } from "@/components/ui/api-state"
 
 interface RecentActivityCardProps {
   isLoading?: boolean;
 }
 
 export function RecentActivityCard({ isLoading: cardIsLoading }: RecentActivityCardProps) {
-  // Fetch activities with React Query
-  const { data, isLoading: dataIsLoading, isError, error, refetch } = useActivities({ limit: 5 });
-
-  // Combine loading states
-  const isLoading = cardIsLoading || dataIsLoading;
+  const isLoading = cardIsLoading;
 
   return (
     <Card>
@@ -31,44 +25,15 @@ export function RecentActivityCard({ isLoading: cardIsLoading }: RecentActivityC
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <LoadingState message="Loading activities..." />
-        ) : isError ? (
-          <ErrorState
-            message={`Error loading activities: ${error?.message || 'Unknown error'}`}
-            onRetry={() => refetch()}
-          />
-        ) : !data?.data || data.data.length === 0 ? (
           <EmptyState
-            title="No recent activity"
-            description="There has been no recent activity in your team."
+            title="Preparing activity feed"
+            description="Recent activity is loading."
           />
         ) : (
-          <div className="space-y-4">
-            {data.data.map((activity) => (
-              <div key={activity.id} className="flex gap-4">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src={activity.user.avatar || "/placeholder.svg"} alt={activity.user.name} />
-                  <AvatarFallback>{activity.user.initials}</AvatarFallback>
-                </Avatar>
-                <div className="space-y-1">
-                  <p className="text-sm">
-                    <span className="font-medium">{activity.user.name}</span>{" "}
-                    <span className="text-muted-foreground">{activity.action}</span>{" "}
-                    <span className="font-medium">{activity.target}</span>
-                    {activity.assignee && (
-                      <>
-                        {" "}
-                        <span className="text-muted-foreground">to</span>{" "}
-                        <span className="font-medium">{activity.assignee.name}</span>
-                      </>
-                    )}
-                  </p>
-                  {activity.comment && <p className="text-sm text-muted-foreground">"{activity.comment}"</p>}
-                  <p className="text-xs text-muted-foreground">{activity.timestamp || activity.time}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+          <EmptyState
+            title="Activity feed temporarily unavailable"
+            description="This panel is disabled until the backend activities API is available."
+          />
         )}
       </CardContent>
     </Card>

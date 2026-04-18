@@ -4,6 +4,19 @@
 const TOKEN_KEY = 'auth_token';
 const TOKEN_EXPIRY_KEY = 'auth_token_expiry';
 const REFRESH_TOKEN_KEY = 'auth_refresh_token';
+const AUTH_COOKIE_NAME = 'teamtasker_auth';
+
+const setAuthCookie = (token: string): void => {
+  if (typeof document === 'undefined') return;
+
+  const secure = window.location.protocol === 'https:' ? '; Secure' : '';
+  document.cookie = `${AUTH_COOKIE_NAME}=${encodeURIComponent(token)}; Path=/; Max-Age=604800; SameSite=Lax${secure}`;
+};
+
+const clearAuthCookie = (): void => {
+  if (typeof document === 'undefined') return;
+  document.cookie = `${AUTH_COOKIE_NAME}=; Path=/; Max-Age=0; SameSite=Lax`;
+};
 
 // Token types
 export interface TokenData {
@@ -36,7 +49,10 @@ export const getAuthToken = (): string | null => {
  * Set the authentication token in storage
  */
 export const setAuthToken = (token: string, refreshToken?: string): void => {
+  if (typeof window === 'undefined') return;
+
   localStorage.setItem(TOKEN_KEY, token);
+  setAuthCookie(token);
 
   // Parse token to get expiration
   const tokenData = parseToken(token);
@@ -64,9 +80,12 @@ export const getRefreshToken = (): string | null => {
  * Remove all authentication tokens from storage
  */
 export const removeAuthToken = (): void => {
+  if (typeof window === 'undefined') return;
+
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(TOKEN_EXPIRY_KEY);
   localStorage.removeItem(REFRESH_TOKEN_KEY);
+  clearAuthCookie();
 };
 
 /**

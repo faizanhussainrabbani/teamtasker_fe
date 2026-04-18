@@ -8,6 +8,20 @@ import { User } from '@/lib/api/types/users';
 import { LoginRequest, RegisterRequest } from '@/lib/api/types/auth';
 import { parseApiError, ApiError } from '@/lib/error-handling';
 import { useToast } from '@/components/ui/use-toast';
+import '@/lib/api/token-refresh';
+
+const buildInitials = (name: string): string => {
+  const parts = name.split(' ').filter(Boolean);
+  if (parts.length === 0) {
+    return 'TT';
+  }
+
+  if (parts.length === 1) {
+    return parts[0]?.slice(0, 2).toUpperCase() || 'TT';
+  }
+
+  return `${parts[0]?.[0] || ''}${parts[1]?.[0] || ''}`.toUpperCase();
+}
 
 /**
  * Authentication context type definition
@@ -113,7 +127,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const userObj: User = {
         id: currentUser.id.toString(),
         name: currentUser.fullName,
+        fullName: currentUser.fullName,
         email: currentUser.email,
+        role: currentUser.role || 'User',
+        initials: buildInitials(currentUser.fullName),
       };
       setUser(userObj);
       setIsLoading(false);
@@ -146,12 +163,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       const result = await loginMutation.mutateAsync(credentials);
 
-      setAuthToken(result.token);
+      if (result.token) {
+        setAuthToken(result.token, result.refreshToken ?? undefined);
+      }
       // Create a user object from the auth response
       const userObj: User = {
         id: result.id.toString(),
         name: result.fullName,
+        fullName: result.fullName,
         email: result.email,
+        role: result.role || 'User',
+        initials: buildInitials(result.fullName),
       };
       setUser(userObj);
 
@@ -182,12 +204,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       const result = await registerMutation.mutateAsync(userData);
 
-      setAuthToken(result.token);
+      if (result.token) {
+        setAuthToken(result.token, result.refreshToken ?? undefined);
+      }
       // Create a user object from the auth response
       const userObj: User = {
         id: result.id.toString(),
         name: result.fullName,
+        fullName: result.fullName,
         email: result.email,
+        role: result.role || 'User',
+        initials: buildInitials(result.fullName),
       };
       setUser(userObj);
 

@@ -54,7 +54,6 @@ const initialGoals = [
 export function ProfileDevelopment() {
   const [goals, setGoals] = useState(initialGoals)
   const [isEditing, setIsEditing] = useState(false)
-  const [editingGoalId, setEditingGoalId] = useState<string | null>(null)
 
   const emptyGoal = {
     id: "",

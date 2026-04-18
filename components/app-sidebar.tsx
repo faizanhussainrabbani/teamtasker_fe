@@ -3,10 +3,11 @@
 import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { BarChart3, Users, CheckSquare, User, MessageSquare, Settings, BookOpen, Search } from "lucide-react"
+import { BarChart3, Users, CheckSquare, User, Settings, BookOpen, Search, FolderKanban, Shield } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { useAuth } from "@/context/auth-context"
 import {
   Sidebar,
   SidebarContent,
@@ -18,14 +19,14 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 
-const mainNavItems = [
+const baseNavItems = [
   {
     title: "Dashboard",
     href: "/",
     icon: BarChart3,
   },
   {
-    title: "Team Overview",
+    title: "Team Management",
     href: "/team",
     icon: Users,
   },
@@ -35,14 +36,14 @@ const mainNavItems = [
     icon: CheckSquare,
   },
   {
+    title: "Projects",
+    href: "/projects",
+    icon: FolderKanban,
+  },
+  {
     title: "My Profile",
     href: "/profile",
     icon: User,
-  },
-  {
-    title: "Communication",
-    href: "/communication",
-    icon: MessageSquare,
   },
   {
     title: "Development",
@@ -54,6 +55,19 @@ const mainNavItems = [
 export function AppSidebar() {
   const pathname = usePathname()
   const [searchQuery, setSearchQuery] = useState("")
+  const { user } = useAuth()
+  const isAdmin = (user?.role || "").toLowerCase() === "admin"
+
+  const mainNavItems = isAdmin
+    ? [
+        ...baseNavItems,
+        {
+          title: "Admin",
+          href: "/admin",
+          icon: Shield,
+        },
+      ]
+    : baseNavItems
 
   return (
     <Sidebar>
@@ -95,12 +109,12 @@ export function AppSidebar() {
       <SidebarFooter className="border-t p-4">
         <div className="flex items-center gap-2">
           <Avatar className="h-9 w-9">
-            <AvatarImage src="/placeholder.svg?height=36&width=36" alt="User" />
-            <AvatarFallback>JD</AvatarFallback>
+            <AvatarImage src={user?.avatar || "/placeholder.svg?height=36&width=36"} alt={user?.name || "User"} />
+            <AvatarFallback>{user?.initials || "TT"}</AvatarFallback>
           </Avatar>
           <div className="flex flex-col">
-            <span className="text-sm font-medium">Jane Doe</span>
-            <span className="text-xs text-muted-foreground">Senior Developer</span>
+            <span className="text-sm font-medium">{user?.name || "TeamTasker User"}</span>
+            <span className="text-xs text-muted-foreground">{user?.role || "Member"}</span>
           </div>
           <Button variant="ghost" size="icon" className="ml-auto">
             <Settings className="h-4 w-4" />

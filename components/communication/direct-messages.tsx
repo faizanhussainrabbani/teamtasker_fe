@@ -2,12 +2,19 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { Paperclip, Search, Send, Smile } from "lucide-react"
+
+interface DirectMessage {
+  id: string
+  sender: string
+  content: string
+  timestamp: string
+}
 
 // Sample team members
 const teamMembers = [
@@ -54,7 +61,7 @@ const teamMembers = [
 ]
 
 // Sample conversations
-const conversations: Record<string, any[]> = {
+const conversations: Record<string, DirectMessage[]> = {
   "user-2": [
     {
       id: "msg-1",
@@ -164,7 +171,7 @@ const currentUser = {
 }
 
 export function DirectMessages() {
-  const [selectedUser, setSelectedUser] = useState(teamMembers[0])
+  const [selectedUser, setSelectedUser] = useState<(typeof teamMembers)[number] | undefined>(teamMembers[0])
   const [searchQuery, setSearchQuery] = useState("")
   const [newMessage, setNewMessage] = useState("")
   const [activeConversations, setActiveConversations] = useState(conversations)
@@ -174,6 +181,7 @@ export function DirectMessages() {
   )
 
   const handleSendMessage = () => {
+    if (!selectedUser) return
     if (newMessage.trim() === "") return
 
     const message = {
@@ -206,6 +214,17 @@ export function DirectMessages() {
       default:
         return "bg-gray-500"
     }
+  }
+
+  if (!selectedUser) {
+    return (
+      <Card className="flex h-[calc(80vh-8rem)] flex-col">
+        <CardHeader className="p-4">
+          <CardTitle>Direct Messages</CardTitle>
+          <CardDescription>No contacts available</CardDescription>
+        </CardHeader>
+      </Card>
+    )
   }
 
   return (

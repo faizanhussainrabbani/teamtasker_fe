@@ -1,7 +1,7 @@
 import { PaginatedResponse } from './common';
 
-export type TaskStatus = 'todo' | 'in-progress' | 'completed';
-export type TaskPriority = 'low' | 'medium' | 'high';
+export type TaskStatus = 'todo' | 'in-progress' | 'completed' | 'blocked' | 'on-hold' | 'cancelled';
+export type TaskPriority = 'low' | 'medium' | 'high' | 'critical';
 
 export interface Task {
   id: string;

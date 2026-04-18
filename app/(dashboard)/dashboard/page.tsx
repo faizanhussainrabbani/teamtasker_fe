@@ -3,8 +3,6 @@
 import { useAuth } from '@/context/auth-context';
 import { TeamWorkloadCard } from "@/components/dashboard/team-workload-card";
 import { MyTasksCard } from "@/components/dashboard/my-tasks-card";
-import { SkillsOverviewCard } from "@/components/dashboard/skills-overview-card";
-import { RecentActivityCard } from "@/components/dashboard/recent-activity-card";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { DevelopmentGoalsCard } from "@/components/dashboard/development-goals-card";
 import { useState, useEffect } from 'react';
@@ -24,18 +22,18 @@ export default function DashboardPage() {
 
       return () => clearTimeout(timer);
     }
+
+    return undefined;
   }, [isLoading, user]);
 
   if (isLoading || !user) {
     return (
-      <div className="p-6">
+      <div className="space-y-6 p-6">
         <Skeleton className="h-12 w-64 mb-6" />
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          <Skeleton className="h-[200px] w-full lg:col-span-2" />
-          <Skeleton className="h-[200px] w-full" />
-          <Skeleton className="h-[200px] w-full lg:col-span-2" />
-          <Skeleton className="h-[200px] w-full" />
-          <Skeleton className="h-[200px] w-full lg:col-span-3" />
+        <div className="grid gap-4 lg:grid-cols-12">
+          <Skeleton className="h-[280px] w-full lg:col-span-8" />
+          <Skeleton className="h-[280px] w-full lg:col-span-4" />
+          <Skeleton className="h-[320px] w-full lg:col-span-12" />
         </div>
       </div>
     );
@@ -44,21 +42,19 @@ export default function DashboardPage() {
   return (
     <div className="flex flex-col">
       <DashboardHeader />
-      <div className="grid gap-4 p-4 md:grid-cols-2 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <MyTasksCard isLoading={isPageLoading} />
-        </div>
-        <div className="lg:col-span-1">
-          <SkillsOverviewCard isLoading={isPageLoading} />
-        </div>
-        <div className="lg:col-span-2">
-          <TeamWorkloadCard isLoading={isPageLoading} />
-        </div>
-        <div className="lg:col-span-1">
-          <DevelopmentGoalsCard isLoading={isPageLoading} />
-        </div>
-        <div className="lg:col-span-3">
-          <RecentActivityCard isLoading={isPageLoading} />
+      <div className="p-4 md:p-6">
+        <div className="rounded-2xl border bg-gradient-to-br from-muted/40 via-background to-muted/20 p-4 shadow-sm md:p-5">
+          <div className="grid gap-4 lg:grid-cols-12">
+            <div className="lg:col-span-8">
+              <MyTasksCard isLoading={isPageLoading} />
+            </div>
+            <div className="lg:col-span-4">
+              <DevelopmentGoalsCard isLoading={isPageLoading} />
+            </div>
+            <div className="lg:col-span-12">
+              <TeamWorkloadCard isLoading={isPageLoading} />
+            </div>
+          </div>
         </div>
       </div>
     </div>

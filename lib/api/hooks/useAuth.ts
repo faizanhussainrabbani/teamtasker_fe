@@ -15,9 +15,8 @@ import {
   ResetPasswordRequest,
   ChangePasswordRequest
 } from '../types/auth';
-import { setAuthToken, removeAuthToken } from '@/lib/auth';
+import { getAuthToken, setAuthToken, removeAuthToken } from '@/lib/auth';
 import { parseApiError } from '@/lib/error-handling';
-import { userKeys } from './useUsers';
 
 // Query keys
 export const authKeys = {
@@ -34,9 +33,11 @@ export const useLogin = () => {
     mutationFn: (credentials: LoginRequest) => login(credentials),
     onSuccess: (data) => {
       // Save the token
-      setAuthToken(data.token);
+      if (data.token) {
+        setAuthToken(data.token, data.refreshToken ?? undefined);
+      }
       // Update the current user in the cache
-      queryClient.setQueryData(authKeys.user(), data.user);
+      queryClient.setQueryData(authKeys.user(), data);
     },
     onError: (error) => {
       console.error('Login error:', parseApiError(error));
@@ -54,9 +55,11 @@ export const useRegister = () => {
     mutationFn: (userData: RegisterRequest) => register(userData),
     onSuccess: (data) => {
       // Save the token
-      setAuthToken(data.token);
+      if (data.token) {
+        setAuthToken(data.token, data.refreshToken ?? undefined);
+      }
       // Update the current user in the cache
-      queryClient.setQueryData(authKeys.user(), data.user);
+      queryClient.setQueryData(authKeys.user(), data);
     },
     onError: (error) => {
       console.error('Registration error:', parseApiError(error));
@@ -68,13 +71,13 @@ export const useRegister = () => {
  * Hook for getting the current authenticated user
  */
 export const useCurrentUser = () => {
+  const hasToken = typeof window !== 'undefined' && Boolean(getAuthToken());
+
   return useQuery({
     queryKey: authKeys.user(),
     queryFn: () => getCurrentUser(),
+    enabled: hasToken,
     retry: false,
-    onError: (error) => {
-      console.error('Error fetching current user:', parseApiError(error));
-    },
   });
 };
 
@@ -89,17 +92,14 @@ export const useLogout = () => {
     onSuccess: () => {
       // Remove the token
       removeAuthToken();
-      // Clear the user from the cache
-      queryClient.removeQueries({ queryKey: authKeys.user() });
-      // Clear user profile data
-      queryClient.removeQueries({ queryKey: userKeys.profile() });
+      // Clear all cached data to prevent cross-user data leakage.
+      queryClient.clear();
     },
     onError: (error) => {
       console.error('Logout error:', parseApiError(error));
       // Even if the API call fails, we should still remove the token and clear the cache
       removeAuthToken();
-      queryClient.removeQueries({ queryKey: authKeys.user() });
-      queryClient.removeQueries({ queryKey: userKeys.profile() });
+      queryClient.clear();
     },
   });
 };

@@ -19,7 +19,7 @@ export interface ApiResponse<T> {
 export interface ErrorResponse {
   message: string;
   code?: string;
-  details?: any;
+  details?: unknown;
   status: number;
 }
 

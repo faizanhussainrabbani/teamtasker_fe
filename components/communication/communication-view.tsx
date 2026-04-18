@@ -1,6 +1,5 @@
 "use client"
 
-import { useState } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { TeamChat } from "@/components/communication/team-chat"
 import { DirectMessages } from "@/components/communication/direct-messages"

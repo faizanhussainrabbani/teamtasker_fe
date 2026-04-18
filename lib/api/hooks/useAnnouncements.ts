@@ -31,9 +31,6 @@ export const useAnnouncements = (params?: AnnouncementsQueryParams) => {
   return useQuery({
     queryKey: announcementKeys.list(params || {}),
     queryFn: () => getAnnouncements(params),
-    onError: (error) => {
-      console.error('Error fetching announcements:', parseApiError(error));
-    },
   });
 };
 
@@ -45,9 +42,6 @@ export const useAnnouncement = (id: string) => {
     queryKey: announcementKeys.detail(id),
     queryFn: () => getAnnouncementById(id),
     enabled: !!id, // Only run if id is provided
-    onError: (error) => {
-      console.error(`Error fetching announcement ${id}:`, parseApiError(error));
-    },
   });
 };
 

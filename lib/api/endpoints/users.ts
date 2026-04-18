@@ -3,12 +3,9 @@ import { API_CONFIG } from '../config';
 import { 
   User, 
   UserProfile,
-  UserCreateRequest, 
   UserUpdateRequest, 
   UsersResponse,
-  UsersQueryParams,
-  UserSkill,
-  DevelopmentGoal
+  UsersQueryParams
 } from '../types/users';
 
 const USERS_ENDPOINT = API_CONFIG.endpoints.users;
@@ -18,7 +15,13 @@ const PROFILE_ENDPOINT = API_CONFIG.endpoints.profile;
  * Get all users with optional filtering
  */
 export const getUsers = async (params?: UsersQueryParams): Promise<UsersResponse> => {
-  const response = await apiClient.get(USERS_ENDPOINT, { params });
+  const normalizedParams = {
+    ...params,
+    pageNumber: params?.pageNumber ?? params?.page,
+    pageSize: params?.pageSize ?? params?.limit,
+  };
+
+  const response = await apiClient.get(USERS_ENDPOINT, { params: normalizedParams });
   return response.data;
 };
 
@@ -28,29 +31,6 @@ export const getUsers = async (params?: UsersQueryParams): Promise<UsersResponse
 export const getUserById = async (id: string): Promise<User> => {
   const response = await apiClient.get(`${USERS_ENDPOINT}/${id}`);
   return response.data;
-};
-
-/**
- * Create a new user
- */
-export const createUser = async (user: UserCreateRequest): Promise<User> => {
-  const response = await apiClient.post(USERS_ENDPOINT, user);
-  return response.data;
-};
-
-/**
- * Update an existing user
- */
-export const updateUser = async (id: string, user: UserUpdateRequest): Promise<User> => {
-  const response = await apiClient.patch(`${USERS_ENDPOINT}/${id}`, user);
-  return response.data;
-};
-
-/**
- * Delete a user
- */
-export const deleteUser = async (id: string): Promise<void> => {
-  await apiClient.delete(`${USERS_ENDPOINT}/${id}`);
 };
 
 /**
@@ -65,38 +45,19 @@ export const getCurrentUserProfile = async (): Promise<UserProfile> => {
  * Update current user profile
  */
 export const updateCurrentUserProfile = async (profile: UserUpdateRequest): Promise<UserProfile> => {
-  const response = await apiClient.patch(PROFILE_ENDPOINT, profile);
-  return response.data;
-};
+  const firstName = profile.firstName ?? (profile.name ? profile.name.split(' ').slice(0, -1).join(' ') || profile.name : undefined);
+  const lastName = profile.lastName ?? (profile.name ? profile.name.split(' ').slice(-1).join(' ') : undefined);
 
-/**
- * Update user skills
- */
-export const updateUserSkills = async (skills: UserSkill[]): Promise<UserSkill[]> => {
-  const response = await apiClient.put(`${PROFILE_ENDPOINT}/skills`, { skills });
-  return response.data;
-};
+  const payload = {
+    firstName,
+    lastName,
+    email: profile.email,
+    department: profile.department,
+    bio: profile.bio,
+    location: profile.location,
+    phone: profile.phone,
+  };
 
-/**
- * Get user development goals
- */
-export const getUserDevelopmentGoals = async (): Promise<DevelopmentGoal[]> => {
-  const response = await apiClient.get(`${PROFILE_ENDPOINT}/development-goals`);
-  return response.data;
-};
-
-/**
- * Create development goal
- */
-export const createDevelopmentGoal = async (goal: Omit<DevelopmentGoal, 'id'>): Promise<DevelopmentGoal> => {
-  const response = await apiClient.post(`${PROFILE_ENDPOINT}/development-goals`, goal);
-  return response.data;
-};
-
-/**
- * Update development goal
- */
-export const updateDevelopmentGoal = async (id: string, goal: Partial<DevelopmentGoal>): Promise<DevelopmentGoal> => {
-  const response = await apiClient.patch(`${PROFILE_ENDPOINT}/development-goals/${id}`, goal);
+  const response = await apiClient.patch(PROFILE_ENDPOINT, payload);
   return response.data;
 };

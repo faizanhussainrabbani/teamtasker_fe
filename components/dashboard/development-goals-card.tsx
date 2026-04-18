@@ -3,8 +3,24 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ChevronRight, Target, BookOpen, Award, PlusCircle } from "lucide-react"
-import { useUserDevelopmentGoals } from "@/lib/api/hooks/useUsers"
-import { LoadingState, ErrorState, EmptyState } from "@/components/ui/api-state"
+import { LoadingState } from "@/components/ui/api-state"
+
+const placeholderGoals = [
+  {
+    id: "manual-goal-1",
+    title: "Complete architecture review",
+    category: "technical",
+    progress: 60,
+    status: "in-progress",
+  },
+  {
+    id: "manual-goal-2",
+    title: "Prepare quarterly learning plan",
+    category: "leadership",
+    progress: 25,
+    status: "planned",
+  },
+]
 
 // Helper function to get an icon based on goal category
 const getGoalIcon = (category: string) => {
@@ -25,11 +41,7 @@ interface DevelopmentGoalsCardProps {
 }
 
 export function DevelopmentGoalsCard({ isLoading: cardIsLoading }: DevelopmentGoalsCardProps) {
-  // Fetch user development goals
-  const { data: goals, isLoading: dataIsLoading, isError, error, refetch } = useUserDevelopmentGoals();
-
-  // Combine loading states
-  const isLoading = cardIsLoading || dataIsLoading;
+  const isLoading = Boolean(cardIsLoading)
 
   return (
     <Card className="h-full">
@@ -38,27 +50,21 @@ export function DevelopmentGoalsCard({ isLoading: cardIsLoading }: DevelopmentGo
           <CardTitle>Development Goals</CardTitle>
           <CardDescription>Your learning and growth targets</CardDescription>
         </div>
-        <Button variant="ghost" size="icon">
+        <Button variant="ghost" size="icon" disabled>
           <PlusCircle className="h-4 w-4" />
         </Button>
       </CardHeader>
       <CardContent>
         {isLoading ? (
           <LoadingState message="Loading development goals..." />
-        ) : isError ? (
-          <ErrorState
-            message={`Error loading goals: ${error?.message || 'Unknown error'}`}
-            onRetry={() => refetch()}
-          />
-        ) : !goals || goals.length === 0 ? (
-          <EmptyState
-            title="No development goals found"
-            description="You haven't set any development goals yet."
-          />
         ) : (
           <>
+            <div className="mb-4 rounded-md border border-dashed p-3 text-xs text-muted-foreground">
+              Goals API endpoints are not available yet. Showing local placeholder goals without server sync.
+            </div>
+
             <div className="space-y-4">
-              {goals.map((goal) => {
+              {placeholderGoals.map((goal) => {
                 const Icon = getGoalIcon(goal.category);
                 return (
                   <div key={goal.id} className="flex items-start gap-3 rounded-lg border p-3">
@@ -73,7 +79,7 @@ export function DevelopmentGoalsCard({ isLoading: cardIsLoading }: DevelopmentGo
                 );
               })}
             </div>
-            <Button variant="outline" size="sm" className="mt-6 w-full">
+            <Button variant="outline" size="sm" className="mt-6 w-full" disabled>
               View Career Path <ChevronRight className="ml-1 h-4 w-4" />
             </Button>
           </>

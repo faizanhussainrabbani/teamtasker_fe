@@ -3,25 +3,34 @@ import { PaginatedResponse } from './common';
 export interface User {
   id: string;
   name: string;
+  firstName?: string;
+  lastName?: string;
+  fullName?: string;
+  username?: string;
   email: string;
   role: string;
-  avatar: string;
-  initials: string;
+  avatar?: string;
+  initials?: string;
+  department?: string;
   bio?: string;
   phone?: string;
   location?: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
+  createdDate?: string;
+  updatedDate?: string;
 }
 
 export interface UserSkill {
+  id?: string;
   name: string;
   level: number;
+  yearsOfExperience?: number;
 }
 
 export interface UserProfile extends User {
-  skills: UserSkill[];
-  developmentGoals: DevelopmentGoal[];
+  skills?: UserSkill[];
+  developmentGoals?: DevelopmentGoal[];
 }
 
 export interface DevelopmentGoal {
@@ -34,17 +43,12 @@ export interface DevelopmentGoal {
   status: 'planned' | 'in-progress' | 'completed';
 }
 
-export interface UserCreateRequest {
-  name: string;
-  email: string;
-  password: string;
-  role?: string;
-}
-
 export interface UserUpdateRequest {
+  firstName?: string;
+  lastName?: string;
   name?: string;
   email?: string;
-  role?: string;
+  department?: string;
   bio?: string;
   phone?: string;
   location?: string;
@@ -52,9 +56,14 @@ export interface UserUpdateRequest {
 
 export interface UsersQueryParams {
   role?: string;
+  department?: string;
   search?: string;
   page?: number;
   limit?: number;
+  pageNumber?: number;
+  pageSize?: number;
+  sortBy?: string;
+  sortDirection?: 'asc' | 'desc';
 }
 
 export type UsersResponse = PaginatedResponse<User>;

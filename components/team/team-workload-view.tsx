@@ -1,76 +1,68 @@
 "use client"
 
+import { useMemo } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
+import { useUsers } from "@/lib/api/hooks/useUsers"
+import { useTasks } from "@/lib/api/hooks/useTasks"
+import { LoadingState, ErrorState, EmptyState } from "@/components/ui/api-state"
+import { Task } from "@/lib/api/types/tasks"
 
-// Sample team data
-const teamMembers = [
-  {
-    id: "user-1",
-    name: "Jane Doe",
-    role: "Senior Developer",
-    avatar: "/placeholder.svg?height=40&width=40",
-    initials: "JD",
-    workload: 85,
-    tasks: [
-      { name: "API Integration", priority: "high", dueDate: "2023-05-15" },
-      { name: "Code Review", priority: "medium", dueDate: "2023-05-16" },
-      { name: "Security Audit", priority: "high", dueDate: "2023-05-25" },
-    ],
-    skills: ["React", "Node.js", "TypeScript"],
-  },
-  {
-    id: "user-2",
-    name: "John Smith",
-    role: "Frontend Developer",
-    avatar: "/placeholder.svg?height=40&width=40",
-    initials: "JS",
-    workload: 60,
-    tasks: [
-      { name: "User Dashboard Redesign", priority: "medium", dueDate: "2023-05-18" },
-      { name: "Component Library", priority: "low", dueDate: "2023-05-22" },
-    ],
-    skills: ["React", "CSS", "UI/UX"],
-  },
-  {
-    id: "user-3",
-    name: "Emily Chen",
-    role: "Backend Developer",
-    avatar: "/placeholder.svg?height=40&width=40",
-    initials: "EC",
-    workload: 45,
-    tasks: [{ name: "Database Optimization", priority: "medium", dueDate: "2023-05-20" }],
-    skills: ["Python", "Django", "SQL"],
-  },
-  {
-    id: "user-4",
-    name: "Michael Brown",
-    role: "DevOps Engineer",
-    avatar: "/placeholder.svg?height=40&width=40",
-    initials: "MB",
-    workload: 70,
-    tasks: [
-      { name: "CI/CD Pipeline", priority: "high", dueDate: "2023-05-17" },
-      { name: "Server Monitoring", priority: "medium", dueDate: "2023-05-19" },
-    ],
-    skills: ["Docker", "AWS", "CI/CD"],
-  },
-  {
-    id: "user-5",
-    name: "Sarah Wilson",
-    role: "Product Manager",
-    avatar: "/placeholder.svg?height=40&width=40",
-    initials: "SW",
-    workload: 75,
-    tasks: [
-      { name: "Sprint Planning", priority: "high", dueDate: "2023-05-14" },
-      { name: "Stakeholder Meeting", priority: "medium", dueDate: "2023-05-16" },
-      { name: "Product Roadmap", priority: "medium", dueDate: "2023-05-23" },
-    ],
-    skills: ["Product Management", "Agile", "User Research"],
-  },
-]
+const ACTIVE_WORKLOAD_STATUSES = new Set(["todo", "in-progress", "blocked", "on-hold"])
+
+const PRIORITY_WEIGHT: Record<string, number> = {
+  low: 1,
+  medium: 2,
+  high: 3,
+  critical: 4,
+}
+
+interface MemberWorkload {
+  id: string
+  name: string
+  role: string
+  avatar?: string
+  initials: string
+  workload: number
+  activeTasks: Task[]
+  tags: string[]
+}
+
+const normalizeDate = (value?: string) => {
+  if (!value) {
+    return Number.POSITIVE_INFINITY
+  }
+
+  const timestamp = new Date(value).getTime()
+  return Number.isNaN(timestamp) ? Number.POSITIVE_INFINITY : timestamp
+}
+
+const formatDueDate = (value?: string) => {
+  if (!value) {
+    return "No due date"
+  }
+
+  const date = new Date(value)
+  return Number.isNaN(date.getTime()) ? "No due date" : date.toLocaleDateString()
+}
+
+const getTaskAssigneeId = (task: Task) => {
+  return task.assigneeId || task.assignee?.id || ""
+}
+
+const calculateWorkload = (tasks: Task[]) => {
+  const points = tasks.reduce((total, task) => {
+    if (!ACTIVE_WORKLOAD_STATUSES.has(task.status)) {
+      return total
+    }
+
+    return total + (PRIORITY_WEIGHT[task.priority] ?? 1)
+  }, 0)
+
+  // 12 weighted points maps to a full workload lane.
+  return Math.min(100, Math.round((points / 12) * 100))
+}
 
 // Update the getWorkloadColor function to use more bluish colors
 const getWorkloadColor = (workload: number) => {
@@ -82,6 +74,8 @@ const getWorkloadColor = (workload: number) => {
 // Update the getPriorityColor function to use more greyish-bluish colors
 const getPriorityColor = (priority: string) => {
   switch (priority) {
+    case "critical":
+      return "bg-blue-200 text-blue-900 dark:bg-blue-900/40 dark:text-blue-200"
     case "high":
       return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
     case "medium":
@@ -94,9 +88,97 @@ const getPriorityColor = (priority: string) => {
 }
 
 export function TeamWorkloadView() {
+  const {
+    data: usersData,
+    isLoading: usersLoading,
+    isError: usersError,
+    error: usersErrorDetail,
+    refetch: refetchUsers,
+  } = useUsers({ page: 1, limit: 100 })
+
+  const {
+    data: tasksData,
+    isLoading: tasksLoading,
+    isError: tasksError,
+    error: tasksErrorDetail,
+    refetch: refetchTasks,
+  } = useTasks({ page: 1, limit: 100 })
+
+  const isLoading = usersLoading || tasksLoading
+  const isError = usersError || tasksError
+
+  const members = useMemo<MemberWorkload[]>(() => {
+    const users = usersData?.data ?? []
+    const tasks = tasksData?.data ?? []
+
+    return users
+      .map((user) => {
+        const displayName = user.name || user.fullName || user.email
+        const fallbackInitials = displayName
+          .split(" ")
+          .filter(Boolean)
+          .slice(0, 2)
+          .map((part) => part[0] || "")
+          .join("")
+          .toUpperCase() || "TT"
+
+        const assignedTasks = tasks
+          .filter((task) => getTaskAssigneeId(task) === user.id)
+          .sort((a, b) => normalizeDate(a.dueDate) - normalizeDate(b.dueDate))
+
+        const activeTasks = assignedTasks
+          .filter((task) => ACTIVE_WORKLOAD_STATUSES.has(task.status))
+          .slice(0, 3)
+
+        const workload = calculateWorkload(assignedTasks)
+        const tags = [user.department, user.role].filter(Boolean) as string[]
+
+        return {
+          id: user.id,
+          name: displayName,
+          role: user.role,
+          avatar: user.avatar,
+          initials: user.initials || fallbackInitials,
+          workload,
+          activeTasks,
+          tags,
+        }
+      })
+      .sort((a, b) => b.workload - a.workload)
+  }, [usersData?.data, tasksData?.data])
+
+  if (isLoading) {
+    return <LoadingState message="Loading team workload..." />
+  }
+
+  if (isError) {
+    const message = usersError
+      ? usersErrorDetail?.message || "Unable to load users"
+      : tasksErrorDetail?.message || "Unable to load tasks"
+
+    return (
+      <ErrorState
+        message={`Error loading workload: ${message}`}
+        onRetry={() => {
+          refetchUsers()
+          refetchTasks()
+        }}
+      />
+    )
+  }
+
+  if (members.length === 0) {
+    return (
+      <EmptyState
+        title="No team members found"
+        description="Add users and assign tasks to populate workload distribution."
+      />
+    )
+  }
+
   return (
     <div className="space-y-6">
-      {teamMembers.map((member) => (
+      {members.map((member) => (
         <div key={member.id} className="rounded-lg border p-4">
           <div className="flex flex-col gap-4 md:flex-row md:items-start">
             <div className="flex items-center gap-3">
@@ -116,26 +198,38 @@ export function TeamWorkloadView() {
               </div>
               <Progress value={member.workload} className={`h-2 ${getWorkloadColor(member.workload)}`} />
               <div className="flex flex-wrap gap-1">
-                {member.skills.map((skill) => (
-                  <Badge key={skill} variant="secondary" className="text-xs">
-                    {skill}
+                {member.tags.length > 0 ? (
+                  member.tags.map((tag) => (
+                    <Badge key={`${member.id}-${tag}`} variant="secondary" className="text-xs">
+                      {tag}
+                    </Badge>
+                  ))
+                ) : (
+                  <Badge variant="secondary" className="text-xs">
+                    General
                   </Badge>
-                ))}
+                )}
               </div>
             </div>
             <div className="min-w-[250px] space-y-2">
-              <h4 className="text-sm font-medium">Current Tasks ({member.tasks.length})</h4>
-              {member.tasks.map((task) => (
-                <div key={task.name} className="flex items-center justify-between rounded-md border p-2 text-sm">
-                  <span>{task.name}</span>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className={getPriorityColor(task.priority)}>
-                      {task.priority}
-                    </Badge>
-                    <span className="text-xs text-muted-foreground">{new Date(task.dueDate).toLocaleDateString()}</span>
-                  </div>
+              <h4 className="text-sm font-medium">Current Tasks ({member.activeTasks.length})</h4>
+              {member.activeTasks.length === 0 ? (
+                <div className="rounded-md border border-dashed p-2 text-xs text-muted-foreground">
+                  No active tasks assigned.
                 </div>
-              ))}
+              ) : (
+                member.activeTasks.map((task) => (
+                  <div key={task.id} className="flex items-center justify-between rounded-md border p-2 text-sm">
+                    <span>{task.title}</span>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className={getPriorityColor(task.priority)}>
+                        {task.priority}
+                      </Badge>
+                      <span className="text-xs text-muted-foreground">{formatDueDate(task.dueDate)}</span>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>

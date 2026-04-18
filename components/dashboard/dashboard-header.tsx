@@ -20,7 +20,7 @@ interface DashboardHeaderProps {
 }
 
 export function DashboardHeader({ isLoading }: DashboardHeaderProps) {
-  const [notifications, setNotifications] = useState(3)
+  const [notifications] = useState(3)
   const { user } = useAuth();
 
   const firstName = user?.name?.split(' ')[0] || 'User';
@@ -33,12 +33,12 @@ export function DashboardHeader({ isLoading }: DashboardHeaderProps) {
         <p className="text-sm text-muted-foreground">Welcome back, {firstName}. You have {notifications} new notifications.</p>
       </div>
       <div className="flex items-center gap-2">
-        <Button variant="outline" size="icon">
+        <Button variant="outline" size="icon" disabled={Boolean(isLoading)}>
           <Calendar className="h-4 w-4" />
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="icon" className="relative">
+            <Button variant="outline" size="icon" className="relative" disabled={Boolean(isLoading)}>
               <Bell className="h-4 w-4" />
               {notifications > 0 && (
                 <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-medium text-destructive-foreground">
@@ -57,7 +57,7 @@ export function DashboardHeader({ isLoading }: DashboardHeaderProps) {
         </DropdownMenu>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" disabled={Boolean(isLoading)}>
               <Filter className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>

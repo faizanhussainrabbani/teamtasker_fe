@@ -34,7 +34,7 @@ export default function ForgotPasswordPage() {
       <div className="mb-6 text-center">
         <h1 className="text-2xl font-bold text-foreground">Forgot Password</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Enter your email address and we'll send you a link to reset your password
+          Enter your email address and we&apos;ll send you a link to reset your password
         </p>
       </div>
 
@@ -43,7 +43,7 @@ export default function ForgotPasswordPage() {
           <Alert className="bg-green-50 border-green-200">
             <CheckCircle className="h-4 w-4 text-green-600" />
             <AlertDescription className="text-green-700">
-              If an account exists with that email, we've sent password reset instructions.
+              If an account exists with that email, we&apos;ve sent password reset instructions.
             </AlertDescription>
           </Alert>
           <Button

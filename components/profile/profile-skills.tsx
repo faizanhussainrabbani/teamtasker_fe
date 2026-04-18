@@ -80,7 +80,7 @@ export function ProfileSkills() {
                     max={100}
                     step={5}
                     className="flex-1"
-                    onValueChange={(value) => handleSkillLevelChange(skill.name, value[0])}
+                    onValueChange={(value) => handleSkillLevelChange(skill.name, value[0] ?? skill.level)}
                   />
                   <span className="w-16 text-right text-sm">{getSkillLevelText(skill.level)}</span>
                 </div>
@@ -108,7 +108,7 @@ export function ProfileSkills() {
                   max={100}
                   step={5}
                   className="flex-1"
-                  onValueChange={(value) => setNewSkill({ ...newSkill, level: value[0] })}
+                  onValueChange={(value) => setNewSkill({ ...newSkill, level: value[0] ?? newSkill.level })}
                 />
                 <span className="w-16 text-right text-sm">{getSkillLevelText(newSkill.level)}</span>
               </div>

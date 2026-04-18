@@ -15,11 +15,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {
-  AlertCircle,
-  Calendar,
-  CheckCircle2,
-  Circle,
-  Clock,
   Filter,
   MoreHorizontal,
   Plus,
@@ -27,31 +22,29 @@ import {
   SortAsc,
   Trash2,
 } from "lucide-react"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select"
 import { TaskDialog } from "@/components/tasks/task-dialog"
 import { LoadingState, ErrorState, EmptyState } from "@/components/ui/api-state"
 import { useTasks, useDeleteTask, useUpdateTaskStatus } from "@/lib/api/hooks/useTasks"
-import { TaskStatus, TaskPriority } from "@/lib/api/types/tasks"
-
-// This would be replaced by API data
-
-// Update the getStatusIcon function to use blue colors
-const getStatusIcon = (status: string) => {
-  switch (status) {
-    case "completed":
-      return <CheckCircle2 className="h-5 w-5 text-green-500" />
-    case "in-progress":
-      return <Clock className="h-5 w-5 text-blue-400" />
-    case "todo":
-      return <Circle className="h-5 w-5 text-gray-400" />
-    default:
-      return <AlertCircle className="h-5 w-5 text-blue-300" />
-  }
-}
+import { Task, TaskStatus, TaskPriority } from "@/lib/api/types/tasks"
+import { useAuth } from "@/context/auth-context"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { useToast } from "@/components/ui/use-toast"
 
 // Function to get priority color
 const getPriorityColor = (priority: string) => {
   switch (priority) {
+    case "critical":
+      return "text-rose-600 border-rose-200 bg-rose-50 dark:bg-rose-950 dark:border-rose-800"
     case "high":
       return "text-red-500 border-red-200 bg-red-50 dark:bg-red-950 dark:border-red-800"
     case "medium":
@@ -64,11 +57,14 @@ const getPriorityColor = (priority: string) => {
 }
 
 export function TasksList() {
+  const { user } = useAuth()
+  const { toast } = useToast()
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [priorityFilter, setPriorityFilter] = useState<string>("all")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [selectedTask, setSelectedTask] = useState<any>(null)
+  const [selectedTask, setSelectedTask] = useState<Task | undefined>(undefined)
+  const [taskPendingDelete, setTaskPendingDelete] = useState<Task | null>(null)
 
   // Convert UI filters to API parameters
   const apiParams = {
@@ -91,20 +87,38 @@ export function TasksList() {
 
   // Update task status mutation
   const updateTaskStatusMutation = useUpdateTaskStatus();
+  const isAdmin = (user?.role || '').toLowerCase() === 'admin';
 
-  const handleDeleteTask = (id: string, e: React.MouseEvent) => {
+  const handleDeleteTask = (task: Task, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (confirm("Are you sure you want to delete this task?")) {
-      deleteTaskMutation.mutate(id);
+
+    if (!isAdmin) {
+      toast({
+        title: "Admin access required",
+        description: "Only admins can delete tasks.",
+        variant: "destructive",
+      })
+      return;
     }
+
+    setTaskPendingDelete(task)
   };
+
+  const confirmDeleteTask = () => {
+    if (!taskPendingDelete) {
+      return
+    }
+
+    deleteTaskMutation.mutate(taskPendingDelete.id)
+    setTaskPendingDelete(null)
+  }
 
   const handleStatusChange = (id: string, status: TaskStatus, e: React.MouseEvent) => {
     e.stopPropagation();
     updateTaskStatusMutation.mutate({ id, status });
   };
 
-  const openTaskDialog = (task: any) => {
+  const openTaskDialog = (task: Task) => {
     setSelectedTask(task);
     setIsDialogOpen(true);
   };
@@ -114,9 +128,9 @@ export function TasksList() {
       <CardHeader className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
         <div>
           <CardTitle>All Tasks</CardTitle>
-          <CardDescription>Manage and track your team's tasks</CardDescription>
+          <CardDescription>Manage and track your team&apos;s tasks</CardDescription>
         </div>
-        <Button onClick={() => { setSelectedTask(null); setIsDialogOpen(true); }}>
+        <Button onClick={() => { setSelectedTask(undefined); setIsDialogOpen(true); }}>
           <Plus className="mr-2 h-4 w-4" />
           New Task
         </Button>
@@ -145,6 +159,9 @@ export function TasksList() {
                   <SelectItem value="todo">To Do</SelectItem>
                   <SelectItem value="in-progress">In Progress</SelectItem>
                   <SelectItem value="completed">Completed</SelectItem>
+                  <SelectItem value="blocked">Blocked</SelectItem>
+                  <SelectItem value="on-hold">On Hold</SelectItem>
+                  <SelectItem value="cancelled">Cancelled</SelectItem>
                 </SelectContent>
               </Select>
               <Select value={priorityFilter} onValueChange={setPriorityFilter}>
@@ -154,6 +171,7 @@ export function TasksList() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Priorities</SelectItem>
+                  <SelectItem value="critical">Critical</SelectItem>
                   <SelectItem value="high">High</SelectItem>
                   <SelectItem value="medium">Medium</SelectItem>
                   <SelectItem value="low">Low</SelectItem>
@@ -174,7 +192,7 @@ export function TasksList() {
               title="No tasks found"
               description="There are no tasks matching your filters."
               action={
-                <Button onClick={() => { setSelectedTask(null); setIsDialogOpen(true); }}>
+                <Button onClick={() => { setSelectedTask(undefined); setIsDialogOpen(true); }}>
                   <Plus className="mr-2 h-4 w-4" />
                   Create Task
                 </Button>
@@ -245,13 +263,15 @@ export function TasksList() {
                         <DropdownMenuItem onClick={(e) => handleStatusChange(task.id, task.status === "completed" ? "in-progress" : "completed", e)}>
                           {task.status === "completed" ? "Mark as In Progress" : "Mark as Completed"}
                         </DropdownMenuItem>
-                        <DropdownMenuItem
-                          className="text-destructive focus:text-destructive"
-                          onClick={(e) => handleDeleteTask(task.id, e)}
-                        >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Delete Task
-                        </DropdownMenuItem>
+                        {isAdmin && (
+                          <DropdownMenuItem
+                            className="text-destructive focus:text-destructive"
+                            onClick={(e) => handleDeleteTask(task, e)}
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete Task
+                          </DropdownMenuItem>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
@@ -268,6 +288,29 @@ export function TasksList() {
           onOpenChange={setIsDialogOpen}
         />
       )}
+
+      <AlertDialog open={!!taskPendingDelete} onOpenChange={(open) => !open && setTaskPendingDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete task</AlertDialogTitle>
+            <AlertDialogDescription>
+              {`Are you sure you want to delete "${taskPendingDelete?.title || 'this task'}"? This action cannot be undone.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={(event) => {
+                event.preventDefault()
+                confirmDeleteTask()
+              }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   )
 }

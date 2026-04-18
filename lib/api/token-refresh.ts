@@ -1,3 +1,4 @@
+import axios from 'axios';
 import apiClient from './client';
 import { API_CONFIG } from './config';
 import { getRefreshToken, setAuthToken, removeAuthToken, isTokenExpiringSoon } from '@/lib/auth';
@@ -51,9 +52,15 @@ export const refreshAccessToken = async (): Promise<string | null> => {
     isRefreshing = true;
     
     // Call the refresh token endpoint
-    const response = await apiClient.post(
-      `${API_CONFIG.endpoints.auth}/refresh-token`,
-      { refreshToken }
+    const response = await axios.post(
+      `${API_CONFIG.baseURL}${API_CONFIG.endpoints.auth}/refresh-token`,
+      { refreshToken },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      }
     );
     
     const { token, refreshToken: newRefreshToken } = response.data;
@@ -65,7 +72,7 @@ export const refreshAccessToken = async (): Promise<string | null> => {
     onTokenRefreshed(token);
     
     return token;
-  } catch (error) {
+  } catch {
     // If refresh fails, clear tokens and force re-login
     removeAuthToken();
     return null;
@@ -89,6 +96,11 @@ export const checkAndRefreshToken = async (): Promise<boolean> => {
 // Add interceptor to automatically refresh token
 apiClient.interceptors.request.use(
   async (config) => {
+    // Avoid recursive refresh interception for refresh-token endpoint calls.
+    if (config.url?.includes('/refresh-token')) {
+      return config;
+    }
+
     // Check if token needs refresh before making request
     await checkAndRefreshToken();
     return config;

@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import { PageHeader } from "@/components/page-header"
-import { CommunicationView } from "@/components/communication/communication-view"
+import { EmptyState } from "@/components/ui/api-state"
 
 export const metadata: Metadata = {
   title: "Communication | Team-Centered Task Management",
@@ -12,7 +12,10 @@ export default function CommunicationPage() {
     <div className="flex flex-col">
       <PageHeader title="Communication" description="Team communication, messages, and collaboration tools" />
       <div className="p-4">
-        <CommunicationView />
+        <EmptyState
+          title="Communication is temporarily unavailable"
+          description="This page is disabled until backend communication and announcements APIs are implemented."
+        />
       </div>
     </div>
   )

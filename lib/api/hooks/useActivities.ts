@@ -6,7 +6,6 @@ import {
 import { 
   ActivitiesQueryParams
 } from '../types/activities';
-import { parseApiError } from '@/lib/error-handling';
 
 // Query keys
 export const activityKeys = {
@@ -24,9 +23,6 @@ export const useActivities = (params?: ActivitiesQueryParams) => {
   return useQuery({
     queryKey: activityKeys.list(params || {}),
     queryFn: () => getActivities(params),
-    onError: (error) => {
-      console.error('Error fetching activities:', parseApiError(error));
-    },
   });
 };
 
@@ -38,8 +34,5 @@ export const useActivity = (id: string) => {
     queryKey: activityKeys.detail(id),
     queryFn: () => getActivityById(id),
     enabled: !!id, // Only run if id is provided
-    onError: (error) => {
-      console.error(`Error fetching activity ${id}:`, parseApiError(error));
-    },
   });
 };

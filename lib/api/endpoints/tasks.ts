@@ -10,6 +10,15 @@ import {
 
 const TASKS_ENDPOINT = API_CONFIG.endpoints.tasks;
 
+const normalizeAssigneeId = (assigneeId: unknown): string | undefined => {
+  if (assigneeId === null || assigneeId === undefined) {
+    return undefined;
+  }
+
+  const normalizedAssigneeId = String(assigneeId).trim();
+  return normalizedAssigneeId.length > 0 ? normalizedAssigneeId : undefined;
+};
+
 /**
  * Get all tasks with optional filtering
  */
@@ -30,7 +39,12 @@ export const getTaskById = async (id: string): Promise<Task> => {
  * Create a new task
  */
 export const createTask = async (task: TaskCreateRequest): Promise<Task> => {
-  const response = await apiClient.post(TASKS_ENDPOINT, task);
+  const payload: TaskCreateRequest = {
+    ...task,
+    assigneeId: normalizeAssigneeId(task.assigneeId),
+  };
+
+  const response = await apiClient.post(TASKS_ENDPOINT, payload);
   return response.data;
 };
 
@@ -38,7 +52,12 @@ export const createTask = async (task: TaskCreateRequest): Promise<Task> => {
  * Update an existing task
  */
 export const updateTask = async (id: string, task: TaskUpdateRequest): Promise<Task> => {
-  const response = await apiClient.patch(`${TASKS_ENDPOINT}/${id}`, task);
+  const payload: TaskUpdateRequest = {
+    ...task,
+    assigneeId: normalizeAssigneeId(task.assigneeId),
+  };
+
+  const response = await apiClient.patch(`${TASKS_ENDPOINT}/${id}`, payload);
   return response.data;
 };
 
